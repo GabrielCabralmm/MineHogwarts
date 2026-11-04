@@ -1,0 +1,11 @@
+{
+  "item.hogwartsmod.wand": "Wand",
+  "itemGroup.hogwartsmod": "Hogwarts Mod",
+  "entity.hogwartsmod.spell_projectile": "Spell",
+  "spell.hogwartsmod.lumos": "Lumos",
+  "spell.hogwartsmod.expelliarmus": "Expelliarmus",
+  "spell.hogwartsmod.stupefy": "Stupefy",
+  "message.hogwartsmod.spell_selected": "Selected spell: %s",
+  "tooltip.hogwartsmod.wand.spell": "Spell: %s",
+  "tooltip.hogwartsmod.wand.hint": "Shift + right-click to switch"
+}

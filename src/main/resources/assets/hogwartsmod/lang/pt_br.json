@@ -1,0 +1,11 @@
+{
+  "item.hogwartsmod.wand": "Varinha",
+  "itemGroup.hogwartsmod": "Hogwarts Mod",
+  "entity.hogwartsmod.spell_projectile": "Feitiço",
+  "spell.hogwartsmod.lumos": "Lumos",
+  "spell.hogwartsmod.expelliarmus": "Expelliarmus",
+  "spell.hogwartsmod.stupefy": "Stupefy",
+  "message.hogwartsmod.spell_selected": "Feitiço selecionado: %s",
+  "tooltip.hogwartsmod.wand.spell": "Feitiço: %s",
+  "tooltip.hogwartsmod.wand.hint": "Shift + botão direito para trocar"
+}
