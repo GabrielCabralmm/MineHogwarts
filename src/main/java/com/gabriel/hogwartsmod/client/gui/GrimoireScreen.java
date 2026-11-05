@@ -11,7 +11,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,7 +26,7 @@ public class GrimoireScreen extends Screen {
     private static final int SLOT_GAP = 3;
     private static final int TAB_PAD = 10;
     private static final int LOCK_SPACE = 11;
-    private static final float TAB_TEXT_SCALE = 0.8f;
+    private static final float TAB_TEXT_SIZE = 7f;
 
     private static final int COVER = 0xFF5C3A22;
     private static final int PAGE_LINE = 0xFFC4AA7C;
@@ -135,19 +134,19 @@ public class GrimoireScreen extends Screen {
     }
 
     private void drawBook(GuiGraphics g) {
-        GuiTextures.blitSmooth(g, BOOK, left, top, BOOK_W, BOOK_H, BOOK_W * 4, BOOK_H * 4);
+        HiRes.image(g, BOOK, left, top, BOOK_W, BOOK_H);
     }
 
     private static boolean isLocked(Tab t) {
         return t == Tab.APPARITION;
     }
 
-    private Component tabLabel(Tab t) {
-        return GuiTextures.bold(Component.translatable("screen.hogwartsmod.grimoire.tab." + t.name().toLowerCase()));
+    private String tabLabel(Tab t) {
+        return Component.translatable("screen.hogwartsmod.grimoire.tab." + t.name().toLowerCase()).getString();
     }
 
     private int tabHeight(Tab t) {
-        return Math.round(font.width(tabLabel(t)) * TAB_TEXT_SCALE) + TAB_PAD + (isLocked(t) ? LOCK_SPACE : 0);
+        return Math.round(HiRes.width(tabLabel(t), HiRes.Style.BOLD, TAB_TEXT_SIZE)) + TAB_PAD + (isLocked(t) ? LOCK_SPACE : 0);
     }
 
     private int tabTop(Tab t) {
@@ -172,10 +171,9 @@ public class GrimoireScreen extends Screen {
             g.fill(x0, y0 + 1, x1 - 1, y0 + h - 1, on ? NOTE_ON : NOTE);
             g.fill(x1 - 4, y0 + h - 4, x1 - 1, y0 + h - 1, NOTE_EDGE);
             g.pose().pushPose();
-            g.pose().translate(x1 - 2, y0 + TAB_PAD / 2f, 0);
+            g.pose().translate(x1 - 1.5f, y0 + TAB_PAD / 2f, 0);
             g.pose().mulPose(Axis.ZP.rotationDegrees(90));
-            g.pose().scale(TAB_TEXT_SCALE, TAB_TEXT_SCALE, 1f);
-            g.drawString(font, tabLabel(t), 0, 0, INK, false);
+            HiRes.text(g, tabLabel(t), HiRes.Style.BOLD, TAB_TEXT_SIZE, 0, 0, INK);
             g.pose().popPose();
             if (isLocked(t)) {
                 drawLock(g, x1 - 9, y0 + h - LOCK_SPACE);
@@ -199,11 +197,11 @@ public class GrimoireScreen extends Screen {
         }
         int lx = left + 16;
         int pageW = BOOK_W / 2 - 26;
-        centered(g, GuiTextures.bold(Component.translatable("screen.hogwartsmod.grimoire.learned")), lx + pageW / 2, top + 18, TITLE);
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.learned"), HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
         List<Spell> spells = learned();
         page = Mth.clamp(page, 0, pageCount() - 1);
         if (spells.isEmpty()) {
-            wrapped(g, GuiTextures.italic(Component.translatable("screen.hogwartsmod.grimoire.empty")), lx + pageW / 2, top + 60, pageW, MUTED);
+            wrapped(g, tr("screen.hogwartsmod.grimoire.empty"), HiRes.Style.ITALIC, lx + pageW / 2f, top + 60, pageW, MUTED);
         }
         for (int i = 0; i < PER_PAGE; i++) {
             int index = page * PER_PAGE + i;
@@ -217,15 +215,11 @@ public class GrimoireScreen extends Screen {
                 g.fill(lx - 2, y - 1, lx + pageW + 2, y + ROW_H - 1, spell == armed ? GOLD : HIGHLIGHT);
             }
             SpellIcons.draw(g, spell, lx, y, 12);
-            Component level = GuiTextures.serif(Component.literal("Nv " + spell.getRequiredLevel()));
-            int maxName = pageW - 16 - font.width(level) - 4;
-            Component name = GuiTextures.serif(spell.getDisplayName());
-            if (font.width(name) > maxName) {
-                Component dots = GuiTextures.serif(Component.literal("…"));
-                name = GuiTextures.serif(Component.literal(font.substrByWidth(name, maxName - font.width(dots)).getString() + "…"));
-            }
-            g.drawString(font, name, lx + 16, y + 3, INK, false);
-            g.drawString(font, level, lx + pageW - font.width(level), y + 3, MUTED, false);
+            String level = "Nv " + spell.getRequiredLevel();
+            float levelW = HiRes.width(level, HiRes.Style.REGULAR);
+            String name = HiRes.ellipsize(spell.getDisplayName().getString(), HiRes.Style.REGULAR, pageW - 16 - levelW - 4);
+            HiRes.text(g, name, HiRes.Style.REGULAR, lx + 16, y + 1.5f, INK);
+            HiRes.right(g, level, HiRes.Style.REGULAR, lx + pageW, y + 1.5f, MUTED);
         }
         drawPagination(g, lx + pageW / 2, top + BOOK_H - 24);
 
@@ -233,24 +227,24 @@ public class GrimoireScreen extends Screen {
         int rw = BOOK_W / 2 - 26;
         int rc = rx + rw / 2;
         if (selected != null) {
-            centered(g, GuiTextures.bold(selected.getDisplayName()), rc, top + 18, TITLE);
+            HiRes.centered(g, selected.getDisplayName().getString(), HiRes.Style.BOLD, rc, top + 17, TITLE);
             SpellIcons.draw(g, selected, rc - 12, top + 28, 24);
-            List<FormattedCharSequence> lines = font.split(GuiTextures.italic(Component.translatable("spell.hogwartsmod." + selected.getId() + ".desc")), rw);
+            List<String> lines = HiRes.wrap(tr("spell.hogwartsmod." + selected.getId() + ".desc"), HiRes.Style.ITALIC, rw);
             for (int i = 0; i < Math.min(3, lines.size()); i++) {
-                g.drawString(font, lines.get(i), rc - font.width(lines.get(i)) / 2, top + 56 + i * 9, INK, false);
+                HiRes.centered(g, lines.get(i), HiRes.Style.ITALIC, rc, top + 56 + i * 10, INK);
             }
-            int sy = top + 86;
-            stat(g, rx, rw, sy, "category", Component.translatable("category.hogwartsmod." + selected.getCategory().name().toLowerCase()));
-            stat(g, rx, rw, sy + 10, "cost", Component.literal(formatCost(selected)));
-            stat(g, rx, rw, sy + 20, "cooldown", Component.literal(String.format("%.1f s", selected.getCooldownTicks() / 20f)));
-            g.drawString(font, GuiTextures.serif(Component.translatable("screen.hogwartsmod.grimoire.stat.mastery")), rx, sy + 30, MUTED, false);
+            int sy = top + 88;
+            stat(g, rx, rw, sy, "category", tr("category.hogwartsmod." + selected.getCategory().name().toLowerCase()));
+            stat(g, rx, rw, sy + 10, "cost", formatCost(selected));
+            stat(g, rx, rw, sy + 20, "cooldown", String.format("%.1f s", selected.getCooldownTicks() / 20f));
+            HiRes.text(g, tr("screen.hogwartsmod.grimoire.stat.mastery"), HiRes.Style.REGULAR, rx, sy + 30, MUTED);
             int mastery = data.getMastery(selected);
             for (int i = 0; i < selected.getMaxMastery(); i++) {
                 int dx = rx + rw - (selected.getMaxMastery() - i) * 8;
-                diamond(g, dx, sy + 31, i < mastery);
+                diamond(g, dx, sy + 32, i < mastery);
             }
         }
-        centered(g, GuiTextures.bold(Component.translatable("screen.hogwartsmod.grimoire.shortcuts")), rc, top + 132, TITLE);
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.shortcuts"), HiRes.Style.BOLD, rc, top + 131, TITLE);
         for (int i = 0; i < MagicData.SLOT_COUNT; i++) {
             int x = slotX(i);
             int y = slotY();
@@ -262,9 +256,9 @@ public class GrimoireScreen extends Screen {
             if (spell != null && !(dragging && pressSlot == i)) {
                 SpellIcons.draw(g, spell, x + 1, y + 1, 16);
             } else if (spell == null) {
-                centered(g, GuiTextures.serif(Component.literal("+")), x + SLOT / 2, y + 5, MUTED);
+                HiRes.centered(g, "+", HiRes.Style.REGULAR, x + SLOT / 2f, y + 4, MUTED);
             }
-            centered(g, GuiTextures.serif(Component.literal(String.valueOf(i + 1))), x + SLOT / 2, y + SLOT + 2, MUTED);
+            HiRes.centered(g, String.valueOf(i + 1), HiRes.Style.REGULAR, x + SLOT / 2f, y + SLOT + 1, MUTED);
         }
     }
 
@@ -275,7 +269,7 @@ public class GrimoireScreen extends Screen {
         }
         int lx = left + 16;
         int pageW = BOOK_W / 2 - 26;
-        centered(g, GuiTextures.bold(Component.translatable("screen.hogwartsmod.grimoire.teachable")), lx + pageW / 2, top + 18, TITLE);
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.teachable"), HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
         int row = 0;
         for (Spell spell : learned()) {
             if (!data.hasMaxMastery(spell)) {
@@ -283,18 +277,18 @@ public class GrimoireScreen extends Screen {
             }
             int y = top + 30 + row * ROW_H;
             SpellIcons.draw(g, spell, lx, y, 12);
-            g.drawString(font, GuiTextures.serif(spell.getDisplayName()), lx + 16, y + 3, INK, false);
+            HiRes.text(g, spell.getDisplayName().getString(), HiRes.Style.REGULAR, lx + 16, y + 1.5f, INK);
             if (++row >= PER_PAGE) {
                 break;
             }
         }
         if (row == 0) {
-            wrapped(g, GuiTextures.italic(Component.translatable("screen.hogwartsmod.grimoire.teach_none")), lx + pageW / 2, top + 60, pageW, MUTED);
+            wrapped(g, tr("screen.hogwartsmod.grimoire.teach_none"), HiRes.Style.ITALIC, lx + pageW / 2f, top + 60, pageW, MUTED);
         }
         int rx = left + BOOK_W / 2 + 10;
         int rw = BOOK_W / 2 - 26;
-        centered(g, GuiTextures.bold(Component.translatable("screen.hogwartsmod.grimoire.students")), rx + rw / 2, top + 18, TITLE);
-        wrapped(g, GuiTextures.italic(Component.translatable("screen.hogwartsmod.grimoire.teach_soon")), rx + rw / 2, top + 60, rw, MUTED);
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.students"), HiRes.Style.BOLD, rx + rw / 2f, top + 17, TITLE);
+        wrapped(g, tr("screen.hogwartsmod.grimoire.teach_soon"), HiRes.Style.ITALIC, rx + rw / 2f, top + 60, rw, MUTED);
     }
 
     private void drawPagination(GuiGraphics g, int cx, int y) {
@@ -305,14 +299,13 @@ public class GrimoireScreen extends Screen {
             if (i == page) {
                 g.fill(x - 5, y - 2, x + 6, y + 9, HIGHLIGHT);
             }
-            centered(g, i == page ? GuiTextures.bold(Component.literal(String.valueOf(i + 1))) : GuiTextures.serif(Component.literal(String.valueOf(i + 1))), x + 1, y, i == page ? TITLE : MUTED);
+            HiRes.centered(g, String.valueOf(i + 1), i == page ? HiRes.Style.BOLD : HiRes.Style.REGULAR, x + 0.5f, y - 1, i == page ? TITLE : MUTED);
         }
     }
 
-    private void stat(GuiGraphics g, int x, int w, int y, String key, Component value) {
-        g.drawString(font, GuiTextures.serif(Component.translatable("screen.hogwartsmod.grimoire.stat." + key)), x, y, MUTED, false);
-        Component styled = GuiTextures.serif(value);
-        g.drawString(font, styled, x + w - font.width(styled), y, INK, false);
+    private void stat(GuiGraphics g, int x, int w, int y, String key, String value) {
+        HiRes.text(g, tr("screen.hogwartsmod.grimoire.stat." + key), HiRes.Style.REGULAR, x, y, MUTED);
+        HiRes.right(g, value, HiRes.Style.REGULAR, x + w, y, INK);
     }
 
     private void diamond(GuiGraphics g, int x, int y, boolean filled) {
@@ -329,14 +322,14 @@ public class GrimoireScreen extends Screen {
         return spell.isSustained() ? base + " +/s" : base;
     }
 
-    private void centered(GuiGraphics g, Component text, int cx, int y, int color) {
-        g.drawString(font, text, cx - font.width(text) / 2, y, color, false);
+    private static String tr(String key) {
+        return Component.translatable(key).getString();
     }
 
-    private void wrapped(GuiGraphics g, Component text, int cx, int y, int w, int color) {
-        List<FormattedCharSequence> lines = font.split(text, w);
+    private void wrapped(GuiGraphics g, String text, HiRes.Style style, float cx, int y, int w, int color) {
+        List<String> lines = HiRes.wrap(text, style, w);
         for (int i = 0; i < lines.size(); i++) {
-            g.drawString(font, lines.get(i), cx - font.width(lines.get(i)) / 2, y + i * 10, color, false);
+            HiRes.centered(g, lines.get(i), style, cx, y + i * 10, color);
         }
     }
 

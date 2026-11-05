@@ -15,6 +15,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 @Mod(HogwartsMod.MOD_ID)
 public class HogwartsMod {
     public static final String MOD_ID = "hogwartsmod";
+    public static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
 
     public HogwartsMod(FMLJavaModLoadingContext context) {
         IEventBus modBus = context.getModEventBus();

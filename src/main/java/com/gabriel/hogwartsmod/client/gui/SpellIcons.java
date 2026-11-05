@@ -6,7 +6,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 public final class SpellIcons {
-    private static final int SIZE = 64;
 
     private SpellIcons() {
     }
@@ -16,6 +15,6 @@ public final class SpellIcons {
     }
 
     public static void draw(GuiGraphics g, Spell spell, int x, int y, int size) {
-        GuiTextures.blitSmooth(g, texture(spell), x, y, size, size, SIZE, SIZE);
+        HiRes.image(g, texture(spell), x, y, size, size);
     }
 }
