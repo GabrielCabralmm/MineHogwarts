@@ -2,6 +2,8 @@ package com.gabriel.hogwartsmod.client;
 
 import com.gabriel.hogwartsmod.magic.MagicData;
 import net.minecraft.client.Minecraft;
+import com.gabriel.hogwartsmod.client.fx.ClientFxState;
+import com.gabriel.hogwartsmod.network.PlayerFxPacket;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 
@@ -25,5 +27,9 @@ public final class ClientPacketHandler {
         if (level != null && level.getEntity(entityId) instanceof AbstractClientPlayer player) {
             CastAnimations.play(player, animation);
         }
+    }
+
+    public static void handlePlayerFx(int entityId, PlayerFxPacket.Kind kind, boolean value) {
+        ClientFxState.apply(entityId, kind, value);
     }
 }
