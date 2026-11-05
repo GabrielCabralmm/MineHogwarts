@@ -1,5 +1,6 @@
 package com.gabriel.hogwartsmod.client;
 
+import com.gabriel.hogwartsmod.client.gui.SpellIcons;
 import com.gabriel.hogwartsmod.magic.MagicData;
 import com.gabriel.hogwartsmod.spell.Spell;
 import net.minecraft.client.Minecraft;
@@ -15,7 +16,6 @@ public final class MagicHud implements IGuiOverlay {
     private static final int PARCHMENT = 0xE0ECDCB6;
     private static final int EDGE = 0xFF5C3A22;
     private static final int GOLD = 0xFFBE8C28;
-    private static final int INK = 0xFF38261A;
     private static final int COOLDOWN = 0xA0281E14;
     private static final int RESERVE = 0xFF5A96E6;
     private static final int BAR_BACK = 0xB0281E14;
@@ -59,9 +59,7 @@ public final class MagicHud implements IGuiOverlay {
             if (spell == null) {
                 continue;
             }
-            int color = 0xFF000000 | spell.getColor();
-            g.fill(x + 5, slotY + 5, x + SLOT - 5, slotY + SLOT - 5, INK);
-            g.fill(x + 6, slotY + 6, x + SLOT - 6, slotY + SLOT - 6, color);
+            SpellIcons.draw(g, spell, x + 1, slotY + 1, 16);
             int remaining = data.getCooldownRemaining(spell, now);
             int total = data.getCooldownTotal(spell);
             if (remaining > 0 && total > 0) {
