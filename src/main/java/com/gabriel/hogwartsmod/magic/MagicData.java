@@ -40,6 +40,9 @@ public class MagicData {
     private float shieldHp;
     private long shieldStart;
     private long lastIncendioMastery;
+    @Nullable
+    private String pendingSpell;
+    private long pendingAt;
     private boolean pendingLevelUp;
     private boolean dirty = true;
     private boolean forceSync = true;
@@ -217,6 +220,31 @@ public class MagicData {
     public int getCooldownTotal(Spell spell) {
         long[] cd = cooldowns.get(spell.getId());
         return cd == null ? 0 : (int) cd[1];
+    }
+
+    // -- Conjuração com animação
+
+    public boolean hasPendingCast() {
+        return pendingSpell != null;
+    }
+
+    public void schedule(Spell spell, long gameTime) {
+        pendingSpell = spell.getId();
+        pendingAt = gameTime;
+    }
+
+    @Nullable
+    public Spell pollPendingCast(long gameTime) {
+        if (pendingSpell == null || gameTime < pendingAt) {
+            return null;
+        }
+        Spell spell = Spells.get(pendingSpell);
+        pendingSpell = null;
+        return spell;
+    }
+
+    public void clearPendingCast() {
+        pendingSpell = null;
     }
 
     // -- Lumos

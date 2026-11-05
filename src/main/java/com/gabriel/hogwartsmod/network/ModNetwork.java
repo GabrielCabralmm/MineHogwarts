@@ -23,6 +23,16 @@ public final class ModNetwork {
                 .encoder(SyncMagicPacket::encode).decoder(SyncMagicPacket::decode).consumerMainThread(SyncMagicPacket::handle).add();
         CHANNEL.messageBuilder(SelectSlotPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(SelectSlotPacket::encode).decoder(SelectSlotPacket::decode).consumerMainThread(SelectSlotPacket::handle).add();
+        CHANNEL.messageBuilder(CastAnimationPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(CastAnimationPacket::encode).decoder(CastAnimationPacket::decode).consumerMainThread(CastAnimationPacket::handle).add();
+    }
+
+    public static void playAnimation(ServerPlayer player, String animation) {
+        CHANNEL.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player), new CastAnimationPacket(player.getId(), animation));
+    }
+
+    public static void stopAnimation(ServerPlayer player) {
+        playAnimation(player, "");
     }
 
     public static void sync(ServerPlayer player, MagicData data) {

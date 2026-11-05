@@ -1,6 +1,7 @@
 package com.gabriel.hogwartsmod.item;
 
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.network.ModNetwork;
 import com.gabriel.hogwartsmod.spell.Spell;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -37,6 +38,9 @@ public class WandItem extends Item {
             notify(player, level, Component.translatable("message.hogwartsmod.not_learned", spell.getDisplayName()));
             return InteractionResultHolder.fail(stack);
         }
+        if (data.hasPendingCast()) {
+            return InteractionResultHolder.fail(stack);
+        }
         if (spell.isFreeCast(data, now)) {
             if (player instanceof ServerPlayer sp) {
                 spell.cast(sp, data);
@@ -59,17 +63,23 @@ public class WandItem extends Item {
                     return InteractionResultHolder.fail(stack);
                 }
                 data.spend(spell.getCost());
+                ModNetwork.playAnimation(sp, spell.getDelivery().getAnimation());
             }
             player.startUsingItem(hand);
             return InteractionResultHolder.consume(stack);
         }
         if (player instanceof ServerPlayer sp) {
             data.spend(spell.getCost());
-            spell.cast(sp, data);
             data.setCooldown(spell, now, spell.getCooldownTicks());
+            ModNetwork.playAnimation(sp, spell.getDelivery().getAnimation());
+            int release = spell.getDelivery().getReleaseTick();
+            if (release <= 0) {
+                spell.cast(sp, data);
+            } else {
+                data.schedule(spell, now + release);
+            }
             data.markForSync();
         }
-        player.swing(hand, true);
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
@@ -100,6 +110,7 @@ public class WandItem extends Item {
         if (spell != null && spell.isSustained()) {
             spell.stopHold(player, data);
             data.setCooldown(spell, level.getGameTime(), spell.getCooldownTicks());
+            ModNetwork.stopAnimation(player);
         }
         if (data != null) {
             data.stopShield();

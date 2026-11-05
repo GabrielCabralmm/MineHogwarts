@@ -3,6 +3,7 @@ package com.gabriel.hogwartsmod.magic;
 import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.network.ModNetwork;
 import com.gabriel.hogwartsmod.item.WandItem;
+import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
 import com.gabriel.hogwartsmod.spell.Spells;
 import com.gabriel.hogwartsmod.spell.impl.LumosSpell;
@@ -124,6 +125,10 @@ public final class MagicEvents {
             boolean usingWand = player.isUsingItem() && player.getUseItem().getItem() instanceof WandItem;
             if (data.getReserve() < data.getMaxReserve() && !usingWand) {
                 data.setReserve(data.getReserve() + regen);
+            }
+            Spell pending = data.pollPendingCast(player.level().getGameTime());
+            if (pending != null && player.isAlive()) {
+                pending.cast(player, data);
             }
             if (data.consumeLevelUp()) {
                 playLevelUp(player);
