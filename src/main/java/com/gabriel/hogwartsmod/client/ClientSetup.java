@@ -49,5 +49,6 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(ModKeys.SPELL_MODIFIER);
+        event.register(ModKeys.OPEN_GRIMOIRE);
     }
 }

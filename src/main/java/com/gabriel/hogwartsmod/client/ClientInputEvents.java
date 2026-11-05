@@ -6,7 +6,9 @@ import com.gabriel.hogwartsmod.network.ModNetwork;
 import com.gabriel.hogwartsmod.network.SelectSlotPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
+import com.gabriel.hogwartsmod.client.gui.GrimoireScreen;
 import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -34,5 +36,18 @@ public final class ClientInputEvents {
         data.setActiveSlot(next);
         ModNetwork.CHANNEL.sendToServer(new SelectSlotPacket(data.getActiveSlot()));
         event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        while (ModKeys.OPEN_GRIMOIRE.consumeClick()) {
+            if (mc.player != null && mc.screen == null) {
+                mc.setScreen(new GrimoireScreen());
+            }
+        }
     }
 }

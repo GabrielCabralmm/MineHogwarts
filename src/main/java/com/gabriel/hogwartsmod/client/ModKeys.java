@@ -10,6 +10,8 @@ public final class ModKeys {
     public static final String CATEGORY = "key.categories.hogwartsmod";
     public static final KeyMapping SPELL_MODIFIER = new KeyMapping("key.hogwartsmod.spell_modifier",
             KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_LEFT_CONTROL, CATEGORY);
+    public static final KeyMapping OPEN_GRIMOIRE = new KeyMapping("key.hogwartsmod.open_grimoire",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
 
     private ModKeys() {
     }

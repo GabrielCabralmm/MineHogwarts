@@ -25,6 +25,8 @@ public final class ModNetwork {
                 .encoder(SelectSlotPacket::encode).decoder(SelectSlotPacket::decode).consumerMainThread(SelectSlotPacket::handle).add();
         CHANNEL.messageBuilder(CastAnimationPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(CastAnimationPacket::encode).decoder(CastAnimationPacket::decode).consumerMainThread(CastAnimationPacket::handle).add();
+        CHANNEL.messageBuilder(UpdateSlotsPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(UpdateSlotsPacket::encode).decoder(UpdateSlotsPacket::decode).consumerMainThread(UpdateSlotsPacket::handle).add();
         CHANNEL.messageBuilder(PlayerFxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(PlayerFxPacket::encode).decoder(PlayerFxPacket::decode).consumerMainThread(PlayerFxPacket::handle).add();
     }
