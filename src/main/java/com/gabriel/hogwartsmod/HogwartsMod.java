@@ -1,10 +1,14 @@
 package com.gabriel.hogwartsmod;
 
+import com.gabriel.hogwartsmod.magic.MagicConfig;
+import com.gabriel.hogwartsmod.network.ModNetwork;
 import com.gabriel.hogwartsmod.registry.ModCreativeTabs;
 import com.gabriel.hogwartsmod.registry.ModEntities;
 import com.gabriel.hogwartsmod.registry.ModItems;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(HogwartsMod.MOD_ID)
@@ -16,5 +20,11 @@ public class HogwartsMod {
         ModItems.ITEMS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
+        context.registerConfig(ModConfig.Type.COMMON, MagicConfig.SPEC);
+        modBus.addListener(this::commonSetup);
+    }
+
+    private void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(ModNetwork::register);
     }
 }

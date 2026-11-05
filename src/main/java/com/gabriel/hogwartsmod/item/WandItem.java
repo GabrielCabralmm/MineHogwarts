@@ -1,67 +1,124 @@
 package com.gabriel.hogwartsmod.item;
 
+import com.gabriel.hogwartsmod.magic.MagicData;
 import com.gabriel.hogwartsmod.spell.Spell;
-import com.gabriel.hogwartsmod.spell.SpellCaster;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class WandItem extends Item {
-    private static final String SPELL_TAG = "SelectedSpell";
 
     public WandItem(Properties properties) {
         super(properties);
     }
 
-    public static Spell getSelectedSpell(ItemStack stack) {
-        return Spell.byId(stack.getOrCreateTag().getString(SPELL_TAG));
-    }
-
-    public static void setSelectedSpell(ItemStack stack, Spell spell) {
-        stack.getOrCreateTag().putString(SPELL_TAG, spell.getId());
-    }
-
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        Spell spell = getSelectedSpell(stack);
-
-        if (player.isShiftKeyDown()) {
-            Spell next = spell.next();
-            if (!level.isClientSide) {
-                setSelectedSpell(stack, next);
-                player.displayClientMessage(Component.translatable("message.hogwartsmod.spell_selected",
-                        next.getDisplayName().copy().withStyle(ChatFormatting.GOLD)), true);
-                level.playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 1.0f);
+        MagicData data = MagicData.get(player);
+        if (data == null) {
+            return InteractionResultHolder.pass(stack);
+        }
+        Spell spell = data.getActiveSpell();
+        long now = level.getGameTime();
+        if (spell == null) {
+            notify(player, level, Component.translatable("message.hogwartsmod.no_spell"));
+            return InteractionResultHolder.fail(stack);
+        }
+        if (!data.knows(spell)) {
+            notify(player, level, Component.translatable("message.hogwartsmod.not_learned", spell.getDisplayName()));
+            return InteractionResultHolder.fail(stack);
+        }
+        if (spell.isFreeCast(data, now)) {
+            if (player instanceof ServerPlayer sp) {
+                spell.cast(sp, data);
             }
-            return InteractionResultHolder.success(stack);
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
         }
-
-        if (level instanceof ServerLevel server) {
-            SpellCaster.cast(server, player, spell);
-            player.displayClientMessage(spell.getDisplayName().copy().withStyle(ChatFormatting.ITALIC, ChatFormatting.AQUA), true);
+        int cooldown = data.getCooldownRemaining(spell, now);
+        if (cooldown > 0) {
+            notify(player, level, Component.translatable("message.hogwartsmod.cooldown", spell.getDisplayName(),
+                    String.format("%.1f", cooldown / 20f)));
+            return InteractionResultHolder.fail(stack);
         }
-        player.getCooldowns().addCooldown(this, spell.getCooldownTicks());
+        if (data.getReserve() < spell.getCost()) {
+            notify(player, level, Component.translatable("message.hogwartsmod.no_reserve"));
+            return InteractionResultHolder.fail(stack);
+        }
+        if (spell.isSustained()) {
+            if (player instanceof ServerPlayer sp) {
+                if (!spell.startHold(sp, data)) {
+                    return InteractionResultHolder.fail(stack);
+                }
+                data.spend(spell.getCost());
+            }
+            player.startUsingItem(hand);
+            return InteractionResultHolder.consume(stack);
+        }
+        if (player instanceof ServerPlayer sp) {
+            data.spend(spell.getCost());
+            spell.cast(sp, data);
+            data.setCooldown(spell, now, spell.getCooldownTicks());
+            data.markForSync();
+        }
         player.swing(hand, true);
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("tooltip.hogwartsmod.wand.spell",
-                getSelectedSpell(stack).getDisplayName().copy().withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.hogwartsmod.wand.hint").withStyle(ChatFormatting.DARK_GRAY));
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remaining) {
+        if (!(entity instanceof ServerPlayer player)) {
+            return;
+        }
+        MagicData data = MagicData.get(player);
+        Spell spell = data == null ? null : data.getActiveSpell();
+        if (spell == null || !spell.isSustained()) {
+            player.stopUsingItem();
+            return;
+        }
+        int held = getUseDuration(stack) - remaining;
+        if (!spell.tickHold(player, data, held)) {
+            player.stopUsingItem();
+        }
+    }
+
+    @Override
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int remaining) {
+        if (!(entity instanceof ServerPlayer player)) {
+            return;
+        }
+        MagicData data = MagicData.get(player);
+        Spell spell = data == null ? null : data.getActiveSpell();
+        if (spell != null && spell.isSustained()) {
+            spell.stopHold(player, data);
+            data.setCooldown(spell, level.getGameTime(), spell.getCooldownTicks());
+        }
+        if (data != null) {
+            data.stopShield();
+        }
+    }
+
+    @Override
+    public int getUseDuration(ItemStack stack) {
+        return 72000;
+    }
+
+    @Override
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.NONE;
+    }
+
+    private static void notify(Player player, Level level, Component message) {
+        if (!level.isClientSide) {
+            player.displayClientMessage(message.copy().withStyle(ChatFormatting.GRAY), true);
+        }
     }
 }
