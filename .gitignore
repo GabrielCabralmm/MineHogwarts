@@ -2,6 +2,9 @@ build/
 out/
 run/
 run-data/
+run-aluno/
+run-server/
+run-client2/
 .gradle/
 .idea/
 *.iml

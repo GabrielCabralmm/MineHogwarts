@@ -36,8 +36,21 @@ minecraft {
             property 'forge.enabledGameTestNamespaces', mod_id
         }
 
+        professor {
+            parent runs.client
+            args '--username', 'Professor', '--quickPlayMultiplayer', 'localhost'
+        }
+
+        student {
+            parent runs.client
+            taskName 'runAluno'
+            workingDirectory project.file('run-aluno')
+            args '--username', 'Aluno', '--quickPlayMultiplayer', 'localhost'
+        }
+
         server {
             property 'forge.enabledGameTestNamespaces', mod_id
+            workingDirectory project.file('run-server')
             args '--nogui'
         }
 
