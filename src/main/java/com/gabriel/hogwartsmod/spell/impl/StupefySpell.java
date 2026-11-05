@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public class StupefySpell extends ProjectileSpell {
 
     public StupefySpell() {
-        super("stupefy", SpellCategory.CONTROLE, 3, 15f, 80, 3, 20, 0xD03050);
+        super("stupefy", SpellCategory.CONTROLE, 3, 15f, 80, 3, 20, 0xFF3322);
     }
 
     @Override

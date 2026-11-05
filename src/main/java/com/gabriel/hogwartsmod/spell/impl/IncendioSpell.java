@@ -1,10 +1,11 @@
 package com.gabriel.hogwartsmod.spell.impl;
 
+import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
 import com.gabriel.hogwartsmod.spell.SpellDelivery;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -23,7 +24,7 @@ public class IncendioSpell extends Spell {
     private static final float DRAIN_PER_TICK = 6f / 20f;
 
     public IncendioSpell() {
-        super("incendio", SpellCategory.DANO, SpellDelivery.FEIXE, 5, 3f, 120, 4, 25, 0xF07020);
+        super("incendio", SpellCategory.DANO, SpellDelivery.FEIXE, 5, 3f, 120, 4, 25, 0xFF6A1A);
     }
 
     public float getDamage(MagicData data) {
@@ -40,19 +41,18 @@ public class IncendioSpell extends Spell {
         if (!data.spend(DRAIN_PER_TICK)) {
             return false;
         }
-        if (ticksHeld % 2 != 0 || !(caster.level() instanceof ServerLevel server)) {
+        if (!(caster.level() instanceof ServerLevel server)) {
             return true;
         }
         Vec3 start = wandTip(caster);
+        jet(server, start, caster.getLookAngle(), ticksHeld);
+        if (ticksHeld % 2 != 0) {
+            return true;
+        }
         Vec3 end = start.add(caster.getLookAngle().scale(RANGE));
         HitResult blockHit = server.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
         if (blockHit.getType() != HitResult.Type.MISS) {
             end = blockHit.getLocation();
-        }
-        Vec3 step = end.subtract(start).scale(1.0 / 12);
-        for (int i = 1; i <= 12; i++) {
-            Vec3 p = start.add(step.scale(i));
-            server.sendParticles(ParticleTypes.FLAME, p.x, p.y, p.z, 1, 0.05, 0.05, 0.05, 0.01);
         }
         if (ticksHeld % 10 == 0) {
             server.playSound(null, caster.blockPosition(), SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.4f, 1.2f);
@@ -76,6 +76,23 @@ public class IncendioSpell extends Spell {
             data.addMastery(this, 1, getXpPerUse());
         }
         return true;
+    }
+
+    private void jet(ServerLevel server, Vec3 tip, Vec3 look, int ticksHeld) {
+        var random = server.getRandom();
+        for (int i = 0; i < 4; i++) {
+            Vec3 spread = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).scale(0.045);
+            Vec3 velocity = look.scale(0.55 + random.nextDouble() * 0.15).add(spread);
+            SpellFx.particle(server, ModParticles.FIRE.get(), getColor(), 0.32f + random.nextFloat() * 0.12f, 14 + random.nextInt(5), tip, velocity);
+        }
+        Vec3 emberVel = look.scale(0.45).add(new Vec3(random.nextGaussian(), random.nextGaussian() + 1, random.nextGaussian()).scale(0.06));
+        SpellFx.particle(server, ModParticles.EMBER.get(), 0xFFA040, 0.1f, 22, tip, emberVel);
+        if (ticksHeld % 3 == 0) {
+            SpellFx.particle(server, ModParticles.SMOKE.get(), 0x3A3634, 0.6f, 30, tip.add(look.scale(5)), look.scale(0.1).add(0, 0.04, 0));
+        }
+        if (ticksHeld % 2 == 0) {
+            SpellFx.particle(server, ModParticles.GLOW.get(), 0xFF8A30, 0.45f, 3, tip, Vec3.ZERO);
+        }
     }
 
     private void burn(ServerPlayer caster, MagicData data, LivingEntity target, Vec3 from, ServerLevel server) {

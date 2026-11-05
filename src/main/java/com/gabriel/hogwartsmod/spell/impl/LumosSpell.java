@@ -1,11 +1,13 @@
 package com.gabriel.hogwartsmod.spell.impl;
 
+import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.network.PlayerFxPacket;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
 import com.gabriel.hogwartsmod.spell.SpellDelivery;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -18,7 +20,7 @@ import net.minecraft.world.phys.Vec3;
 public class LumosSpell extends Spell {
 
     public LumosSpell() {
-        super("lumos", SpellCategory.ESSENCIAL, SpellDelivery.EM_SI_MESMO, 1, 5f, 40, 2, 10, 0xFFF6C2);
+        super("lumos", SpellCategory.ESSENCIAL, SpellDelivery.EM_SI_MESMO, 1, 5f, 40, 2, 10, 0xDDEBFF);
     }
 
     public int getDurationTicks(MagicData data) {
@@ -39,6 +41,7 @@ public class LumosSpell extends Spell {
         long now = caster.level().getGameTime();
         if (data.getLumosUntil() > now) {
             data.setLumosUntil(0);
+            SpellFx.sendState(caster, PlayerFxPacket.Kind.LUMOS, false);
             caster.level().playSound(null, caster.blockPosition(), SoundEvents.CANDLE_EXTINGUISH, SoundSource.PLAYERS, 1.0f, 1.2f);
             return;
         }
@@ -46,8 +49,10 @@ public class LumosSpell extends Spell {
         data.addMastery(this, 1, getXpPerUse());
         Vec3 tip = wandTip(caster);
         if (caster.level() instanceof ServerLevel server) {
-            server.sendParticles(ParticleTypes.END_ROD, tip.x, tip.y, tip.z, 15, 0.1, 0.1, 0.1, 0.02);
+            SpellFx.flash(server, tip, getColor(), 1.2f);
+            SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.08f, 16, tip, 10, 0.08);
         }
+        SpellFx.sendState(caster, PlayerFxPacket.Kind.LUMOS, true);
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 1.6f);
     }
 
@@ -56,15 +61,15 @@ public class LumosSpell extends Spell {
         boolean active = data.getLumosUntil() > level.getGameTime();
         BlockPos old = data.getLumosLight();
         if (!active) {
+            if (data.isLumosAnnounced()) {
+                data.setLumosAnnounced(false);
+                SpellFx.sendState(player, PlayerFxPacket.Kind.LUMOS, false);
+            }
             if (old != null) {
                 removeLight(level, old);
                 data.setLumosLight(null);
             }
             return;
-        }
-        if (level instanceof ServerLevel server && level.getGameTime() % 10 == 0) {
-            Vec3 tip = wandTip(player);
-            server.sendParticles(ParticleTypes.END_ROD, tip.x, tip.y, tip.z, 1, 0.02, 0.02, 0.02, 0.0);
         }
         BlockPos target = BlockPos.containing(player.getEyePosition());
         if (!level.getBlockState(target).isAir() && !level.getBlockState(target).is(Blocks.LIGHT)) {

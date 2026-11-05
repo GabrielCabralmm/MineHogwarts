@@ -1,10 +1,11 @@
 package com.gabriel.hogwartsmod.spell.impl;
 
+import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
 import com.gabriel.hogwartsmod.spell.SpellDelivery;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -22,7 +23,7 @@ import net.minecraft.world.phys.Vec3;
 public class AccioSpell extends Spell {
 
     public AccioSpell() {
-        super("accio", SpellCategory.FORCA, SpellDelivery.ALVO_DIRETO, 4, 12f, 100, 2, 15, 0x9060E0);
+        super("accio", SpellCategory.FORCA, SpellDelivery.ALVO_DIRETO, 4, 12f, 100, 2, 15, 0xC8D8FF);
     }
 
     public double getRange(MagicData data) {
@@ -42,12 +43,21 @@ public class AccioSpell extends Spell {
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(caster, start, end, box,
                 e -> (e instanceof LivingEntity || e instanceof ItemEntity) && e != caster && !e.isSpectator(), range * range);
         if (caster.level() instanceof ServerLevel server) {
-            DustParticleOptions dust = new DustParticleOptions(getColorVector(), 0.8f);
+            Vec3 tip = wandTip(caster);
             Vec3 to = hit != null ? hit.getLocation() : end;
-            Vec3 step = to.subtract(start).scale(1.0 / 16);
-            for (int i = 1; i <= 16; i++) {
-                Vec3 p = start.add(step.scale(i));
-                server.sendParticles(dust, p.x, p.y - 0.2, p.z, 1, 0, 0, 0, 0);
+            Vec3 path = to.subtract(tip);
+            int steps = Math.max(6, (int) (path.length() * 2));
+            Vec3 back = path.normalize().scale(-0.18);
+            SpellFx.flash(server, tip, getColor(), 0.6f);
+            for (int i = 1; i <= steps; i++) {
+                Vec3 p = tip.add(path.scale(i / (double) steps));
+                SpellFx.particle(server, ModParticles.GLOW.get(), 0x3A4660, 0.55f, 10, p, back);
+                if (i % 3 == 0) {
+                    SpellFx.particle(server, ModParticles.SPARK.get(), getColor(), 0.05f, 12, p, back.scale(1.5));
+                }
+            }
+            if (hit != null) {
+                SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.07f, 14, hit.getLocation(), 10, 0.12);
             }
         }
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.5f);

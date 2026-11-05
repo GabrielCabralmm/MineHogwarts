@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public class ExpelliarmusSpell extends ProjectileSpell {
 
     public ExpelliarmusSpell() {
-        super("expelliarmus", SpellCategory.CONTROLE, 2, 15f, 80, 3, 20, 0xE03030);
+        super("expelliarmus", SpellCategory.CONTROLE, 2, 15f, 80, 3, 20, 0xE0102E);
     }
 
     @Override

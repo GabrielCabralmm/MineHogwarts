@@ -1,11 +1,12 @@
 package com.gabriel.hogwartsmod.entity;
 
+import com.gabriel.hogwartsmod.fx.SpellFx;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.registry.ModEntities;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
 import com.gabriel.hogwartsmod.spell.Spells;
 import com.gabriel.hogwartsmod.spell.impl.ProtegoSpell;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -60,11 +61,16 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         super.tick();
         Spell spell = getSpell();
         if (level().isClientSide && spell != null) {
-            DustParticleOptions dust = new DustParticleOptions(spell.getColorVector(), 1.2f);
             Vec3 motion = getDeltaMovement();
-            for (int i = 0; i < 4; i++) {
-                double t = i / 4.0;
-                level().addParticle(dust, getX() - motion.x * t, getY() - motion.y * t, getZ() - motion.z * t, 0, 0, 0);
+            double cy = getY() + getBbHeight() / 2;
+            for (int i = 0; i < 3; i++) {
+                double t = i / 3.0;
+                level().addParticle(ModParticles.GLOW.get().with(spell.getColor(), 0.28f, 8),
+                        getX() - motion.x * t, cy - motion.y * t, getZ() - motion.z * t, 0, 0, 0);
+            }
+            if (random.nextInt(2) == 0) {
+                level().addParticle(ModParticles.SPARK.get().with(spell.getColor(), 0.08f, 10),
+                        getX(), cy, getZ(), (random.nextDouble() - 0.5) * 0.08, (random.nextDouble() - 0.5) * 0.08, (random.nextDouble() - 0.5) * 0.08);
             }
         } else if (!level().isClientSide && tickCount > MAX_LIFETIME) {
             discard();
@@ -105,10 +111,10 @@ public class SpellProjectileEntity extends ThrowableProjectile {
             }
             Spell spell = getSpell();
             if (spell != null) {
-                DustParticleOptions dust = new DustParticleOptions(spell.getColorVector(), 1.6f);
-                server.sendParticles(dust, getX(), getY(), getZ(), 30, 0.3, 0.3, 0.3, 0.05);
+                SpellFx.impact(server, result.getLocation(), spell.getColor());
             }
             server.playSound(null, blockPosition(), SoundEvents.AMETHYST_BLOCK_BREAK, SoundSource.PLAYERS, 1.0f, 1.2f);
+            server.playSound(null, blockPosition(), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 0.5f, 1.6f);
             discard();
         }
     }

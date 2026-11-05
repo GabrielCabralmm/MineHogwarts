@@ -1,7 +1,10 @@
 package com.gabriel.hogwartsmod.magic;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.fx.SpellFx;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.network.ModNetwork;
+import com.gabriel.hogwartsmod.network.PlayerFxPacket;
 import com.gabriel.hogwartsmod.item.WandItem;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
@@ -9,7 +12,6 @@ import com.gabriel.hogwartsmod.spell.Spells;
 import com.gabriel.hogwartsmod.spell.impl.LumosSpell;
 import com.gabriel.hogwartsmod.spell.impl.ProtegoSpell;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,7 +19,6 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
@@ -25,6 +26,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.network.PacketDistributor;
 
 public final class MagicEvents {
     private static final ResourceLocation KEY = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "magic");
@@ -89,6 +91,25 @@ public final class MagicEvents {
                     LumosSpell.removeLight(player.level(), data.getLumosLight());
                     data.setLumosLight(null);
                 }
+            }
+        }
+
+        @SubscribeEvent
+        public static void startTracking(PlayerEvent.StartTracking event) {
+            if (!(event.getTarget() instanceof ServerPlayer target) || !(event.getEntity() instanceof ServerPlayer tracker)) {
+                return;
+            }
+            MagicData data = MagicData.get(target);
+            if (data == null) {
+                return;
+            }
+            if (data.getLumosUntil() > target.level().getGameTime()) {
+                ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> tracker),
+                        new PlayerFxPacket(target.getId(), PlayerFxPacket.Kind.LUMOS, true));
+            }
+            if (data.isShielding()) {
+                ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> tracker),
+                        new PlayerFxPacket(target.getId(), PlayerFxPacket.Kind.SHIELD, true));
             }
         }
 
@@ -166,8 +187,9 @@ public final class MagicEvents {
 
     public static void playLevelUp(ServerPlayer player) {
         if (player.level() instanceof ServerLevel server) {
-            DustParticleOptions gold = new DustParticleOptions(new Vector3f(1.0f, 0.82f, 0.3f), 1.2f);
-            server.sendParticles(gold, player.getX(), player.getY() + 1.0, player.getZ(), 50, 0.6, 0.9, 0.6, 0.05);
+            Vec3 center = player.position().add(0, 1.0, 0);
+            SpellFx.particle(server, ModParticles.RING.get(), 0xFFD27A, 1.6f, 20, player.position().add(0, 0.1, 0), Vec3.ZERO);
+            SpellFx.burst(server, ModParticles.EMBER.get(), 0xFFD27A, 0.1f, 40, center, 30, 0.08);
         }
     }
 }

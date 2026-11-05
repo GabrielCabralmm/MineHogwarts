@@ -35,6 +35,7 @@ public class MagicData {
     private long lumosUntil;
     @Nullable
     private BlockPos lumosLight;
+    private boolean lumosAnnounced;
 
     private boolean shielding;
     private float shieldHp;
@@ -255,7 +256,16 @@ public class MagicData {
 
     public void setLumosUntil(long value) {
         lumosUntil = value;
+        lumosAnnounced = value > 0;
         markForSync();
+    }
+
+    public boolean isLumosAnnounced() {
+        return lumosAnnounced;
+    }
+
+    public void setLumosAnnounced(boolean value) {
+        lumosAnnounced = value;
     }
 
     @Nullable

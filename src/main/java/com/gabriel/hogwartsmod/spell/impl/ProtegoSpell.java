@@ -1,18 +1,19 @@
 package com.gabriel.hogwartsmod.spell.impl;
 
+import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.network.PlayerFxPacket;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.SpellCategory;
 import com.gabriel.hogwartsmod.spell.SpellDelivery;
 import com.gabriel.hogwartsmod.spell.Spells;
-import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3f;
 
 public class ProtegoSpell extends Spell {
     public static final int PERFECT_BLOCK_TICKS = 5;
@@ -21,7 +22,7 @@ public class ProtegoSpell extends Spell {
     public enum BlockResult { NONE, BLOCKED, PERFECT, REFLECTED, BROKEN }
 
     public ProtegoSpell() {
-        super("protego", SpellCategory.PROTECAO, SpellDelivery.PROTECAO, 2, 10f, 60, 4, 40, 0x7FB8F0);
+        super("protego", SpellCategory.PROTECAO, SpellDelivery.PROTECAO, 2, 10f, 60, 4, 40, 0x9CC8FF);
     }
 
     @Override
@@ -37,6 +38,10 @@ public class ProtegoSpell extends Spell {
     public boolean startHold(ServerPlayer caster, MagicData data) {
         data.startShield(getShieldMaxHp(data), caster.level().getGameTime());
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6f, 1.8f);
+        SpellFx.sendState(caster, PlayerFxPacket.Kind.SHIELD, true);
+        if (caster.level() instanceof ServerLevel server) {
+            SpellFx.flash(server, caster.getEyePosition().add(caster.getLookAngle().scale(1.1)), getColor(), 1.6f);
+        }
         return true;
     }
 
@@ -45,24 +50,23 @@ public class ProtegoSpell extends Spell {
         if (!data.isShielding() || !data.spend(DRAIN_PER_TICK)) {
             return false;
         }
-        if (ticksHeld % 3 == 0 && caster.level() instanceof ServerLevel server) {
-            DustParticleOptions dust = new DustParticleOptions(new Vector3f(0.55f, 0.75f, 1f), 1.0f);
-            Vec3 look = caster.getLookAngle();
-            Vec3 center = caster.getEyePosition().add(look.scale(1.2));
-            Vec3 right = look.cross(new Vec3(0, 1, 0)).normalize();
-            Vec3 up = right.cross(look).normalize();
-            for (int i = 0; i < 16; i++) {
-                double a = i * Math.PI * 2 / 16;
-                Vec3 p = center.add(right.scale(Math.cos(a) * 0.9)).add(up.scale(Math.sin(a) * 0.9));
-                server.sendParticles(dust, p.x, p.y, p.z, 1, 0, 0, 0, 0);
-            }
-        }
         return true;
     }
 
     @Override
     public void stopHold(ServerPlayer caster, MagicData data) {
         data.stopShield();
+        SpellFx.sendState(caster, PlayerFxPacket.Kind.SHIELD, false);
+    }
+
+    private static void hitFx(Player defender, Vec3 from, boolean perfect) {
+        if (defender instanceof ServerPlayer sp && defender.level() instanceof ServerLevel server) {
+            SpellFx.sendState(sp, PlayerFxPacket.Kind.SHIELD_HIT, perfect);
+            Vec3 point = defender.getEyePosition().add(from.subtract(defender.getEyePosition()).normalize().scale(1.1));
+            int color = Spells.PROTEGO.getColor();
+            SpellFx.flash(server, point, perfect ? SpellFx.WHITE : color, perfect ? 1.8f : 1.0f);
+            SpellFx.burst(server, ModParticles.SPARK.get(), color, 0.12f, 10, point, perfect ? 18 : 8, 0.25);
+        }
     }
 
     public static boolean isFacing(Player player, Vec3 from) {
@@ -86,12 +90,14 @@ public class ProtegoSpell extends Spell {
         boolean perfect = now - data.getShieldStart() <= PERFECT_BLOCK_TICKS;
         ServerLevel server = defender.level() instanceof ServerLevel s ? s : null;
         if (perfect) {
+            hitFx(defender, from, true);
             data.addMastery(protego, 10, 3);
             if (server != null) {
                 server.playSound(null, defender.blockPosition(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0f, 1.6f);
             }
             return data.hasMaxMastery(protego) && category != SpellCategory.PROTECAO ? BlockResult.REFLECTED : BlockResult.PERFECT;
         }
+        hitFx(defender, from, false);
         if (category == SpellCategory.FORCA) {
             return BlockResult.BLOCKED;
         }
