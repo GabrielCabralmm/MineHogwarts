@@ -15,11 +15,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class MagicParticle extends TextureSheetParticle {
 
-    public enum Shape { GLOW, SPARK, EMBER, SMOKE, FIRE, RING }
+    public enum Shape { GLOW, SPARK, EMBER, SMOKE, FIRE, RING, STAR, ORB }
 
     private static final int FULL_BRIGHT = 0xF000F0;
 
     private final Shape shape;
+    private final SpriteSet sprites;
     private final float baseSize;
     private final float baseR;
     private final float baseG;
@@ -30,6 +31,7 @@ public class MagicParticle extends TextureSheetParticle {
                             MagicParticleOptions options, SpriteSet sprites, Shape shape) {
         super(level, x, y, z);
         this.shape = shape;
+        this.sprites = sprites;
         this.xd = vx;
         this.yd = vy;
         this.zd = vz;
@@ -46,7 +48,11 @@ public class MagicParticle extends TextureSheetParticle {
         this.spin = (random.nextFloat() - 0.5f) * 0.12f;
         this.roll = random.nextFloat() * Mth.TWO_PI;
         this.oRoll = roll;
-        pickSprite(sprites);
+        if (shape == Shape.EMBER) {
+            pickSprite(sprites);
+        } else {
+            setSpriteFromAge(sprites);
+        }
         switch (shape) {
             case GLOW -> { friction = 0.86f; gravity = 0f; }
             case SPARK -> { friction = 0.9f; gravity = 0.5f; }
@@ -54,6 +60,8 @@ public class MagicParticle extends TextureSheetParticle {
             case SMOKE -> { friction = 0.9f; gravity = -0.015f; alpha = 0.35f; }
             case FIRE -> { friction = 0.93f; gravity = -0.02f; }
             case RING -> { friction = 1f; gravity = 0f; }
+            case STAR -> { friction = 0.8f; gravity = 0f; }
+            case ORB -> { friction = 1f; gravity = 0f; }
         }
         updateLook(0f);
     }
@@ -61,40 +69,47 @@ public class MagicParticle extends TextureSheetParticle {
     @Override
     public void tick() {
         super.tick();
-        oRoll = roll;
-        roll += spin;
+        if (shape != Shape.EMBER && isAlive()) {
+            setSpriteFromAge(sprites);
+        }
+        oRoll = shape == Shape.FIRE || shape == Shape.SMOKE ? roll : 0f;
+        roll = shape == Shape.FIRE || shape == Shape.SMOKE ? roll + spin : 0f;
         updateLook(age / (float) lifetime);
     }
 
     private void updateLook(float t) {
         switch (shape) {
-            case GLOW -> {
-                alpha = 1f - t;
-                quadSize = baseSize * (1f - 0.45f * t);
+            case GLOW, ORB -> {
+                alpha = 1f - t * t;
+                quadSize = baseSize;
+            }
+            case STAR -> {
+                alpha = 1f;
+                quadSize = baseSize * (1f + 0.3f * t);
             }
             case SPARK -> {
-                alpha = 1f - t * t;
-                quadSize = baseSize * (1f - t);
+                alpha = 1f;
+                quadSize = baseSize;
             }
             case EMBER -> {
                 alpha = (0.65f + 0.35f * Mth.sin(age * 1.7f)) * (1f - t);
                 quadSize = baseSize * (1f - 0.5f * t);
             }
             case SMOKE -> {
-                alpha = 0.35f * (1f - t);
-                quadSize = baseSize * (1f + 1.6f * t);
+                alpha = 0.6f * (1f - t * 0.5f);
+                quadSize = baseSize * (1f + 0.8f * t);
             }
             case FIRE -> {
                 float hot = Math.max(0f, 1f - t * 1.8f);
                 rCol = Mth.lerp(hot, baseR, 1f);
                 gCol = Mth.lerp(hot, baseG, 0.95f);
                 bCol = Mth.lerp(hot, baseB, 0.7f);
-                alpha = (float) Math.pow(1f - t, 1.4);
-                quadSize = baseSize * (0.55f + 1.3f * t);
+                alpha = 1f;
+                quadSize = baseSize * (0.7f + 0.9f * t);
             }
             case RING -> {
                 float ease = 1f - (1f - t) * (1f - t) * (1f - t);
-                alpha = 1f - t;
+                alpha = 1f;
                 quadSize = baseSize * (0.1f + 0.9f * ease);
             }
         }

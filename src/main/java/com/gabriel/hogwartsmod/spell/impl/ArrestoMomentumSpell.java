@@ -41,9 +41,16 @@ public class ArrestoMomentumSpell extends Spell {
         Vec3 feet = caster.position().add(0, 0.08, 0);
         SpellFx.particle(server, ModParticles.RING.get(), getColor(), (float) radius, 18, feet, Vec3.ZERO);
         SpellFx.particle(server, ModParticles.RING.get(), 0xFFF2CC, (float) radius * 0.7f, 14, feet.add(0, 0.6, 0), Vec3.ZERO);
-        SpellFx.flash(server, wandTip(caster), getColor(), 1.2f);
+        SpellFx.particle(server, ModParticles.RING.get(), getColor(), (float) radius * 0.45f, 10, feet.add(0, 1.2, 0), Vec3.ZERO);
+        SpellFx.flash(server, wandTip(caster), getColor(), 1.4f);
+        SpellFx.burst(server, ModParticles.STAR.get(), getColor(), 0.5f, 10, caster.position().add(0, 1, 0), 8, 0.4);
         var random = server.getRandom();
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 24; i++) {
+            double a = i * Math.PI * 2 / 24;
+            SpellFx.particle(server, ModParticles.SPARK.get(), getColor(), 0.16f, 14, feet.add(0, 0.2, 0),
+                    new Vec3(Math.cos(a) * radius * 0.12, 0.05, Math.sin(a) * radius * 0.12));
+        }
+        for (int i = 0; i < 70; i++) {
             double a = random.nextDouble() * Math.PI * 2;
             double d = random.nextDouble() * radius;
             Vec3 p = feet.add(Math.cos(a) * d, 0.1, Math.sin(a) * d);
@@ -67,7 +74,8 @@ public class ArrestoMomentumSpell extends Spell {
                 living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, getDuration(data), 4, false, true));
                 Vec3 center = living.position().add(0, living.getBbHeight() / 2, 0);
                 SpellFx.particle(server, ModParticles.GLOW.get(), getColor(), living.getBbHeight() * 1.2f, 16, center, Vec3.ZERO);
-                SpellFx.burst(server, ModParticles.EMBER.get(), getColor(), 0.08f, 30, center, 10, 0.05);
+                SpellFx.particle(server, ModParticles.STAR.get(), 0xFFF2CC, 0.8f, 8, center, Vec3.ZERO);
+                SpellFx.burst(server, ModParticles.EMBER.get(), getColor(), 0.08f, 40, center, 16, 0.06);
                 affected++;
             }
         }

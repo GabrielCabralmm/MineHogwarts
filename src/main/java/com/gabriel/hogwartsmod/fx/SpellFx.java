@@ -30,19 +30,24 @@ public final class SpellFx {
 
     public static void flash(ServerLevel level, Vec3 pos, int color, float scale) {
         particle(level, ModParticles.GLOW.get(), color, scale, 6, pos, Vec3.ZERO);
-        particle(level, ModParticles.GLOW.get(), WHITE, scale * 0.45f, 4, pos, Vec3.ZERO);
+        particle(level, ModParticles.STAR.get(), WHITE, scale * 0.6f, 5, pos, Vec3.ZERO);
     }
 
     public static void castFlash(ServerLevel level, Vec3 tip, int color) {
-        flash(level, tip, color, 0.7f);
-        burst(level, ModParticles.SPARK.get(), color, 0.12f, 8, tip, 6, 0.12);
+        flash(level, tip, color, 0.8f);
+        burst(level, ModParticles.SPARK.get(), color, 0.14f, 12, tip, 10, 0.18);
+        burst(level, ModParticles.EMBER.get(), color, 0.06f, 16, tip, 6, 0.08);
     }
 
     public static void impact(ServerLevel level, Vec3 pos, int color) {
-        flash(level, pos, color, 1.6f);
-        particle(level, ModParticles.GLOW.get(), color, 2.4f, 10, pos, Vec3.ZERO);
-        burst(level, ModParticles.SPARK.get(), color, 0.16f, 14, pos, 16, 0.32);
-        burst(level, ModParticles.SPARK.get(), WHITE, 0.1f, 10, pos, 6, 0.25);
+        particle(level, ModParticles.GLOW.get(), color, 2.2f, 8, pos, Vec3.ZERO);
+        particle(level, ModParticles.STAR.get(), color, 1.6f, 8, pos, Vec3.ZERO);
+        particle(level, ModParticles.STAR.get(), WHITE, 0.8f, 6, pos, Vec3.ZERO);
+        particle(level, ModParticles.RING.get(), color, 2.4f, 10, pos, Vec3.ZERO);
+        burst(level, ModParticles.SPARK.get(), color, 0.2f, 16, pos, 28, 0.5);
+        burst(level, ModParticles.SPARK.get(), WHITE, 0.12f, 12, pos, 10, 0.35);
+        burst(level, ModParticles.EMBER.get(), color, 0.08f, 30, pos, 14, 0.12);
+        burst(level, ModParticles.SMOKE.get(), 0x5A5560, 0.5f, 24, pos, 4, 0.04);
     }
 
     public static void sendState(ServerPlayer player, PlayerFxPacket.Kind kind, boolean value) {

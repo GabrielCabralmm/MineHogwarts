@@ -190,6 +190,7 @@ public final class MagicEvents {
             Vec3 center = player.position().add(0, 1.0, 0);
             SpellFx.particle(server, ModParticles.RING.get(), 0xFFD27A, 1.6f, 20, player.position().add(0, 0.1, 0), Vec3.ZERO);
             SpellFx.burst(server, ModParticles.EMBER.get(), 0xFFD27A, 0.1f, 40, center, 30, 0.08);
+            SpellFx.burst(server, ModParticles.STAR.get(), 0xFFE9A8, 0.5f, 12, center, 10, 0.3);
         }
     }
 }

@@ -1,5 +1,8 @@
 {
   "textures": [
-    "hogwartsmod:ring"
+    "hogwartsmod:ring_0",
+    "hogwartsmod:ring_1",
+    "hogwartsmod:ring_2",
+    "hogwartsmod:ring_3"
   ]
 }

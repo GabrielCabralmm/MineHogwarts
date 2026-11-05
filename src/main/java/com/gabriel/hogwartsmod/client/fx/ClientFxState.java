@@ -82,14 +82,26 @@ public final class ClientFxState {
                 }
                 continue;
             }
+            if (state.shield && level.random.nextInt(2) == 0) {
+                Vec3 look = player.getViewVector(1f);
+                Vec3 right = look.cross(new Vec3(0, 1, 0));
+                if (right.lengthSqr() > 1.0E-4) {
+                    right = right.normalize();
+                    Vec3 up = right.cross(look).normalize();
+                    double a = level.random.nextDouble() * Math.PI * 2;
+                    Vec3 p = player.getEyePosition(1f).add(look.scale(1.05)).add(0, -0.15, 0)
+                            .add(right.scale(Math.cos(a) * 0.95)).add(up.scale(Math.sin(a) * 0.95));
+                    level.addParticle(ModParticles.SPARK.get().with(0xBFDFFF, 0.08f, 10), p.x, p.y, p.z, 0, 0, 0);
+                }
+            }
             if (state.lumos) {
                 Vec3 tip = wandTip(player, 1f);
                 float flicker = 0.9f + level.random.nextFloat() * 0.2f;
-                level.addParticle(ModParticles.GLOW.get().with(0xEAF3FF, 0.22f * flicker, 3), tip.x, tip.y, tip.z, 0, 0, 0);
-                level.addParticle(ModParticles.GLOW.get().with(0x2C3D5C, 1.1f * flicker, 3), tip.x, tip.y, tip.z, 0, 0, 0);
-                if (level.random.nextInt(4) == 0) {
-                    level.addParticle(ModParticles.SPARK.get().with(0xCFE4FF, 0.06f, 14), tip.x, tip.y, tip.z,
-                            (level.random.nextFloat() - 0.5f) * 0.02, 0.01, (level.random.nextFloat() - 0.5f) * 0.02);
+                level.addParticle(ModParticles.ORB.get().with(0xF4F8FF, 0.28f * flicker, 2), tip.x, tip.y, tip.z, 0, 0, 0);
+                level.addParticle(ModParticles.GLOW.get().with(0x6E86B4, 0.6f * flicker, 2), tip.x, tip.y, tip.z, 0, 0, 0);
+                if (level.random.nextInt(2) == 0) {
+                    level.addParticle(ModParticles.SPARK.get().with(0xCFE4FF, 0.08f, 14), tip.x, tip.y, tip.z,
+                            (level.random.nextFloat() - 0.5f) * 0.04, 0.02, (level.random.nextFloat() - 0.5f) * 0.04);
                 }
             }
         }

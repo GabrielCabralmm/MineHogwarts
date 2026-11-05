@@ -1,5 +1,8 @@
 {
   "textures": [
-    "hogwartsmod:spark"
+    "hogwartsmod:spark_0",
+    "hogwartsmod:spark_1",
+    "hogwartsmod:spark_2",
+    "hogwartsmod:spark_3"
   ]
 }

@@ -51,13 +51,14 @@ public class AccioSpell extends Spell {
             SpellFx.flash(server, tip, getColor(), 0.6f);
             for (int i = 1; i <= steps; i++) {
                 Vec3 p = tip.add(path.scale(i / (double) steps));
-                SpellFx.particle(server, ModParticles.GLOW.get(), 0x3A4660, 0.55f, 10, p, back);
-                if (i % 3 == 0) {
-                    SpellFx.particle(server, ModParticles.SPARK.get(), getColor(), 0.05f, 12, p, back.scale(1.5));
+                SpellFx.particle(server, ModParticles.GLOW.get(), 0x46557A, 0.45f, 10, p, back);
+                if (i % 2 == 0) {
+                    SpellFx.particle(server, ModParticles.SPARK.get(), getColor(), 0.1f, 12, p, back.scale(1.5));
                 }
             }
             if (hit != null) {
-                SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.07f, 14, hit.getLocation(), 10, 0.12);
+                SpellFx.particle(server, ModParticles.STAR.get(), getColor(), 1.0f, 8, hit.getLocation(), Vec3.ZERO);
+                SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.12f, 14, hit.getLocation(), 16, 0.2);
             }
         }
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.ILLUSIONER_CAST_SPELL, SoundSource.PLAYERS, 0.8f, 1.5f);

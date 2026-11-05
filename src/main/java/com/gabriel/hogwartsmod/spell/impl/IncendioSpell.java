@@ -80,19 +80,23 @@ public class IncendioSpell extends Spell {
 
     private void jet(ServerLevel server, Vec3 tip, Vec3 look, int ticksHeld) {
         var random = server.getRandom();
-        for (int i = 0; i < 4; i++) {
-            Vec3 spread = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).scale(0.045);
-            Vec3 velocity = look.scale(0.55 + random.nextDouble() * 0.15).add(spread);
-            SpellFx.particle(server, ModParticles.FIRE.get(), getColor(), 0.32f + random.nextFloat() * 0.12f, 14 + random.nextInt(5), tip, velocity);
+        for (int i = 0; i < 7; i++) {
+            Vec3 spread = new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).scale(0.06);
+            Vec3 velocity = look.scale(0.55 + random.nextDouble() * 0.2).add(spread);
+            int color = random.nextInt(3) == 0 ? 0xFFC03A : getColor();
+            SpellFx.particle(server, ModParticles.FIRE.get(), color, 0.4f + random.nextFloat() * 0.2f, 12 + random.nextInt(6), tip, velocity);
         }
-        Vec3 emberVel = look.scale(0.45).add(new Vec3(random.nextGaussian(), random.nextGaussian() + 1, random.nextGaussian()).scale(0.06));
-        SpellFx.particle(server, ModParticles.EMBER.get(), 0xFFA040, 0.1f, 22, tip, emberVel);
-        if (ticksHeld % 3 == 0) {
-            SpellFx.particle(server, ModParticles.SMOKE.get(), 0x3A3634, 0.6f, 30, tip.add(look.scale(5)), look.scale(0.1).add(0, 0.04, 0));
+        for (int i = 0; i < 2; i++) {
+            Vec3 emberVel = look.scale(0.5).add(new Vec3(random.nextGaussian(), random.nextGaussian() + 1, random.nextGaussian()).scale(0.08));
+            SpellFx.particle(server, ModParticles.EMBER.get(), 0xFFA040, 0.07f, 22 + random.nextInt(10), tip, emberVel);
         }
         if (ticksHeld % 2 == 0) {
-            SpellFx.particle(server, ModParticles.GLOW.get(), 0xFF8A30, 0.45f, 3, tip, Vec3.ZERO);
+            Vec3 end = tip.add(look.scale(4 + random.nextDouble() * 3));
+            SpellFx.particle(server, ModParticles.SMOKE.get(), 0x3A3634, 0.7f, 30, end, look.scale(0.08).add(0, 0.05, 0));
+            SpellFx.particle(server, ModParticles.SPARK.get(), 0xFFD060, 0.12f, 12, tip,
+                    look.scale(0.4).add(new Vec3(random.nextGaussian(), random.nextGaussian(), random.nextGaussian()).scale(0.1)));
         }
+        SpellFx.particle(server, ModParticles.GLOW.get(), 0xFF8A30, 0.6f, 2, tip, Vec3.ZERO);
     }
 
     private void burn(ServerPlayer caster, MagicData data, LivingEntity target, Vec3 from, ServerLevel server) {

@@ -49,8 +49,9 @@ public class LumosSpell extends Spell {
         data.addMastery(this, 1, getXpPerUse());
         Vec3 tip = wandTip(caster);
         if (caster.level() instanceof ServerLevel server) {
-            SpellFx.flash(server, tip, getColor(), 1.2f);
-            SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.08f, 16, tip, 10, 0.08);
+            SpellFx.flash(server, tip, getColor(), 1.6f);
+            SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.12f, 16, tip, 18, 0.15);
+            SpellFx.burst(server, ModParticles.STAR.get(), 0xFFF6C8, 0.4f, 10, tip, 4, 0.1);
         }
         SpellFx.sendState(caster, PlayerFxPacket.Kind.LUMOS, true);
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.0f, 1.6f);

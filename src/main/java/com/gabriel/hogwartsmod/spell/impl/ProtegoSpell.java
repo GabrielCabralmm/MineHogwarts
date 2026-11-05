@@ -40,7 +40,9 @@ public class ProtegoSpell extends Spell {
         caster.level().playSound(null, caster.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.6f, 1.8f);
         SpellFx.sendState(caster, PlayerFxPacket.Kind.SHIELD, true);
         if (caster.level() instanceof ServerLevel server) {
-            SpellFx.flash(server, caster.getEyePosition().add(caster.getLookAngle().scale(1.1)), getColor(), 1.6f);
+            Vec3 front = caster.getEyePosition().add(caster.getLookAngle().scale(1.1));
+            SpellFx.flash(server, front, getColor(), 1.8f);
+            SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.12f, 14, front, 16, 0.25);
         }
         return true;
     }
@@ -64,8 +66,9 @@ public class ProtegoSpell extends Spell {
             SpellFx.sendState(sp, PlayerFxPacket.Kind.SHIELD_HIT, perfect);
             Vec3 point = defender.getEyePosition().add(from.subtract(defender.getEyePosition()).normalize().scale(1.1));
             int color = Spells.PROTEGO.getColor();
-            SpellFx.flash(server, point, perfect ? SpellFx.WHITE : color, perfect ? 1.8f : 1.0f);
-            SpellFx.burst(server, ModParticles.SPARK.get(), color, 0.12f, 10, point, perfect ? 18 : 8, 0.25);
+            SpellFx.flash(server, point, perfect ? SpellFx.WHITE : color, perfect ? 2.0f : 1.2f);
+            SpellFx.particle(server, ModParticles.STAR.get(), color, perfect ? 1.6f : 0.9f, 8, point, Vec3.ZERO);
+            SpellFx.burst(server, ModParticles.SPARK.get(), color, 0.16f, 14, point, perfect ? 30 : 14, 0.35);
         }
     }
 

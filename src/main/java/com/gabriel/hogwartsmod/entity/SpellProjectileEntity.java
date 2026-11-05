@@ -63,14 +63,20 @@ public class SpellProjectileEntity extends ThrowableProjectile {
         if (level().isClientSide && spell != null) {
             Vec3 motion = getDeltaMovement();
             double cy = getY() + getBbHeight() / 2;
-            for (int i = 0; i < 3; i++) {
-                double t = i / 3.0;
-                level().addParticle(ModParticles.GLOW.get().with(spell.getColor(), 0.28f, 8),
+            int color = spell.getColor();
+            level().addParticle(ModParticles.ORB.get().with(color, 0.5f, 2), getX(), cy, getZ(), 0, 0, 0);
+            level().addParticle(ModParticles.GLOW.get().with(0xFFFFFF, 0.2f, 2), getX(), cy, getZ(), 0, 0, 0);
+            for (int i = 1; i <= 5; i++) {
+                double t = i / 5.0;
+                level().addParticle(ModParticles.GLOW.get().with(color, 0.32f - 0.04f * i, 8 + i),
                         getX() - motion.x * t, cy - motion.y * t, getZ() - motion.z * t, 0, 0, 0);
             }
-            if (random.nextInt(2) == 0) {
-                level().addParticle(ModParticles.SPARK.get().with(spell.getColor(), 0.08f, 10),
-                        getX(), cy, getZ(), (random.nextDouble() - 0.5) * 0.08, (random.nextDouble() - 0.5) * 0.08, (random.nextDouble() - 0.5) * 0.08);
+            for (int i = 0; i < 2; i++) {
+                level().addParticle(ModParticles.SPARK.get().with(color, 0.1f, 12 + random.nextInt(6)),
+                        getX(), cy, getZ(), (random.nextDouble() - 0.5) * 0.12, (random.nextDouble() - 0.3) * 0.12, (random.nextDouble() - 0.5) * 0.12);
+            }
+            if (random.nextInt(3) == 0) {
+                level().addParticle(ModParticles.EMBER.get().with(color, 0.05f, 20), getX(), cy, getZ(), 0, 0.01, 0);
             }
         } else if (!level().isClientSide && tickCount > MAX_LIFETIME) {
             discard();

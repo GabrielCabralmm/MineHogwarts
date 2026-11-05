@@ -1,5 +1,8 @@
 {
   "textures": [
-    "hogwartsmod:glow"
+    "hogwartsmod:glow_0",
+    "hogwartsmod:glow_1",
+    "hogwartsmod:glow_2",
+    "hogwartsmod:glow_3"
   ]
 }

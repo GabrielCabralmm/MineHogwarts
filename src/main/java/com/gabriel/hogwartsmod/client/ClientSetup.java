@@ -2,8 +2,8 @@ package com.gabriel.hogwartsmod.client;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.registry.ModEntities;
-import com.gabriel.hogwartsmod.client.fx.SpellProjectileRenderer;
 import com.gabriel.hogwartsmod.client.particle.MagicParticle;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import com.gabriel.hogwartsmod.particle.ModParticles;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -28,7 +28,7 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), SpellProjectileRenderer::new);
+        event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), NoopRenderer::new);
     }
 
     @SubscribeEvent
@@ -44,6 +44,8 @@ public final class ClientSetup {
         event.registerSpriteSet(ModParticles.SMOKE.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.SMOKE));
         event.registerSpriteSet(ModParticles.FIRE.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.FIRE));
         event.registerSpriteSet(ModParticles.RING.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.RING));
+        event.registerSpriteSet(ModParticles.STAR.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.STAR));
+        event.registerSpriteSet(ModParticles.ORB.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.ORB));
     }
 
     @SubscribeEvent
