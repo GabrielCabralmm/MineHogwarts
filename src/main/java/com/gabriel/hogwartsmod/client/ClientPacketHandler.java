@@ -6,6 +6,14 @@ import com.gabriel.hogwartsmod.client.fx.ClientFxState;
 import com.gabriel.hogwartsmod.network.PlayerFxPacket;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
+import com.gabriel.hogwartsmod.client.gui.TraceScreen;
+import com.gabriel.hogwartsmod.client.trace.ClientTeachState;
+import com.gabriel.hogwartsmod.network.StudentsPacket;
+import com.gabriel.hogwartsmod.spell.Spell;
+import com.gabriel.hogwartsmod.spell.Spells;
+import com.gabriel.hogwartsmod.teach.TeachRules;
+
+import java.util.List;
 
 public final class ClientPacketHandler {
 
@@ -19,6 +27,22 @@ public final class ClientPacketHandler {
             if (data != null) {
                 data.load(tag);
             }
+        }
+        if (tag.contains("TeachMinLevel")) {
+            ClientTeachState.limits = new TeachRules.Limits(tag.getInt("TeachMinLevel"), tag.getInt("TeachMaxSpellLevel"));
+            ClientTeachState.range = tag.getInt("TeachRange");
+        }
+    }
+
+    public static void handleStudents(String spell, List<StudentsPacket.Entry> students) {
+        ClientTeachState.spell = spell;
+        ClientTeachState.students = students;
+    }
+
+    public static void handleOpenTrace(String spell, String teacher, int attempts) {
+        Spell resolved = Spells.get(spell);
+        if (resolved != null) {
+            Minecraft.getInstance().setScreen(new TraceScreen(resolved, teacher, attempts));
         }
     }
 

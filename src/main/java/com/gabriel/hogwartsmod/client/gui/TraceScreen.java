@@ -1,0 +1,421 @@
+package com.gabriel.hogwartsmod.client.gui;
+
+import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.client.trace.TracePatterns;
+import com.gabriel.hogwartsmod.network.ModNetwork;
+import com.gabriel.hogwartsmod.network.TraceResultPacket;
+import com.gabriel.hogwartsmod.spell.Spell;
+import com.gabriel.hogwartsmod.teach.TraceResult;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+public class TraceScreen extends Screen {
+    private static final int SHEET_W = 240;
+    private static final int SHEET_H = 220;
+    private static final int CANVAS = 140;
+    private static final float MIN_ACCURACY = 0.75f;
+
+    private static final int INK = 0xFF38261A;
+    private static final int TITLE = 0xFF6E281E;
+    private static final int MUTED = 0xFF82684C;
+    private static final int GOLD = 0xFFBE8C28;
+    private static final int GREEN = 0xFF3F6B2A;
+    private static final int WINE = 0xFF8E2A2A;
+    private static final int PAGE_LINE = 0xFFC4AA7C;
+
+    private static final ResourceLocation SHEET =
+            ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/trace_sheet.png");
+
+    private enum State { READY, DRAWING, MISSED, FAILED, LEARNED }
+
+    private final Spell spell;
+    private final String teacher;
+    private final int maxAttempts;
+    private final float[][] pattern;
+    private final float tolerance;
+    private final HiRes.Canvas canvas = new HiRes.Canvas();
+    private final List<float[]> stroke = new ArrayList<>();
+
+    private int attemptsLeft;
+    private State state = State.READY;
+    private int stateTicks;
+    private int ticks;
+    private int progress;
+    private int offPoints;
+    private String feedback = "";
+    private int feedbackColor = MUTED;
+    private boolean dirty = true;
+    private boolean finished;
+    private int left;
+    private int top;
+
+    public TraceScreen(Spell spell, String teacher, int attempts) {
+        super(Component.translatable("screen.hogwartsmod.trace"));
+        this.spell = spell;
+        this.teacher = teacher;
+        this.maxAttempts = Math.max(1, attempts);
+        this.attemptsLeft = this.maxAttempts;
+        this.pattern = TracePatterns.get(spell.getId());
+        this.tolerance = 10f - Math.min(4f, spell.getRequiredLevel() * 0.35f);
+    }
+
+    @Override
+    protected void init() {
+        left = (width - SHEET_W) / 2;
+        top = (height - SHEET_H) / 2;
+        dirty = true;
+        if (state == State.READY) {
+            feedback = tr("screen.hogwartsmod.trace.hint");
+            feedbackColor = MUTED;
+        }
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    private int canvasX() {
+        return left + (SHEET_W - CANVAS) / 2;
+    }
+
+    private int canvasY() {
+        return top + 44;
+    }
+
+    private float guideX(int i) {
+        return pattern[i][0] * CANVAS;
+    }
+
+    private float guideY(int i) {
+        return pattern[i][1] * CANVAS;
+    }
+
+    // -- Desenho
+
+    @Override
+    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        renderBackground(g);
+        HiRes.image(g, SHEET, left, top, SHEET_W, SHEET_H);
+        float cx = left + SHEET_W / 2f;
+        HiRes.centered(g, Component.translatable("screen.hogwartsmod.trace.title", spell.getDisplayName()).getString(),
+                HiRes.Style.BOLD, 11f, cx, top + 15, TITLE);
+        HiRes.centered(g, Component.translatable("screen.hogwartsmod.trace.teacher", teacher).getString(),
+                HiRes.Style.ITALIC, cx, top + 30, MUTED);
+        if (dirty) {
+            redraw();
+            dirty = false;
+        }
+        canvas.draw(g, canvasX(), canvasY(), CANVAS, CANVAS);
+        if (state == State.READY && (ticks / 10) % 2 == 0) {
+            float sx = canvasX() + guideX(0);
+            float sy = canvasY() + guideY(0);
+            g.fill((int) sx - 1, (int) sy - 9, (int) sx + 1, (int) sy - 6, GOLD);
+        }
+        HiRes.centered(g, feedback, state == State.LEARNED ? HiRes.Style.BOLD : HiRes.Style.ITALIC, cx, top + 190, feedbackColor);
+        drawAttempts(g, cx, top + 204);
+        super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private void drawAttempts(GuiGraphics g, float cx, int y) {
+        String label = tr("screen.hogwartsmod.trace.attempts");
+        float labelW = HiRes.width(label, HiRes.Style.REGULAR);
+        float total = labelW + 4 + maxAttempts * 8;
+        float x = cx - total / 2f;
+        HiRes.text(g, label, HiRes.Style.REGULAR, x, y - 1.5f, MUTED);
+        for (int i = 0; i < maxAttempts; i++) {
+            diamond(g, Math.round(x + labelW + 4 + i * 8), y, i < attemptsLeft ? GOLD : PAGE_LINE);
+        }
+    }
+
+    private void diamond(GuiGraphics g, int x, int y, int color) {
+        g.fill(x + 2, y, x + 4, y + 1, color);
+        g.fill(x + 1, y + 1, x + 5, y + 2, color);
+        g.fill(x, y + 2, x + 6, y + 4, color);
+        g.fill(x + 1, y + 4, x + 5, y + 5, color);
+        g.fill(x + 2, y + 5, x + 4, y + 6, color);
+    }
+
+    private void redraw() {
+        BufferedImage[] holder = new BufferedImage[1];
+        Graphics2D g = canvas.begin(holder, CANVAS, CANVAS);
+        float s = (float) canvas.scale();
+        int n = pattern.length;
+        boolean learned = state == State.LEARNED;
+        Color spellColor = new Color(spell.getColor());
+
+        Path2D guide = path(0, n - 1, s);
+        g.setColor(new Color(0x82, 0x68, 0x4C, 110));
+        g.setStroke(new BasicStroke(2.2f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{4f * s, 3.5f * s}, 0f));
+        g.draw(guide);
+        for (float f : new float[]{0.22f, 0.5f, 0.78f}) {
+            arrow(g, (int) (f * (n - 1)), s);
+        }
+
+        if (progress > 0 || learned) {
+            Path2D done = path(0, learned ? n - 1 : progress, s);
+            g.setStroke(new BasicStroke(7f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setColor(new Color(0xF0, 0xC8, 0x5A, 70));
+            g.draw(done);
+            g.setStroke(new BasicStroke(3f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setColor(new Color(0xBE, 0x8C, 0x28, 230));
+            g.draw(done);
+        }
+
+        if (stroke.size() > 1 && !learned) {
+            Path2D line = new Path2D.Float();
+            line.moveTo(stroke.get(0)[0] * s, stroke.get(0)[1] * s);
+            for (int i = 1; i < stroke.size(); i++) {
+                line.lineTo(stroke.get(i)[0] * s, stroke.get(i)[1] * s);
+            }
+            boolean bad = state == State.MISSED || state == State.FAILED;
+            g.setStroke(new BasicStroke(6f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setColor(bad ? new Color(0x8E, 0x2A, 0x2A, 60) : new Color(spellColor.getRed(), spellColor.getGreen(), spellColor.getBlue(), 80));
+            g.draw(line);
+            g.setStroke(new BasicStroke(2f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setColor(bad ? new Color(0x8E, 0x2A, 0x2A, 235) : new Color(0x38, 0x26, 0x1A, 235));
+            g.draw(line);
+        }
+
+        dot(g, guideX(n - 1) * s, guideY(n - 1) * s, 3.2f * s, new Color(0x82, 0x68, 0x4C, 170), false);
+        dot(g, guideX(0) * s, guideY(0) * s, 9f * s, new Color(0xF0, 0xC8, 0x5A, 70), true);
+        dot(g, guideX(0) * s, guideY(0) * s, 4.5f * s, new Color(0xBE, 0x8C, 0x28, 255), true);
+        dot(g, guideX(0) * s, guideY(0) * s, 1.8f * s, new Color(0xFF, 0xF2, 0xC8, 255), true);
+        g.dispose();
+        canvas.end(holder[0]);
+    }
+
+    private Path2D path(int from, int to, float s) {
+        Path2D path = new Path2D.Float();
+        path.moveTo(guideX(from) * s, guideY(from) * s);
+        for (int i = from + 1; i <= to; i++) {
+            path.lineTo(guideX(i) * s, guideY(i) * s);
+        }
+        return path;
+    }
+
+    private void arrow(Graphics2D g, int i, float s) {
+        int j = Math.min(pattern.length - 1, i + 2);
+        double angle = Math.atan2(guideY(j) - guideY(i), guideX(j) - guideX(i));
+        double x = guideX(i) * s;
+        double y = guideY(i) * s;
+        double len = 5 * s;
+        Path2D head = new Path2D.Double();
+        head.moveTo(x + Math.cos(angle + 2.5) * len, y + Math.sin(angle + 2.5) * len);
+        head.lineTo(x, y);
+        head.lineTo(x + Math.cos(angle - 2.5) * len, y + Math.sin(angle - 2.5) * len);
+        g.setStroke(new BasicStroke(1.6f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.setColor(new Color(0x6E, 0x28, 0x1E, 150));
+        g.draw(head);
+    }
+
+    private static void dot(Graphics2D g, float x, float y, float r, Color color, boolean fill) {
+        g.setComposite(AlphaComposite.SrcOver);
+        g.setColor(color);
+        Ellipse2D circle = new Ellipse2D.Float(x - r, y - r, r * 2, r * 2);
+        if (fill) {
+            g.fill(circle);
+        } else {
+            g.setStroke(new BasicStroke(r * 0.5f));
+            g.draw(circle);
+        }
+    }
+
+    // -- Lógica do traçado
+
+    @Override
+    public void tick() {
+        ticks++;
+        if (state == State.MISSED || state == State.FAILED || state == State.LEARNED) {
+            stateTicks++;
+            if (state == State.MISSED && stateTicks >= 30) {
+                reset();
+            } else if (state == State.FAILED && stateTicks >= 50) {
+                finish(TraceResult.FAILED);
+            } else if (state == State.LEARNED && stateTicks >= 45) {
+                finished = true;
+                onClose();
+            }
+        }
+    }
+
+    private void reset() {
+        state = State.READY;
+        stroke.clear();
+        progress = 0;
+        offPoints = 0;
+        feedback = tr("screen.hogwartsmod.trace.hint");
+        feedbackColor = MUTED;
+        dirty = true;
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
+        if (button == 0 && state == State.READY) {
+            float x = (float) (mx - canvasX());
+            float y = (float) (my - canvasY());
+            if (Math.hypot(x - guideX(0), y - guideY(0)) <= tolerance * 1.6f) {
+                state = State.DRAWING;
+                stroke.clear();
+                stroke.add(new float[]{x, y});
+                progress = 0;
+                offPoints = 0;
+                feedback = accuracyText();
+                feedbackColor = INK;
+                dirty = true;
+            } else {
+                feedback = tr("screen.hogwartsmod.trace.start_here");
+                feedbackColor = WINE;
+            }
+            return true;
+        }
+        return super.mouseClicked(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+        if (button != 0 || state != State.DRAWING) {
+            return super.mouseDragged(mx, my, button, dx, dy);
+        }
+        float x = (float) (mx - canvasX());
+        float y = (float) (my - canvasY());
+        float[] last = stroke.get(stroke.size() - 1);
+        double step = Math.hypot(x - last[0], y - last[1]);
+        if (step < 1.0) {
+            return true;
+        }
+        int pieces = (int) Math.ceil(step / 2.0);
+        for (int p = 1; p <= pieces; p++) {
+            float t = p / (float) pieces;
+            if (!addPoint(last[0] + (x - last[0]) * t, last[1] + (y - last[1]) * t)) {
+                break;
+            }
+        }
+        dirty = true;
+        return true;
+    }
+
+    private boolean addPoint(float x, float y) {
+        stroke.add(new float[]{x, y});
+        float nearest = Float.MAX_VALUE;
+        for (int i = 0; i < pattern.length; i++) {
+            nearest = Math.min(nearest, (float) Math.hypot(x - guideX(i), y - guideY(i)));
+        }
+        if (nearest > tolerance * 1.7f) {
+            offPoints++;
+        }
+        if (nearest > tolerance * 3.5f) {
+            miss(tr("screen.hogwartsmod.trace.left_path"));
+            return false;
+        }
+        int limit = Math.min(pattern.length - 1, progress + 8);
+        for (int j = progress; j <= limit; j++) {
+            if (Math.hypot(x - guideX(j), y - guideY(j)) <= tolerance) {
+                progress = j;
+            }
+        }
+        feedback = accuracyText();
+        if (progress >= pattern.length - 2) {
+            if (accuracy() >= MIN_ACCURACY) {
+                learned();
+            } else {
+                miss(tr("screen.hogwartsmod.trace.shaky"));
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private float accuracy() {
+        return stroke.isEmpty() ? 1f : 1f - offPoints / (float) stroke.size();
+    }
+
+    private String accuracyText() {
+        return Component.translatable("screen.hogwartsmod.trace.accuracy", Math.round(accuracy() * 100)).getString();
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        if (button == 0 && state == State.DRAWING) {
+            miss(tr("screen.hogwartsmod.trace.incomplete"));
+            return true;
+        }
+        return super.mouseReleased(mx, my, button);
+    }
+
+    private void miss(String reason) {
+        attemptsLeft--;
+        stateTicks = 0;
+        dirty = true;
+        feedbackColor = WINE;
+        if (attemptsLeft <= 0) {
+            state = State.FAILED;
+            feedback = tr("screen.hogwartsmod.trace.failed");
+            playSound(SoundEvents.NOTE_BLOCK_BASS.get(), 0.6f);
+        } else {
+            state = State.MISSED;
+            feedback = reason;
+            playSound(SoundEvents.NOTE_BLOCK_BASS.get(), 0.9f);
+        }
+    }
+
+    private void learned() {
+        state = State.LEARNED;
+        stateTicks = 0;
+        dirty = true;
+        feedback = Component.translatable("screen.hogwartsmod.trace.learned", spell.getDisplayName()).getString();
+        feedbackColor = GREEN;
+        playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.2f);
+        send(TraceResult.SUCCESS);
+    }
+
+    private void playSound(SoundEvent sound, float pitch) {
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(sound, pitch));
+        }
+    }
+
+    private void send(TraceResult result) {
+        if (!finished) {
+            finished = true;
+            ModNetwork.CHANNEL.sendToServer(new TraceResultPacket(spell.getId(), result));
+        }
+    }
+
+    private void finish(TraceResult result) {
+        send(result);
+        onClose();
+    }
+
+    @Override
+    public void onClose() {
+        send(TraceResult.GAVE_UP);
+        canvas.close();
+        super.onClose();
+    }
+
+    @Override
+    public void removed() {
+        send(TraceResult.GAVE_UP);
+        canvas.close();
+    }
+
+    private static String tr(String key) {
+        return Component.translatable(key).getString();
+    }
+}

@@ -4,6 +4,7 @@ import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.network.ModNetwork;
+import com.gabriel.hogwartsmod.teach.TeachingManager;
 import com.gabriel.hogwartsmod.network.PlayerFxPacket;
 import com.gabriel.hogwartsmod.item.WandItem;
 import com.gabriel.hogwartsmod.spell.Spell;
@@ -86,6 +87,7 @@ public final class MagicEvents {
         @SubscribeEvent
         public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
             if (event.getEntity() instanceof ServerPlayer player) {
+                TeachingManager.onLogout(player);
                 MagicData data = MagicData.get(player);
                 if (data != null && data.getLumosLight() != null) {
                     LumosSpell.removeLight(player.level(), data.getLumosLight());

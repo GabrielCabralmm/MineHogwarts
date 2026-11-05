@@ -32,6 +32,8 @@ public class MagicData {
     private final String[] slots = new String[SLOT_COUNT];
     private int activeSlot;
     private final Map<String, long[]> cooldowns = new HashMap<>();
+    private final Map<String, Long> teachReadyAt = new HashMap<>();
+    private Profession profession = Profession.NONE;
     private long lumosUntil;
     @Nullable
     private BlockPos lumosLight;
@@ -172,6 +174,12 @@ public class MagicData {
         return getMastery(spell) >= spell.getMaxMastery();
     }
 
+    public void setMastery(Spell spell, int mastery) {
+        int l = Math.max(0, Math.min(spell.getMaxMastery(), mastery));
+        masteryUses.put(spell.getId(), spell.getMasteryBase() * l * (l + 1) / 2);
+        markForSync();
+    }
+
     public boolean addMastery(Spell spell, int uses, int xpGain) {
         masteryUses.merge(spell.getId(), uses, Integer::sum);
         markForSync();
@@ -221,6 +229,31 @@ public class MagicData {
     public int getCooldownTotal(Spell spell) {
         long[] cd = cooldowns.get(spell.getId());
         return cd == null ? 0 : (int) cd[1];
+    }
+
+    // -- Ensino e profissão
+
+    public Profession getProfession() {
+        return profession;
+    }
+
+    public void setProfession(Profession value) {
+        profession = value;
+        markForSync();
+    }
+
+    public boolean isProfessor() {
+        return profession == Profession.PROFESSOR;
+    }
+
+    public void setTeachCooldown(Spell spell, long readyAt) {
+        teachReadyAt.put(spell.getId(), readyAt);
+        markForSync();
+    }
+
+    public int getTeachCooldownRemaining(Spell spell, long gameTime) {
+        Long readyAt = teachReadyAt.get(spell.getId());
+        return readyAt == null ? 0 : (int) Math.max(0, readyAt - gameTime);
     }
 
     // -- Conjuração com animação
@@ -363,6 +396,10 @@ public class MagicData {
             cooldownTag.put(id, entry);
         });
         tag.put("Cooldowns", cooldownTag);
+        CompoundTag teachTag = new CompoundTag();
+        teachReadyAt.forEach(teachTag::putLong);
+        tag.put("TeachCooldowns", teachTag);
+        tag.putString("Profession", profession.getId());
         tag.putLong("LumosUntil", lumosUntil);
         if (lumosLight != null) {
             tag.put("LumosLight", NbtUtils.writeBlockPos(lumosLight));
@@ -390,6 +427,11 @@ public class MagicData {
             CompoundTag entry = cooldownTag.getCompound(id);
             cooldowns.put(id, new long[]{entry.getLong("ReadyAt"), entry.getLong("Total")});
         });
+        teachReadyAt.clear();
+        CompoundTag teachTag = tag.getCompound("TeachCooldowns");
+        teachTag.getAllKeys().forEach(id -> teachReadyAt.put(id, teachTag.getLong(id)));
+        Profession loaded = Profession.byId(tag.getString("Profession"));
+        profession = loaded == null ? Profession.NONE : loaded;
         lumosUntil = tag.getLong("LumosUntil");
         lumosLight = tag.contains("LumosLight") ? NbtUtils.readBlockPos(tag.getCompound("LumosLight")) : null;
         reserve = tag.contains("Reserve") ? tag.getFloat("Reserve") : -1f;

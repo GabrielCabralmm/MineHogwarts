@@ -2,7 +2,15 @@ package com.gabriel.hogwartsmod.client.gui;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.client.trace.ClientTeachState;
+import com.gabriel.hogwartsmod.network.InviteStudentPacket;
 import com.gabriel.hogwartsmod.network.ModNetwork;
+import com.gabriel.hogwartsmod.network.RequestStudentsPacket;
+import com.gabriel.hogwartsmod.network.StudentsPacket;
+import com.gabriel.hogwartsmod.teach.StudentStatus;
+import com.gabriel.hogwartsmod.teach.TeachRules;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 import com.gabriel.hogwartsmod.network.UpdateSlotsPacket;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.Spells;
@@ -16,11 +24,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GrimoireScreen extends Screen {
     private static final int BOOK_W = 300;
     private static final int BOOK_H = 190;
     private static final int PER_PAGE = 9;
+    private static final int TEACH_ROWS = 7;
     private static final int ROW_H = 15;
     private static final int SLOT = 18;
     private static final int SLOT_GAP = 3;
@@ -39,6 +49,8 @@ public class GrimoireScreen extends Screen {
     private static final int NOTE = 0xFFD4C49E;
     private static final int NOTE_ON = 0xFFF0E4C4;
     private static final int NOTE_EDGE = 0xFF967E5A;
+    private static final int GREEN = 0xFF3F6B2A;
+    private static final int WINE = 0xFF8E2A2A;
 
     private static final ResourceLocation BOOK =
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/grimoire.png");
@@ -59,6 +71,11 @@ public class GrimoireScreen extends Screen {
     private double pressX;
     private double pressY;
     private boolean dragging;
+    @Nullable
+    private Spell teachSpell;
+    @Nullable
+    private UUID teachStudent;
+    private int ticks;
 
     public GrimoireScreen() {
         super(Component.translatable("screen.hogwartsmod.grimoire"));
@@ -111,7 +128,7 @@ public class GrimoireScreen extends Screen {
         drawBook(g);
         switch (tab) {
             case SPELLS -> drawSpellsTab(g, mouseX, mouseY);
-            case TEACH -> drawTeachTab(g);
+            case TEACH -> drawTeachTab(g, mouseX, mouseY);
             case APPARITION -> {
             }
         }
@@ -262,7 +279,28 @@ public class GrimoireScreen extends Screen {
         }
     }
 
-    private void drawTeachTab(GuiGraphics g) {
+    private List<Spell> teachable() {
+        List<Spell> list = new ArrayList<>();
+        MagicData data = data();
+        if (data != null) {
+            for (Spell spell : learned()) {
+                if (TeachRules.isListed(data, spell, ClientTeachState.limits)) {
+                    list.add(spell);
+                }
+            }
+        }
+        return list;
+    }
+
+    private long gameTime() {
+        return minecraft != null && minecraft.level != null ? minecraft.level.getGameTime() : 0;
+    }
+
+    private List<StudentsPacket.Entry> students() {
+        return teachSpell != null && teachSpell.getId().equals(ClientTeachState.spell) ? ClientTeachState.students : List.of();
+    }
+
+    private void drawTeachTab(GuiGraphics g, int mouseX, int mouseY) {
         MagicData data = data();
         if (data == null) {
             return;
@@ -270,25 +308,160 @@ public class GrimoireScreen extends Screen {
         int lx = left + 16;
         int pageW = BOOK_W / 2 - 26;
         HiRes.centered(g, tr("screen.hogwartsmod.grimoire.teachable"), HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
-        int row = 0;
-        for (Spell spell : learned()) {
-            if (!data.hasMaxMastery(spell)) {
-                continue;
+        List<Spell> spells = teachable();
+        if (teachSpell != null && !spells.contains(teachSpell)) {
+            teachSpell = null;
+        }
+        long now = gameTime();
+        for (int i = 0; i < Math.min(TEACH_ROWS, spells.size()); i++) {
+            Spell spell = spells.get(i);
+            int y = top + 30 + i * ROW_H;
+            boolean hover = mouseX >= lx && mouseX < lx + pageW && mouseY >= y && mouseY < y + ROW_H;
+            if (spell == teachSpell || hover) {
+                g.fill(lx - 2, y - 1, lx + pageW + 2, y + ROW_H - 1, HIGHLIGHT);
             }
-            int y = top + 30 + row * ROW_H;
             SpellIcons.draw(g, spell, lx, y, 12);
-            HiRes.text(g, spell.getDisplayName().getString(), HiRes.Style.REGULAR, lx + 16, y + 1.5f, INK);
-            if (++row >= PER_PAGE) {
-                break;
-            }
+            int remaining = data.getTeachCooldownRemaining(spell, now);
+            String status = remaining > 0 ? formatTime(remaining) : tr("screen.hogwartsmod.grimoire.ready");
+            float statusW = HiRes.width(status, HiRes.Style.REGULAR);
+            String name = HiRes.ellipsize(spell.getDisplayName().getString(), HiRes.Style.REGULAR, pageW - 16 - statusW - 4);
+            HiRes.text(g, name, HiRes.Style.REGULAR, lx + 16, y + 1.5f, INK);
+            HiRes.right(g, status, remaining > 0 ? HiRes.Style.REGULAR : HiRes.Style.BOLD, lx + pageW, y + 1.5f, remaining > 0 ? MUTED : GREEN);
         }
-        if (row == 0) {
-            wrapped(g, tr("screen.hogwartsmod.grimoire.teach_none"), HiRes.Style.ITALIC, lx + pageW / 2f, top + 60, pageW, MUTED);
+        if (spells.isEmpty()) {
+            String key = !data.isProfessor() && data.getLevel() < ClientTeachState.limits.minLevel()
+                    ? Component.translatable("screen.hogwartsmod.grimoire.teach_level", ClientTeachState.limits.minLevel()).getString()
+                    : tr("screen.hogwartsmod.grimoire.teach_none");
+            wrapped(g, key, HiRes.Style.ITALIC, lx + pageW / 2f, top + 60, pageW, MUTED);
         }
+        String rule = data.isProfessor() ? tr("screen.hogwartsmod.grimoire.teach_rule_professor")
+                : Component.translatable("screen.hogwartsmod.grimoire.teach_rule", ClientTeachState.limits.maxSpellLevel()).getString();
+        List<String> ruleLines = HiRes.wrap(rule, HiRes.Style.ITALIC, pageW);
+        for (int i = 0; i < ruleLines.size(); i++) {
+            HiRes.centered(g, ruleLines.get(i), HiRes.Style.ITALIC, lx + pageW / 2f, top + BOOK_H - 34 + i * 10 - (ruleLines.size() - 1) * 5, MUTED);
+        }
+
         int rx = left + BOOK_W / 2 + 10;
         int rw = BOOK_W / 2 - 26;
         HiRes.centered(g, tr("screen.hogwartsmod.grimoire.students"), HiRes.Style.BOLD, rx + rw / 2f, top + 17, TITLE);
-        wrapped(g, tr("screen.hogwartsmod.grimoire.teach_soon"), HiRes.Style.ITALIC, rx + rw / 2f, top + 60, rw, MUTED);
+        if (teachSpell == null) {
+            wrapped(g, tr("screen.hogwartsmod.grimoire.pick_spell"), HiRes.Style.ITALIC, rx + rw / 2f, top + 60, rw, MUTED);
+            return;
+        }
+        List<StudentsPacket.Entry> students = students();
+        if (students.isEmpty()) {
+            wrapped(g, Component.translatable("screen.hogwartsmod.grimoire.no_students", ClientTeachState.range).getString(),
+                    HiRes.Style.ITALIC, rx + rw / 2f, top + 60, rw, MUTED);
+        }
+        for (int i = 0; i < Math.min(PER_PAGE - 1, students.size()); i++) {
+            StudentsPacket.Entry entry = students.get(i);
+            int y = top + 30 + i * ROW_H;
+            boolean hover = mouseX >= rx && mouseX < rx + rw && mouseY >= y && mouseY < y + ROW_H;
+            boolean pickable = entry.status() == StudentStatus.CAN_LEARN;
+            if (entry.id().equals(teachStudent) || hover && pickable) {
+                g.fill(rx - 2, y - 1, rx + rw + 2, y + ROW_H - 1, HIGHLIGHT);
+            }
+            String status = tr(entry.status().key());
+            float statusW = HiRes.width(status, HiRes.Style.ITALIC);
+            String name = HiRes.ellipsize(entry.name(), HiRes.Style.REGULAR, rw - statusW - 6);
+            HiRes.text(g, name, HiRes.Style.REGULAR, rx, y + 1.5f, pickable ? INK : MUTED);
+            HiRes.right(g, status, HiRes.Style.ITALIC, rx + rw, y + 1.5f, statusColor(entry.status()));
+        }
+        boolean onCooldown = data.getTeachCooldownRemaining(teachSpell, now) > 0;
+        boolean ready = !onCooldown && selectedStudent() != null;
+        int by = buttonY();
+        boolean hover = ready && mouseX >= rx && mouseX < rx + rw && mouseY >= by && mouseY < by + 15;
+        g.fill(rx, by, rx + rw, by + 15, ready ? COVER : NOTE_EDGE);
+        g.fill(rx + 1, by + 1, rx + rw - 1, by + 14, hover ? NOTE_ON : ready ? NOTE : SLOT_BG);
+        String label = onCooldown ? tr("screen.hogwartsmod.grimoire.on_cooldown") : tr("screen.hogwartsmod.grimoire.invite");
+        HiRes.centered(g, label, HiRes.Style.BOLD, rx + rw / 2f, by + 3, ready ? TITLE : MUTED);
+    }
+
+    private int buttonY() {
+        return top + BOOK_H - 38;
+    }
+
+    @Nullable
+    private StudentsPacket.Entry selectedStudent() {
+        for (StudentsPacket.Entry entry : students()) {
+            if (entry.id().equals(teachStudent) && entry.status() == StudentStatus.CAN_LEARN) {
+                return entry;
+            }
+        }
+        return null;
+    }
+
+    private static int statusColor(StudentStatus status) {
+        return switch (status) {
+            case CAN_LEARN -> GREEN;
+            case LOW_LEVEL -> WINE;
+            case INVITED -> GOLD;
+            default -> MUTED;
+        };
+    }
+
+    private static String formatTime(int ticks) {
+        int seconds = ticks / 20;
+        if (seconds >= 3600) {
+            return String.format("%dh %02dm", seconds / 3600, seconds / 60 % 60);
+        }
+        return String.format("%d:%02d", seconds / 60, seconds % 60);
+    }
+
+    private void requestStudents() {
+        if (teachSpell != null) {
+            ModNetwork.CHANNEL.sendToServer(new RequestStudentsPacket(teachSpell.getId()));
+        }
+    }
+
+    @Override
+    public void tick() {
+        ticks++;
+        if (tab == Tab.TEACH && ticks % 20 == 0) {
+            requestStudents();
+        }
+    }
+
+    private boolean teachClicked(double mx, double my) {
+        int lx = left + 16;
+        int pageW = BOOK_W / 2 - 26;
+        List<Spell> spells = teachable();
+        if (mx >= lx - 2 && mx < lx + pageW + 2 && my >= top + 30) {
+            int row = (int) ((my - (top + 30)) / ROW_H);
+            if (row < Math.min(TEACH_ROWS, spells.size())) {
+                teachSpell = spells.get(row);
+                teachStudent = null;
+                requestStudents();
+                return true;
+            }
+        }
+        int rx = left + BOOK_W / 2 + 10;
+        int rw = BOOK_W / 2 - 26;
+        if (teachSpell == null || mx < rx - 2 || mx >= rx + rw + 2) {
+            return false;
+        }
+        int by = buttonY();
+        if (my >= by && my < by + 15) {
+            StudentsPacket.Entry student = selectedStudent();
+            MagicData data = data();
+            if (student != null && data != null && data.getTeachCooldownRemaining(teachSpell, gameTime()) <= 0) {
+                ModNetwork.CHANNEL.sendToServer(new InviteStudentPacket(teachSpell.getId(), student.id()));
+                teachStudent = null;
+                if (minecraft != null) {
+                    minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+                }
+            }
+            return true;
+        }
+        if (my >= top + 30) {
+            int row = (int) ((my - (top + 30)) / ROW_H);
+            List<StudentsPacket.Entry> students = students();
+            if (row < Math.min(PER_PAGE - 1, students.size()) && students.get(row).status() == StudentStatus.CAN_LEARN) {
+                teachStudent = students.get(row).id();
+                return true;
+            }
+        }
+        return false;
     }
 
     private void drawPagination(GuiGraphics g, int cx, int y) {
@@ -385,9 +558,15 @@ public class GrimoireScreen extends Screen {
                 if (!isLocked(t)) {
                     tab = t;
                     armed = null;
+                    if (t == Tab.TEACH) {
+                        requestStudents();
+                    }
                 }
                 return true;
             }
+        }
+        if (tab == Tab.TEACH && button == 0 && teachClicked(mx, my)) {
+            return true;
         }
         if (tab != Tab.SPELLS) {
             return super.mouseClicked(mx, my, button);

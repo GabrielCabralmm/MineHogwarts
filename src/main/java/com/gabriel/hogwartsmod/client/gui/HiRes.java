@@ -208,6 +208,10 @@ public final class HiRes {
         text(g, text, style, cx - width(text, style) / 2f, y, color);
     }
 
+    public static void centered(GuiGraphics g, String text, Style style, float size, float cx, float y, int color) {
+        text(g, text, style, size, cx - width(text, style, size) / 2f, y, color);
+    }
+
     public static void right(GuiGraphics g, String text, Style style, float rx, float y, int color) {
         text(g, text, style, rx - width(text, style), y, color);
     }
@@ -247,16 +251,7 @@ public final class HiRes {
         int w = image.getWidth();
         int h = image.getHeight();
         NativeImage nativeImage = new NativeImage(w, h, false);
-        for (int y = 0; y < h; y++) {
-            for (int x = 0; x < w; x++) {
-                int argb = image.getRGB(x, y);
-                int a = argb >>> 24;
-                int r = (argb >> 16) & 0xFF;
-                int gr = (argb >> 8) & 0xFF;
-                int b = argb & 0xFF;
-                nativeImage.setPixelRGBA(x, y, (a << 24) | (b << 16) | (gr << 8) | r);
-            }
-        }
+        copy(image, nativeImage);
         DynamicTexture texture = new DynamicTexture(nativeImage);
         texture.setFilter(true, false);
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "hires/" + (counter++));
@@ -270,5 +265,75 @@ public final class HiRes {
             Minecraft.getInstance().getTextureManager().release(eldest.getValue().id());
         }
         return entry;
+    }
+
+    private static void copy(BufferedImage image, NativeImage target) {
+        int w = Math.min(image.getWidth(), target.getWidth());
+        int h = Math.min(image.getHeight(), target.getHeight());
+        int[] row = new int[w];
+        for (int y = 0; y < h; y++) {
+            image.getRGB(0, y, w, 1, row, 0, w);
+            for (int x = 0; x < w; x++) {
+                int argb = row[x];
+                target.setPixelRGBA(x, y, (argb & 0xFF00FF00) | ((argb >> 16) & 0xFF) | ((argb & 0xFF) << 16));
+            }
+        }
+    }
+
+    // -- Tela de desenho livre
+
+    public static final class Canvas {
+        @org.jetbrains.annotations.Nullable
+        private DynamicTexture texture;
+        @org.jetbrains.annotations.Nullable
+        private ResourceLocation id;
+        private int pixelW;
+        private int pixelH;
+
+        public double scale() {
+            return HiRes.scale();
+        }
+
+        public Graphics2D begin(BufferedImage[] out, int w, int h) {
+            int pw = Math.max(1, (int) Math.round(w * scale()));
+            int ph = Math.max(1, (int) Math.round(h * scale()));
+            out[0] = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
+            return configure(out[0].createGraphics());
+        }
+
+        public void end(BufferedImage image) {
+            if (texture == null || pixelW != image.getWidth() || pixelH != image.getHeight()) {
+                close();
+                pixelW = image.getWidth();
+                pixelH = image.getHeight();
+                texture = new DynamicTexture(pixelW, pixelH, true);
+                texture.setFilter(true, false);
+                id = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "hires/canvas_" + (counter++));
+                Minecraft.getInstance().getTextureManager().register(id, texture);
+            }
+            NativeImage pixels = texture.getPixels();
+            if (pixels != null) {
+                copy(image, pixels);
+                texture.upload();
+            }
+        }
+
+        public void draw(GuiGraphics g, int x, int y, int w, int h) {
+            if (id == null) {
+                return;
+            }
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            g.blit(id, x, y, w, h, 0, 0, pixelW, pixelH, pixelW, pixelH);
+            RenderSystem.disableBlend();
+        }
+
+        public void close() {
+            if (id != null) {
+                Minecraft.getInstance().getTextureManager().release(id);
+            }
+            id = null;
+            texture = null;
+        }
     }
 }

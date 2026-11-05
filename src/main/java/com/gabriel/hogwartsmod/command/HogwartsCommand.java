@@ -2,6 +2,8 @@ package com.gabriel.hogwartsmod.command;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.magic.Profession;
+import com.gabriel.hogwartsmod.teach.TeachingManager;
 import com.gabriel.hogwartsmod.spell.Spell;
 import com.gabriel.hogwartsmod.spell.Spells;
 import com.mojang.brigadier.CommandDispatcher;
@@ -9,6 +11,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
@@ -23,11 +26,19 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(modid = HogwartsMod.MOD_ID)
 public final class HogwartsCommand {
     private static final String ALL = "todos";
+    private static final Predicate<CommandSourceStack> STAFF = source -> source.hasPermission(2);
+    private static final SuggestionProvider<CommandSourceStack> PROFESSIONS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.of(Profession.values()).map(Profession::getId), builder);
+    private static final DynamicCommandExceptionType NO_DATA =
+            new DynamicCommandExceptionType(name -> Component.translatable("command.hogwartsmod.no_data", name));
+    private static final SimpleCommandExceptionType UNKNOWN_PROFESSION =
+            new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.unknown_profession"));
     private static final SimpleCommandExceptionType UNKNOWN_SPELL =
             new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.unknown_spell"));
     private static final SuggestionProvider<CommandSourceStack> SPELLS_OR_ALL = (ctx, builder) ->
@@ -45,8 +56,21 @@ public final class HogwartsCommand {
 
     private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("hogwarts")
-                .requires(source -> source.hasPermission(2))
-                .then(Commands.literal("feitico")
+                .then(Commands.literal("aula")
+                        .then(Commands.literal("aceitar")
+                                .executes(ctx -> TeachingManager.accept(ctx.getSource().getPlayerOrException()) ? 1 : 0))
+                        .then(Commands.literal("recusar")
+                                .executes(ctx -> TeachingManager.decline(ctx.getSource().getPlayerOrException()) ? 1 : 0)))
+                .then(Commands.literal("profissao").requires(STAFF)
+                        .then(Commands.argument("alvo", EntityArgument.player())
+                                .then(Commands.argument("profissao", StringArgumentType.word()).suggests(PROFESSIONS)
+                                        .executes(HogwartsCommand::setProfession))))
+                .then(Commands.literal("feitico").requires(STAFF)
+                        .then(Commands.literal("maestria")
+                                .then(Commands.argument("alvo", EntityArgument.player())
+                                        .then(Commands.argument("feitico", StringArgumentType.word()).suggests(SPELLS_OR_ALL)
+                                                .then(Commands.argument("nivel", IntegerArgumentType.integer(0, 5))
+                                                        .executes(HogwartsCommand::setMastery)))))
                         .then(Commands.literal("aprender")
                                 .then(Commands.argument("alvo", EntityArgument.player())
                                         .then(Commands.argument("feitico", StringArgumentType.word()).suggests(SPELLS_OR_ALL)
@@ -55,30 +79,30 @@ public final class HogwartsCommand {
                                 .then(Commands.argument("alvo", EntityArgument.player())
                                         .then(Commands.argument("feitico", StringArgumentType.word()).suggests(SPELLS_OR_ALL)
                                                 .executes(ctx -> learn(ctx, false))))))
-                .then(Commands.literal("atalho")
+                .then(Commands.literal("atalho").requires(STAFF)
                         .then(Commands.argument("slot", IntegerArgumentType.integer(1, MagicData.SLOT_COUNT))
                                 .then(Commands.argument("feitico", StringArgumentType.word()).suggests(SPELLS)
                                         .executes(HogwartsCommand::setSlot))))
-                .then(Commands.literal("nivel")
+                .then(Commands.literal("nivel").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("nivel", IntegerArgumentType.integer(1))
                                         .executes(HogwartsCommand::setLevel))))
-                .then(Commands.literal("xp")
+                .then(Commands.literal("xp").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("quantidade", IntegerArgumentType.integer(1))
                                         .executes(HogwartsCommand::addXp))))
-                .then(Commands.literal("reserva")
+                .then(Commands.literal("reserva").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .executes(HogwartsCommand::fillReserve)))
-                .then(Commands.literal("info")
+                .then(Commands.literal("info").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .executes(HogwartsCommand::info))));
     }
 
-    private static MagicData data(ServerPlayer player) {
+    private static MagicData data(ServerPlayer player) throws CommandSyntaxException {
         MagicData data = MagicData.get(player);
         if (data == null) {
-            throw new IllegalStateException("Dados mágicos ausentes");
+            throw NO_DATA.create(player.getDisplayName());
         }
         return data;
     }
@@ -108,6 +132,34 @@ public final class HogwartsCommand {
         String key = learn ? "command.hogwartsmod.learned" : "command.hogwartsmod.forgot";
         ctx.getSource().sendSuccess(() -> Component.translatable(key, spells.size(), target.getDisplayName()), true);
         return spells.size();
+    }
+
+    private static int setProfession(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        Profession profession = Profession.byId(StringArgumentType.getString(ctx, "profissao"));
+        if (profession == null) {
+            throw UNKNOWN_PROFESSION.create();
+        }
+        data(target).setProfession(profession);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.profession_set", target.getDisplayName(), profession.getDisplayName()), true);
+        return 1;
+    }
+
+    private static int setMastery(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        List<Spell> spells = resolve(StringArgumentType.getString(ctx, "feitico"));
+        int level = IntegerArgumentType.getInteger(ctx, "nivel");
+        MagicData data = data(target);
+        int count = 0;
+        for (Spell spell : spells) {
+            if (data.knows(spell)) {
+                data.setMastery(spell, level);
+                count++;
+            }
+        }
+        int changed = count;
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.mastery_set", changed, target.getDisplayName(), level), true);
+        return changed;
     }
 
     private static int setSlot(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -157,7 +209,7 @@ public final class HogwartsCommand {
         CommandSourceStack source = ctx.getSource();
         source.sendSuccess(() -> Component.translatable("command.hogwartsmod.info_header", target.getDisplayName(),
                 data.getLevel(), data.getXp(), MagicData.xpForNextLevel(data.getLevel()),
-                Math.round(data.getReserve()), Math.round(data.getMaxReserve())), false);
+                Math.round(data.getReserve()), Math.round(data.getMaxReserve()), data.getProfession().getDisplayName()), false);
         for (String id : data.getLearned()) {
             Spell spell = Spells.get(id);
             if (spell != null) {
