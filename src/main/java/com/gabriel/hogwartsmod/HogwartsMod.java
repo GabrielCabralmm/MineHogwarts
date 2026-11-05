@@ -2,6 +2,7 @@ package com.gabriel.hogwartsmod;
 
 import com.gabriel.hogwartsmod.magic.MagicConfig;
 import com.gabriel.hogwartsmod.network.ModNetwork;
+import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.registry.ModCreativeTabs;
 import com.gabriel.hogwartsmod.registry.ModEntities;
 import com.gabriel.hogwartsmod.registry.ModItems;
@@ -20,6 +21,7 @@ public class HogwartsMod {
         ModItems.ITEMS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
+        ModParticles.PARTICLES.register(modBus);
         context.registerConfig(ModConfig.Type.COMMON, MagicConfig.SPEC);
         modBus.addListener(this::commonSetup);
     }
