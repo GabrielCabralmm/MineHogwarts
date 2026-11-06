@@ -36,6 +36,7 @@ public class BroomEntity extends Entity {
 
     private float speed;
     private float stamina = -1;
+    private float pendingTurn;
     private boolean boosting;
     private float roll;
     private float rollOld;
@@ -136,6 +137,10 @@ public class BroomEntity extends Entity {
         double back = index == 0 ? 0.0 : -0.6;
         Vec3 offset = new Vec3(0, 0, back).yRot(-getYRot() * Mth.DEG_TO_RAD);
         move.accept(passenger, getX() + offset.x, getY() + 0.1 + passenger.getMyRidingOffset(), getZ() + offset.z);
+        if (pendingTurn != 0 && passenger == getControllingPassenger()) {
+            passenger.setYRot(passenger.getYRot() + pendingTurn);
+            pendingTurn = 0;
+        }
         alignBody(passenger);
     }
 
@@ -207,6 +212,10 @@ public class BroomEntity extends Entity {
 
     public float getRoll(float partialTick) {
         return Mth.lerp(partialTick, rollOld, roll);
+    }
+
+    public void queueTurn(float turn) {
+        pendingTurn = turn;
     }
 
     public void fly(float forward, float vertical, boolean boost, float targetYaw, float targetPitch) {
