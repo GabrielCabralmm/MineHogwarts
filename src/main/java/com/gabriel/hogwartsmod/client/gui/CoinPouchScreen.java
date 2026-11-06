@@ -147,10 +147,7 @@ public class CoinPouchScreen extends Screen {
         boolean hover = enabled && mouseX >= x && mouseX < x + 70 && mouseY >= y && mouseY < y + 15;
         String state = !enabled ? "d" : hover ? "h" : "n";
         HiRes.image(g, tex("botao_couro_largo_" + state), x, y, 70, 15);
-        float textW = HiRes.width(label, HiRes.Style.BOLD, 7.5f);
-        float start = x + 35 - (textW + 11) / 2f;
-        HiRes.image(g, tex("moeda_" + selected.getId()), Math.round(start), y + 3, 9, 10);
-        HiRes.text(g, label, HiRes.Style.BOLD, 7.5f, start + 11, y + 3.5f, !enabled ? 0xFF6E5A40 : hover ? 0xFFFFE6A8 : 0xFFF0D49A);
+        HiRes.centered(g, label, HiRes.Style.BOLD, 7.5f, x + 35, y + 3.5f, !enabled ? 0xFF6E5A40 : hover ? 0xFFFFE6A8 : 0xFFF0D49A);
     }
 
     private void bigButton(GuiGraphics g, int x, int y, String label, boolean enabled, int mouseX, int mouseY) {
