@@ -385,5 +385,12 @@
   "screen.hogwartsmod.grimoire.no_missions2": "Converse com os NPCs de missões.",
   "screen.hogwartsmod.grimoire.mission_from": "Pedida por %s",
   "screen.hogwartsmod.grimoire.mission_ready": "Pronta! Volte a %s para entregar.",
-  "screen.hogwartsmod.grimoire.mission_going": "Em andamento"
+  "screen.hogwartsmod.grimoire.mission_going": "Em andamento",
+  "screen.hogwartsmod.mission_editor.page_mission": "Missão",
+  "screen.hogwartsmod.mission_editor.page_reward": "Recompensa",
+  "screen.hogwartsmod.mission_editor.coins": "Moedas",
+  "screen.hogwartsmod.mission_editor.items": "Itens",
+  "screen.hogwartsmod.mission_editor.no_items": "Nenhum item: procure abaixo",
+  "screen.hogwartsmod.mission_editor.search": "Procurar item",
+  "screen.hogwartsmod.mission_editor.no_results": "Nenhum item encontrado"
 }

@@ -170,7 +170,7 @@ public class MissionScreen extends Screen {
         int y = top + 45;
         if (!m.description().isBlank()) {
             List<String> lines = HiRes.wrap(m.description(), HiRes.Style.ITALIC, w);
-            for (int i = 0; i < Math.min(4, lines.size()); i++) {
+            for (int i = 0; i < Math.min(m.items().isEmpty() ? 4 : 2, lines.size()); i++) {
                 HiRes.centered(g, lines.get(i), HiRes.Style.ITALIC, cx, y, MUTED);
                 y += 10;
             }
@@ -194,10 +194,11 @@ public class MissionScreen extends Screen {
         y += 2;
         HiRes.text(g, tr("screen.hogwartsmod.missions.reward"), HiRes.Style.BOLD, x, y, INK);
         y += 11;
-        drawReward(g, x, y, m);
-        y += 14;
+        y += drawReward(g, x, y, m) + 2;
         String repeat = m.repeatable() ? tr("screen.hogwartsmod.missions.repeat", m.cooldownHours()) : tr("screen.hogwartsmod.missions.once");
-        HiRes.text(g, repeat, HiRes.Style.ITALIC, 7.5f, x, y, MUTED);
+        if (y < top + H - 40) {
+            HiRes.text(g, repeat, HiRes.Style.ITALIC, 7.5f, x, y, MUTED);
+        }
 
         int by = top + H - 30;
         switch (view.state()) {
@@ -209,24 +210,42 @@ public class MissionScreen extends Screen {
         }
     }
 
-    static void drawReward(GuiGraphics g, int x, int y, Mission m) {
+    static int drawReward(GuiGraphics g, int x, int y, Mission m) {
         int[] amounts = {m.galeoes(), m.sicles(), m.nuques()};
         String[] ids = {"galeao", "sicle", "nuque"};
         float cx = x;
-        boolean any = false;
+        boolean coins = false;
         for (int i = 0; i < 3; i++) {
             if (amounts[i] <= 0) {
                 continue;
             }
-            any = true;
+            coins = true;
             HiRes.image(g, tex("moeda_" + ids[i]), Math.round(cx), y - 1, 10, 11);
             String n = String.valueOf(amounts[i]);
             HiRes.text(g, n, HiRes.Style.BOLD, cx + 12, y, INK);
             cx += 12 + HiRes.width(n, HiRes.Style.BOLD) + 8;
         }
-        if (!any) {
-            HiRes.text(g, tr("screen.hogwartsmod.missions.no_reward"), HiRes.Style.ITALIC, x, y, MUTED);
+        int used = coins ? 12 : 0;
+        for (Mission.RewardItem reward : m.items()) {
+            int ry = y + used;
+            item(g, reward.stack(), x, ry - 1, 10);
+            String label = reward.count() + "× " + reward.item().getDescription().getString();
+            HiRes.text(g, HiRes.ellipsize(label, HiRes.Style.REGULAR, 116), HiRes.Style.REGULAR, x + 13, ry, INK);
+            used += 11;
         }
+        if (!coins && m.items().isEmpty()) {
+            HiRes.text(g, tr("screen.hogwartsmod.missions.no_reward"), HiRes.Style.ITALIC, x, y, MUTED);
+            used = 11;
+        }
+        return Math.max(used, 11);
+    }
+
+    static void item(GuiGraphics g, net.minecraft.world.item.ItemStack stack, int x, int y, int size) {
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(size / 16f, size / 16f, 1f);
+        g.renderItem(stack, 0, 0);
+        g.pose().popPose();
     }
 
     static void button(GuiGraphics g, int x, int y, int w, String label, boolean enabled, int color, int mouseX, int mouseY) {

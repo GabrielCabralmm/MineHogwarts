@@ -145,6 +145,18 @@ public final class MissionManager {
                 }
                 progress.complete(npc.getUUID(), mission.id(), System.currentTimeMillis());
                 MoneyHelper.give(player, done.galeoes(), done.sicles(), done.nuques());
+                for (Mission.RewardItem reward : done.items()) {
+                    Item rewardItem = reward.item();
+                    int left = reward.count();
+                    while (left > 0 && rewardItem != net.minecraft.world.item.Items.AIR) {
+                        int n = Math.min(rewardItem.getMaxStackSize(), left);
+                        ItemStack stack = new ItemStack(rewardItem, n);
+                        if (!player.getInventory().add(stack)) {
+                            player.drop(stack, false);
+                        }
+                        left -= n;
+                    }
+                }
                 npc.talk();
                 player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.3f);
                 player.displayClientMessage(Component.translatable("message.hogwartsmod.mission_done", title(done))

@@ -49,6 +49,9 @@ public class MissionEditorScreen extends Screen {
     private EditBox titleBox;
     private EditBox descBox;
     private EditBox targetBox;
+    private EditBox searchBox;
+    private boolean rewardPage;
+    private List<net.minecraft.world.item.Item> results = List.of();
     private final List<EditBox> boxes = new ArrayList<>();
 
     public MissionEditorScreen(OpenMissionEditorPacket packet) {
@@ -92,6 +95,7 @@ public class MissionEditorScreen extends Screen {
         titleBox = box(rx, top + 42, 142, Mission.MAX_TITLE, "", v -> edit(m -> m.withTitle(v)));
         descBox = box(rx, top + 69, 142, Mission.MAX_DESCRIPTION, "", v -> edit(m -> m.withDescription(v)));
         targetBox = box(rx, top + 114, 94, Mission.MAX_TARGET, "", v -> edit(m -> m.withTarget(v)));
+        searchBox = box(rx, top + 150, 94, 40, "", this::search);
         loadSelected();
     }
 
@@ -103,6 +107,50 @@ public class MissionEditorScreen extends Screen {
         titleBox.moveCursorToStart();
         descBox.moveCursorToStart();
         targetBox.moveCursorToStart();
+        searchBox.setValue("");
+    }
+
+    private void search(String query) {
+        String q = query.strip().toLowerCase();
+        if (q.isEmpty()) {
+            results = List.of();
+            return;
+        }
+        List<net.minecraft.world.item.Item> found = new ArrayList<>();
+        for (net.minecraft.world.item.Item item : BuiltInRegistries.ITEM) {
+            if (item == Items.AIR) {
+                continue;
+            }
+            String id = BuiltInRegistries.ITEM.getKey(item).toString();
+            String name = item.getDescription().getString().toLowerCase();
+            if (name.contains(q) || id.contains(q)) {
+                found.add(item);
+            }
+        }
+        found.sort(java.util.Comparator
+                .comparingInt((net.minecraft.world.item.Item i) -> i.getDescription().getString().toLowerCase().startsWith(q) ? 0 : 1)
+                .thenComparingInt(i -> i.getDescription().getString().length()));
+        results = found.subList(0, Math.min(3, found.size()));
+    }
+
+    private void addReward(net.minecraft.world.item.Item item, int count) {
+        Mission m = current();
+        if (m == null || item == Items.AIR) {
+            return;
+        }
+        String id = BuiltInRegistries.ITEM.getKey(item).toString();
+        List<Mission.RewardItem> list = new ArrayList<>(m.items());
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).id().equals(id)) {
+                list.set(i, new Mission.RewardItem(id, list.get(i).count() + count));
+                missions.set(selected, m.withItems(list));
+                return;
+            }
+        }
+        if (list.size() < Mission.MAX_ITEMS) {
+            list.add(new Mission.RewardItem(id, count));
+            missions.set(selected, m.withItems(list));
+        }
     }
 
     private Mission current() {
@@ -169,7 +217,7 @@ public class MissionEditorScreen extends Screen {
             String label = m.title().isBlank() ? tr("screen.hogwartsmod.mission_editor.untitled") : m.title();
             HiRes.text(g, HiRes.ellipsize(label, HiRes.Style.REGULAR, w - 18), HiRes.Style.REGULAR, x + 3, y + 1.5f, m.title().isBlank() ? MUTED : INK);
             if (hover) {
-                HiRes.right(g, "✕", HiRes.Style.BOLD, x + w - 1, y + 1.5f, WINE);
+                HiRes.right(g, "×", HiRes.Style.BOLD, x + w - 1, y + 1.5f, WINE);
             }
         }
         if (missions.size() < MissionNpcEntity.MAX_MISSIONS) {
@@ -189,52 +237,98 @@ public class MissionEditorScreen extends Screen {
         if (m == null) {
             HiRes.centered(g, tr("screen.hogwartsmod.mission_editor.pick"), HiRes.Style.ITALIC, x + w / 2f, top + 100, MUTED);
         } else {
-            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.title"), HiRes.Style.BOLD, x, top + 29, INK);
-            field(g, titleBox, x, top + 39, w);
-            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.description"), HiRes.Style.BOLD, x, top + 56, INK);
-            field(g, descBox, x, top + 66, w);
-
-            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.type"), HiRes.Style.BOLD, x, top + 86, INK);
-            stepper(g, x + 46, top + 85, w - 46, tr(m.type().key()), mouseX, mouseY);
-
-            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.target." + m.type().getId()), HiRes.Style.BOLD, x, top + 101, INK);
-            field(g, targetBox, x, top + 111, 98);
-            String helper = switch (m.type()) {
-                case ENTREGAR -> tr("screen.hogwartsmod.mission_editor.from_hand");
-                case DERROTAR -> tr("screen.hogwartsmod.mission_editor.next_mob");
-                case IR -> tr("screen.hogwartsmod.mission_editor.next_zone");
-            };
-            button(g, x + 101, top + 110, 47, helper, true, TITLE, mouseX, mouseY);
-            boolean valid = valid(m);
-            HiRes.text(g, HiRes.ellipsize(valid ? m.targetName().getString() : tr("screen.hogwartsmod.mission_editor.invalid"),
-                    HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, 7.5f, x, top + 127, valid ? GREEN : WINE);
-
-            if (m.type() != ObjectiveType.IR) {
-                HiRes.text(g, tr("screen.hogwartsmod.mission_editor.amount"), HiRes.Style.BOLD, x, top + 141, INK);
-                stepper(g, x + 70, top + 140, w - 70, String.valueOf(m.amount()), mouseX, mouseY);
-            }
-
-            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.reward"), HiRes.Style.BOLD, x, top + 156, INK);
-            int[] amounts = {m.galeoes(), m.sicles(), m.nuques()};
-            String[] ids = {"galeao", "sicle", "nuque"};
-            for (int i = 0; i < 3; i++) {
-                int gx = x + i * 50;
-                HiRes.image(g, MissionScreen.tex("moeda_" + ids[i]), gx, top + 168, 10, 11);
-                stepper(g, gx + 11, top + 168, 37, String.valueOf(amounts[i]), mouseX, mouseY);
-            }
-
-            int ry = top + 186;
-            g.fill(x, ry, x + 9, ry + 9, NOTE_EDGE);
-            g.fill(x + 1, ry + 1, x + 8, ry + 8, NOTE_ON);
-            if (m.repeatable()) {
-                HiRes.image(g, MissionScreen.tex("check"), x, ry - 1, 10, 10);
-            }
-            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.repeatable"), HiRes.Style.REGULAR, x + 13, ry + 1, m.repeatable() ? INK : MUTED);
-            if (m.repeatable()) {
-                stepper(g, x + 84, ry, w - 84, m.cooldownHours() + "h", mouseX, mouseY);
+            subTab(g, x, top + 28, 73, tr("screen.hogwartsmod.mission_editor.page_mission"), !rewardPage, mouseX, mouseY);
+            subTab(g, x + 75, top + 28, 73, tr("screen.hogwartsmod.mission_editor.page_reward"), rewardPage, mouseX, mouseY);
+            if (rewardPage) {
+                drawRewardPage(g, x, w, m, mouseX, mouseY);
+            } else {
+                drawMissionPage(g, x, w, m, mouseX, mouseY);
             }
         }
         button(g, x, top + H - 26, w, tr("screen.hogwartsmod.mission_editor.save"), true, GREEN, mouseX, mouseY);
+    }
+
+    private void subTab(GuiGraphics g, int x, int y, int w, String label, boolean on, int mouseX, int mouseY) {
+        if (on || inside(mouseX, mouseY, x, y, w, 13)) {
+            HiRes.highlight(g, x, y, x + w, y + 13, on ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
+        }
+        HiRes.centered(g, label, HiRes.Style.BOLD, x + w / 2f + (on ? 2 : 0), y + 2.5f, on ? TITLE : MUTED);
+    }
+
+    private void drawMissionPage(GuiGraphics g, int x, int w, Mission m, int mouseX, int mouseY) {
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.title"), HiRes.Style.BOLD, x, top + 45, INK);
+        field(g, titleBox, x, top + 55, w);
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.description"), HiRes.Style.BOLD, x, top + 72, INK);
+        field(g, descBox, x, top + 82, w);
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.type"), HiRes.Style.BOLD, x, top + 101, INK);
+        stepper(g, x + 46, top + 100, w - 46, tr(m.type().key()), mouseX, mouseY);
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.target." + m.type().getId()), HiRes.Style.BOLD, x, top + 117, INK);
+        field(g, targetBox, x, top + 127, 98);
+        String helper = switch (m.type()) {
+            case ENTREGAR -> tr("screen.hogwartsmod.mission_editor.from_hand");
+            case DERROTAR -> tr("screen.hogwartsmod.mission_editor.next_mob");
+            case IR -> tr("screen.hogwartsmod.mission_editor.next_zone");
+        };
+        button(g, x + 101, top + 126, 47, helper, true, TITLE, mouseX, mouseY);
+        boolean valid = valid(m);
+        HiRes.text(g, HiRes.ellipsize(valid ? m.targetName().getString() : tr("screen.hogwartsmod.mission_editor.invalid"),
+                HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, 7.5f, x, top + 143, valid ? GREEN : WINE);
+        if (m.type() != ObjectiveType.IR) {
+            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.amount"), HiRes.Style.BOLD, x, top + 158, INK);
+            stepper(g, x + 70, top + 157, w - 70, String.valueOf(m.amount()), mouseX, mouseY);
+        }
+        int ry = top + 178;
+        g.fill(x, ry, x + 9, ry + 9, NOTE_EDGE);
+        g.fill(x + 1, ry + 1, x + 8, ry + 8, NOTE_ON);
+        if (m.repeatable()) {
+            HiRes.image(g, MissionScreen.tex("check"), x, ry - 1, 10, 10);
+        }
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.repeatable"), HiRes.Style.REGULAR, x + 13, ry + 1, m.repeatable() ? INK : MUTED);
+        if (m.repeatable()) {
+            stepper(g, x + 84, ry, w - 84, m.cooldownHours() + "h", mouseX, mouseY);
+        }
+    }
+
+    private void drawRewardPage(GuiGraphics g, int x, int w, Mission m, int mouseX, int mouseY) {
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.coins"), HiRes.Style.BOLD, x, top + 45, INK);
+        int[] amounts = {m.galeoes(), m.sicles(), m.nuques()};
+        String[] ids = {"galeao", "sicle", "nuque"};
+        for (int i = 0; i < 3; i++) {
+            int gx = x + i * 50;
+            HiRes.image(g, MissionScreen.tex("moeda_" + ids[i]), gx, top + 56, 10, 11);
+            stepper(g, gx + 11, top + 56, 37, String.valueOf(amounts[i]), mouseX, mouseY);
+        }
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.items"), HiRes.Style.BOLD, x, top + 74, INK);
+        HiRes.right(g, m.items().size() + "/" + Mission.MAX_ITEMS, HiRes.Style.ITALIC, x + w, top + 74, MUTED);
+        if (m.items().isEmpty()) {
+            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.no_items"), HiRes.Style.ITALIC, 7.5f, x, top + 87, MUTED);
+        }
+        for (int i = 0; i < m.items().size(); i++) {
+            Mission.RewardItem r = m.items().get(i);
+            int y = top + 85 + i * 13;
+            MissionScreen.item(g, r.stack(), x, y, 11);
+            HiRes.text(g, HiRes.ellipsize(r.item().getDescription().getString(), HiRes.Style.REGULAR, 66), HiRes.Style.REGULAR, x + 14, y + 1.5f, INK);
+            stepper(g, x + 82, y + 1, 50, String.valueOf(r.count()), mouseX, mouseY);
+            boolean hoverX = inside(mouseX, mouseY, x + w - 10, y, 10, 12);
+            HiRes.text(g, "×", HiRes.Style.BOLD, x + w - 8, y + 1.5f, hoverX ? WINE : MUTED);
+        }
+        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.search"), HiRes.Style.BOLD, x, top + 140, INK);
+        field(g, searchBox, x, top + 150, 98);
+        button(g, x + 101, top + 149, 47, tr("screen.hogwartsmod.mission_editor.from_hand"), m.items().size() < Mission.MAX_ITEMS, TITLE, mouseX, mouseY);
+        if (!searchBox.getValue().isBlank() && results.isEmpty()) {
+            HiRes.text(g, tr("screen.hogwartsmod.mission_editor.no_results"), HiRes.Style.ITALIC, 7.5f, x, top + 167, MUTED);
+        }
+        for (int i = 0; i < results.size(); i++) {
+            net.minecraft.world.item.Item item = results.get(i);
+            int y = top + 165 + i * 11;
+            boolean hover = inside(mouseX, mouseY, x - 2, y - 1, w + 4, 11);
+            if (hover) {
+                HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + 10, HiRes.Mark.HOVER);
+            }
+            MissionScreen.item(g, new ItemStack(item), x, y, 9);
+            HiRes.text(g, HiRes.ellipsize(item.getDescription().getString(), HiRes.Style.REGULAR, w - 30), HiRes.Style.REGULAR, 7.5f, x + 12, y + 1, INK);
+            HiRes.right(g, "+", HiRes.Style.BOLD, x + w, y, GREEN);
+        }
     }
 
     private static boolean valid(Mission m) {
@@ -334,17 +428,71 @@ public class MissionEditorScreen extends Screen {
         if (m == null) {
             return super.mouseClicked(mx, my, button);
         }
-        if (inside(mx, my, x, top + 39, w, 13)) {
-            return focus(titleBox, mx, my, button);
-        }
-        if (inside(mx, my, x, top + 66, w, 13)) {
-            return focus(descBox, mx, my, button);
-        }
-        if (inside(mx, my, x, top + 111, 98, 13)) {
-            return focus(targetBox, mx, my, button);
+        if (inside(mx, my, x, top + 28, 73, 13) || inside(mx, my, x + 75, top + 28, 73, 13)) {
+            rewardPage = mx >= x + 75;
+            click();
+            return true;
         }
         int step = hasShiftDown() ? 10 : 1;
-        if (stepperDir(mx, my, x + 46, top + 85, w - 46) != 0) {
+        if (rewardPage) {
+            int[] amounts = {m.galeoes(), m.sicles(), m.nuques()};
+            for (int i = 0; i < 3; i++) {
+                int d = stepperDir(mx, my, x + i * 50 + 11, top + 56, 37);
+                if (d != 0) {
+                    amounts[i] = Math.max(0, Math.min(9999, amounts[i] + d * step));
+                    missions.set(selected, m.withReward(amounts[0], amounts[1], amounts[2]));
+                    click();
+                    return true;
+                }
+            }
+            for (int i = 0; i < m.items().size(); i++) {
+                int y = top + 85 + i * 13;
+                List<Mission.RewardItem> list = new ArrayList<>(m.items());
+                if (inside(mx, my, x + w - 10, y, 10, 12)) {
+                    list.remove(i);
+                    missions.set(selected, m.withItems(list));
+                    click();
+                    return true;
+                }
+                int d = stepperDir(mx, my, x + 82, y + 1, 50);
+                if (d != 0) {
+                    Mission.RewardItem r = list.get(i);
+                    list.set(i, new Mission.RewardItem(r.id(), Math.max(1, Math.min(r.item().getMaxStackSize() * 4, r.count() + d * step))));
+                    missions.set(selected, m.withItems(list));
+                    click();
+                    return true;
+                }
+            }
+            if (inside(mx, my, x, top + 150, 98, 13)) {
+                return focus(searchBox, mx, my, button);
+            }
+            if (inside(mx, my, x + 101, top + 149, 47, 15) && minecraft != null && minecraft.player != null) {
+                ItemStack hand = minecraft.player.getMainHandItem();
+                if (!hand.isEmpty()) {
+                    addReward(hand.getItem(), hand.getCount());
+                    click();
+                }
+                return true;
+            }
+            for (int i = 0; i < results.size(); i++) {
+                if (inside(mx, my, x - 2, top + 165 + i * 11 - 1, w + 4, 11)) {
+                    addReward(results.get(i), 1);
+                    click();
+                    return true;
+                }
+            }
+            return super.mouseClicked(mx, my, button);
+        }
+        if (inside(mx, my, x, top + 55, w, 13)) {
+            return focus(titleBox, mx, my, button);
+        }
+        if (inside(mx, my, x, top + 82, w, 13)) {
+            return focus(descBox, mx, my, button);
+        }
+        if (inside(mx, my, x, top + 127, 98, 13)) {
+            return focus(targetBox, mx, my, button);
+        }
+        if (stepperDir(mx, my, x + 46, top + 100, w - 46) != 0) {
             Mission next = m.withType(m.type().next());
             next = next.withTarget(switch (next.type()) {
                 case ENTREGAR -> "minecraft:feather";
@@ -356,30 +504,20 @@ public class MissionEditorScreen extends Screen {
             click();
             return true;
         }
-        if (inside(mx, my, x + 101, top + 110, 47, 15)) {
+        if (inside(mx, my, x + 101, top + 126, 47, 15)) {
             helper(m);
             click();
             return true;
         }
         if (m.type() != ObjectiveType.IR) {
-            int d = stepperDir(mx, my, x + 70, top + 140, w - 70);
+            int d = stepperDir(mx, my, x + 70, top + 157, w - 70);
             if (d != 0) {
                 missions.set(selected, m.withAmount(Math.max(1, Math.min(999, m.amount() + d * step))));
                 click();
                 return true;
             }
         }
-        int[] amounts = {m.galeoes(), m.sicles(), m.nuques()};
-        for (int i = 0; i < 3; i++) {
-            int d = stepperDir(mx, my, x + i * 50 + 11, top + 168, 37);
-            if (d != 0) {
-                amounts[i] = Math.max(0, Math.min(9999, amounts[i] + d * step));
-                missions.set(selected, m.withReward(amounts[0], amounts[1], amounts[2]));
-                click();
-                return true;
-            }
-        }
-        int ry = top + 186;
+        int ry = top + 178;
         if (inside(mx, my, x, ry - 1, 80, 11)) {
             missions.set(selected, m.withRepeatable(!m.repeatable(), m.cooldownHours()));
             click();

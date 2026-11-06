@@ -12,20 +12,38 @@ import net.minecraft.world.item.Items;
 import java.util.UUID;
 
 public record Mission(String id, String title, String description, ObjectiveType type, String target, int amount,
-                      int galeoes, int sicles, int nuques, boolean repeatable, int cooldownHours) {
+                      int galeoes, int sicles, int nuques, boolean repeatable, int cooldownHours, java.util.List<RewardItem> items) {
+    public static final int MAX_ITEMS = 4;
+
+    public record RewardItem(String id, int count) {
+        public Item item() {
+            ResourceLocation rl = ResourceLocation.tryParse(id);
+            return rl == null ? Items.AIR : BuiltInRegistries.ITEM.get(rl);
+        }
+
+        public net.minecraft.world.item.ItemStack stack() {
+            return new net.minecraft.world.item.ItemStack(item(), count);
+        }
+    }
+
+    public Mission {
+        items = items == null ? java.util.List.of() : java.util.List.copyOf(items);
+    }
     public static final int MAX_TITLE = 32;
     public static final int MAX_DESCRIPTION = 120;
     public static final int MAX_TARGET = 64;
 
     public static Mission blank() {
         return new Mission(UUID.randomUUID().toString().substring(0, 8), "", "", ObjectiveType.ENTREGAR, "minecraft:feather", 5,
-                0, 5, 0, false, 24);
+                0, 5, 0, false, 24, java.util.List.of());
     }
 
     public Mission sanitized() {
         return new Mission(id, cut(title, MAX_TITLE), cut(description, MAX_DESCRIPTION), type, cut(target.strip(), MAX_TARGET),
                 type == ObjectiveType.IR ? 1 : Math.max(1, Math.min(999, amount)),
-                clamp(galeoes), clamp(sicles), clamp(nuques), repeatable, Math.max(0, Math.min(24 * 30, cooldownHours)));
+                clamp(galeoes), clamp(sicles), clamp(nuques), repeatable, Math.max(0, Math.min(24 * 30, cooldownHours)),
+                items.stream().filter(r -> r.item() != Items.AIR).limit(MAX_ITEMS)
+                        .map(r -> new RewardItem(r.id(), Math.max(1, Math.min(r.item().getMaxStackSize() * 4, r.count())))).toList());
     }
 
     private static String cut(String s, int max) {
@@ -72,13 +90,31 @@ public record Mission(String id, String title, String description, ObjectiveType
         tag.putInt("Nuques", nuques);
         tag.putBoolean("Repetivel", repeatable);
         tag.putInt("EsperaHoras", cooldownHours);
+        net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
+        for (RewardItem r : items) {
+            CompoundTag it = new CompoundTag();
+            it.putString("Id", r.id());
+            it.putInt("Quantidade", r.count());
+            list.add(it);
+        }
+        tag.put("Itens", list);
         return tag;
     }
 
     public static Mission load(CompoundTag tag) {
         return new Mission(tag.getString("Id"), tag.getString("Titulo"), tag.getString("Descricao"), ObjectiveType.byId(tag.getString("Tipo")),
                 tag.getString("Alvo"), tag.getInt("Quantidade"), tag.getInt("Galeoes"), tag.getInt("Sicles"), tag.getInt("Nuques"),
-                tag.getBoolean("Repetivel"), tag.getInt("EsperaHoras"));
+                tag.getBoolean("Repetivel"), tag.getInt("EsperaHoras"), loadItems(tag));
+    }
+
+    private static java.util.List<RewardItem> loadItems(CompoundTag tag) {
+        java.util.List<RewardItem> list = new java.util.ArrayList<>();
+        net.minecraft.nbt.ListTag items = tag.getList("Itens", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        for (int i = 0; i < items.size(); i++) {
+            CompoundTag it = items.getCompound(i);
+            list.add(new RewardItem(it.getString("Id"), it.getInt("Quantidade")));
+        }
+        return list;
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -90,11 +126,12 @@ public record Mission(String id, String title, String description, ObjectiveType
         return load(tag == null ? new CompoundTag() : tag);
     }
 
-    public Mission withTitle(String v) { return new Mission(id, v, description, type, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours); }
-    public Mission withDescription(String v) { return new Mission(id, title, v, type, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours); }
-    public Mission withType(ObjectiveType v) { return new Mission(id, title, description, v, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours); }
-    public Mission withTarget(String v) { return new Mission(id, title, description, type, v, amount, galeoes, sicles, nuques, repeatable, cooldownHours); }
-    public Mission withAmount(int v) { return new Mission(id, title, description, type, target, v, galeoes, sicles, nuques, repeatable, cooldownHours); }
-    public Mission withReward(int g, int s, int n) { return new Mission(id, title, description, type, target, amount, g, s, n, repeatable, cooldownHours); }
-    public Mission withRepeatable(boolean v, int hours) { return new Mission(id, title, description, type, target, amount, galeoes, sicles, nuques, v, hours); }
+    public Mission withTitle(String v) { return new Mission(id, v, description, type, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours, items); }
+    public Mission withDescription(String v) { return new Mission(id, title, v, type, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours, items); }
+    public Mission withType(ObjectiveType v) { return new Mission(id, title, description, v, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours, items); }
+    public Mission withTarget(String v) { return new Mission(id, title, description, type, v, amount, galeoes, sicles, nuques, repeatable, cooldownHours, items); }
+    public Mission withAmount(int v) { return new Mission(id, title, description, type, target, v, galeoes, sicles, nuques, repeatable, cooldownHours, items); }
+    public Mission withReward(int g, int s, int n) { return new Mission(id, title, description, type, target, amount, g, s, n, repeatable, cooldownHours, items); }
+    public Mission withItems(java.util.List<RewardItem> v) { return new Mission(id, title, description, type, target, amount, galeoes, sicles, nuques, repeatable, cooldownHours, v); }
+    public Mission withRepeatable(boolean v, int hours) { return new Mission(id, title, description, type, target, amount, galeoes, sicles, nuques, v, hours, items); }
 }

@@ -385,5 +385,12 @@
   "screen.hogwartsmod.grimoire.no_missions2": "Talk to the quest NPCs.",
   "screen.hogwartsmod.grimoire.mission_from": "Requested by %s",
   "screen.hogwartsmod.grimoire.mission_ready": "Ready! Go back to %s to deliver.",
-  "screen.hogwartsmod.grimoire.mission_going": "In progress"
+  "screen.hogwartsmod.grimoire.mission_going": "In progress",
+  "screen.hogwartsmod.mission_editor.page_mission": "Quest",
+  "screen.hogwartsmod.mission_editor.page_reward": "Reward",
+  "screen.hogwartsmod.mission_editor.coins": "Coins",
+  "screen.hogwartsmod.mission_editor.items": "Items",
+  "screen.hogwartsmod.mission_editor.no_items": "No items: search below",
+  "screen.hogwartsmod.mission_editor.search": "Search item",
+  "screen.hogwartsmod.mission_editor.no_results": "No item found"
 }
