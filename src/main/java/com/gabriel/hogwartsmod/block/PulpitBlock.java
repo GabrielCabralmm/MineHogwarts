@@ -37,8 +37,8 @@ public class PulpitBlock extends HorizontalDirectionalBlock implements EntityBlo
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(1, 0, 1, 15, 2, 15),
-            Block.box(3, 2, 3, 13, 13, 13),
-            Block.box(1, 13, 1, 15, 16, 15));
+            Block.box(3, 2, 3, 13, 16, 13),
+            Block.box(1, 16, 1, 15, 19, 15));
 
     public PulpitBlock(Properties properties) {
         super(properties);

@@ -41,7 +41,7 @@ public class PulpitRenderer implements BlockEntityRenderer<PulpitBlockEntity> {
         float yaw = (float) Math.atan2(facing.getStepZ(), facing.getStepX());
         float bob = (1 - ease) * (0.06f + (float) Math.sin(time * 0.1f) * 0.04f);
         pose.pushPose();
-        pose.translate(0.5, Mth.lerp(ease, 1.28f, 0.93f) + bob, 0.5);
+        pose.translate(0.5, Mth.lerp(ease, 1.47f, 1.12f) + bob, 0.5);
         pose.mulPose(Axis.YP.rotation(-yaw));
         pose.translate(Mth.lerp(ease, 0f, 0.02f), 0, 0);
         pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(ease, 80f, 67.5f)));
