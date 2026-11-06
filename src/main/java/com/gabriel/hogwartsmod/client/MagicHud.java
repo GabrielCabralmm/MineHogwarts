@@ -39,7 +39,7 @@ public final class MagicHud implements IGuiOverlay {
         }
         Font font = mc.font;
         if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.BroomEntity broom) {
-            renderBroom(mc, g, font, broom, width, height);
+            renderBroom(mc, g, font, broom, height);
             return;
         }
         long now = player.level().getGameTime();
@@ -105,18 +105,18 @@ public final class MagicHud implements IGuiOverlay {
 
     // -- Vassoura
 
-    private static void renderBroom(Minecraft mc, GuiGraphics g, Font font, com.gabriel.hogwartsmod.entity.BroomEntity broom, int width, int height) {
+    private static void renderBroom(Minecraft mc, GuiGraphics g, Font font, com.gabriel.hogwartsmod.entity.BroomEntity broom, int height) {
         int totalWidth = MagicData.SLOT_COUNT * (SLOT + GAP) - GAP;
         int barY = height - MARGIN - 4;
         int labelY = barY - 11;
-        int right = width - MARGIN;
-        int left = right - totalWidth;
+        int left = MARGIN;
+        int right = left + totalWidth;
         float ratio = Math.max(0, Math.min(1, broom.getStamina() / broom.getBroomType().getStamina()));
         net.minecraft.network.chat.Component stamina = net.minecraft.network.chat.Component.translatable("hud.hogwartsmod.broom_stamina");
-        g.drawString(font, stamina, right - font.width(stamina), labelY, 0xFFECDCB6, true);
+        g.drawString(font, stamina, left, labelY, 0xFFECDCB6, true);
         g.fill(left, barY, right, barY + 4, BAR_BACK);
         int filled = Math.round((totalWidth - 2) * ratio);
-        g.fill(right - 1 - filled, barY + 1, right - 1, barY + 3, 0xFFE6B43C);
+        g.fill(left + 1, barY + 1, left + 1 + filled, barY + 3, 0xFFE6B43C);
 
         boolean pilot = broom.getControllingPassenger() == mc.player;
         java.util.List<String[]> rows = new java.util.ArrayList<>();
@@ -132,11 +132,11 @@ public final class MagicHud implements IGuiOverlay {
             String label = "[" + row[0].replace(" esquerdo", " esq.").replace(" direito", " dir.") + "] " + net.minecraft.network.chat.Component.translatable(row[1]).getString();
             int w = font.width(label) + 7;
             boolean lit = row[1].endsWith("boost") && boosting;
-            g.fill(right - w, y, right, y + 11, 0xC0281E14);
+            g.fill(left, y, left + w, y + 11, 0xC0281E14);
             if (lit) {
-                g.fill(right - 1, y, right, y + 11, 0xFFE6B43C);
+                g.fill(left, y, left + 1, y + 11, 0xFFE6B43C);
             }
-            g.drawString(font, label, right - w + 4, y + 2, lit ? 0xFFE6B43C : 0xFFECDCB6, false);
+            g.drawString(font, label, left + 4, y + 2, lit ? 0xFFE6B43C : 0xFFECDCB6, false);
             y -= 13;
         }
     }
