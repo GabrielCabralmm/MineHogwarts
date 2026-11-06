@@ -32,7 +32,7 @@ public class BroomRenderer extends EntityRenderer<BroomEntity> {
         pose.mulPose(Axis.YP.rotationDegrees(-yaw));
         pose.mulPose(Axis.ZP.rotationDegrees(broom.getRoll(partialTick)));
         pose.mulPose(Axis.YP.rotationDegrees(90));
-        pose.scale(1.45f, 1.45f, 1.45f);
+        pose.scale(1.9f, 1.45f, 1.45f);
         items.renderStatic(stack, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY, pose, buffers, broom.level(), broom.getId());
         pose.popPose();
         super.render(broom, yaw, partialTick, pose, buffers, light);
