@@ -24,6 +24,9 @@ public final class ModItems {
     public static final RegistryObject<Item> ZONE_WAND = ITEMS.register("varinha_zonas",
             () -> new com.gabriel.hogwartsmod.item.ZoneWandItem(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> SORTING_HAT = ITEMS.register("chapeu_seletor",
+            () -> new com.gabriel.hogwartsmod.item.SortingHatItem(new Item.Properties().stacksTo(1)));
+
     private ModItems() {
     }
 }

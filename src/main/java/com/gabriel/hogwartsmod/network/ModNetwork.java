@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "11";
+    private static final String VERSION = "12";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -74,6 +74,14 @@ public final class ModNetwork {
                 .encoder(ZoneMarkPacket::encode).decoder(ZoneMarkPacket::decode).consumerMainThread(ZoneMarkPacket::handle).add();
         CHANNEL.messageBuilder(ZoneEditPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ZoneEditPacket::encode).decoder(ZoneEditPacket::decode).consumerMainThread(ZoneEditPacket::handle).add();
+        CHANNEL.messageBuilder(HousePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(HousePacket::encode).decoder(HousePacket::decode).consumerMainThread(HousePacket::handle).add();
+        CHANNEL.messageBuilder(SortingHatPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(SortingHatPacket::encode).decoder(SortingHatPacket::decode).consumerMainThread(SortingHatPacket::handle).add();
+        CHANNEL.messageBuilder(OpenSortingPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenSortingPacket::encode).decoder(OpenSortingPacket::decode).consumerMainThread(OpenSortingPacket::handle).add();
+        CHANNEL.messageBuilder(SortingChoosePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SortingChoosePacket::encode).decoder(SortingChoosePacket::decode).consumerMainThread(SortingChoosePacket::handle).add();
     }
 
     public static void playAnimation(ServerPlayer player, String animation) {

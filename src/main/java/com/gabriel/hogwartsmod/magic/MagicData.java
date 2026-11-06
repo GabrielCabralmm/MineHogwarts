@@ -34,6 +34,8 @@ public class MagicData {
     private final Map<String, long[]> cooldowns = new HashMap<>();
     private final Map<String, Long> teachReadyAt = new HashMap<>();
     private Profession profession = Profession.NONE;
+    @org.jetbrains.annotations.Nullable
+    private com.gabriel.hogwartsmod.house.House house;
     private long lumosUntil;
     @Nullable
     private BlockPos lumosLight;
@@ -355,6 +357,16 @@ public class MagicData {
         return profession == Profession.PROFESSOR;
     }
 
+    @org.jetbrains.annotations.Nullable
+    public com.gabriel.hogwartsmod.house.House getHouse() {
+        return house;
+    }
+
+    public void setHouse(@org.jetbrains.annotations.Nullable com.gabriel.hogwartsmod.house.House value) {
+        house = value;
+        markForSync();
+    }
+
     public void setTeachCooldown(Spell spell, long readyAt) {
         teachReadyAt.put(spell.getId(), readyAt);
         markForSync();
@@ -509,6 +521,9 @@ public class MagicData {
         teachReadyAt.forEach(teachTag::putLong);
         tag.put("TeachCooldowns", teachTag);
         tag.putString("Profession", profession.getId());
+        if (house != null) {
+            tag.putString("House", house.getId());
+        }
         net.minecraft.nbt.ListTag placeTag = new net.minecraft.nbt.ListTag();
         places.forEach(p -> placeTag.add(p.save()));
         tag.put("Places", placeTag);
@@ -551,6 +566,7 @@ public class MagicData {
         apparitionLicense = tag.getBoolean("ApparitionLicense");
         Profession loaded = Profession.byId(tag.getString("Profession"));
         profession = loaded == null ? Profession.NONE : loaded;
+        house = com.gabriel.hogwartsmod.house.House.byId(tag.getString("House"));
         lumosUntil = tag.getLong("LumosUntil");
         lumosLight = tag.contains("LumosLight") ? NbtUtils.readBlockPos(tag.getCompound("LumosLight")) : null;
         reserve = tag.contains("Reserve") ? tag.getFloat("Reserve") : -1f;

@@ -58,6 +58,16 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
+    public static void addLayers(net.minecraftforge.client.event.EntityRenderersEvent.AddLayers event) {
+        for (String skin : event.getSkins()) {
+            net.minecraft.client.renderer.entity.LivingEntityRenderer<?, ?> renderer = event.getSkin(skin);
+            if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer player) {
+                player.addLayer(new com.gabriel.hogwartsmod.client.house.SortingHatLayer(player));
+            }
+        }
+    }
+
+    @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(ModKeys.SPELL_MODIFIER);
         event.register(ModKeys.OPEN_GRIMOIRE);

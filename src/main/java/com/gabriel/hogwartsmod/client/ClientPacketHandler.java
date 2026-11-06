@@ -64,6 +64,31 @@ public final class ClientPacketHandler {
         com.gabriel.hogwartsmod.client.zone.ClientZones.second = second;
     }
 
+    public static void handleHouse(java.util.UUID player, String house) {
+        com.gabriel.hogwartsmod.house.House value = com.gabriel.hogwartsmod.house.House.byId(house);
+        if (value == null) {
+            com.gabriel.hogwartsmod.house.HouseManager.CLIENT_HOUSES.remove(player);
+        } else {
+            com.gabriel.hogwartsmod.house.HouseManager.CLIENT_HOUSES.put(player, value);
+        }
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.level != null) {
+            net.minecraft.world.entity.player.Player p = mc.level.getPlayerByUUID(player);
+            if (p != null) {
+                p.refreshDisplayName();
+            }
+        }
+    }
+
+    public static void handleSortingHat(int entity, boolean on) {
+        com.gabriel.hogwartsmod.client.house.ClientSorting.setWearing(entity, on);
+    }
+
+    public static void handleOpenSorting(java.util.UUID target, String name, String house) {
+        net.minecraft.client.Minecraft.getInstance().setScreen(new com.gabriel.hogwartsmod.client.gui.SortingScreen(target, name,
+                com.gabriel.hogwartsmod.house.House.byId(house)));
+    }
+
     public static void handlePublicLocations(List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> points) {
         com.gabriel.hogwartsmod.client.apparition.ClientApparitionState.publicPoints = List.copyOf(points);
     }

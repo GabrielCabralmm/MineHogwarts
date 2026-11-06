@@ -55,6 +55,11 @@ public final class HogwartsCommand {
                     .map(com.gabriel.hogwartsmod.zone.Zone::name), builder);
     private static final SuggestionProvider<CommandSourceStack> ZONE_RULES = (ctx, builder) ->
             SharedSuggestionProvider.suggest(Stream.of(com.gabriel.hogwartsmod.zone.ZoneRule.values()).map(com.gabriel.hogwartsmod.zone.ZoneRule::getId), builder);
+    private static final SuggestionProvider<CommandSourceStack> HOUSES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.concat(Stream.of("nenhuma"),
+                    Stream.of(com.gabriel.hogwartsmod.house.House.values()).map(com.gabriel.hogwartsmod.house.House::getId)), builder);
+    private static final SimpleCommandExceptionType UNKNOWN_HOUSE =
+            new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.unknown_house"));
     private static final SimpleCommandExceptionType NO_NPC =
             new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.no_npc"));
     private static final SimpleCommandExceptionType UNKNOWN_PROFESSION =
@@ -135,6 +140,12 @@ public final class HogwartsCommand {
                                                 .executes(ctx -> npcSpell(ctx, false)))))
                         .then(Commands.literal("remover")
                                 .executes(HogwartsCommand::removeNpc)))
+                .then(Commands.literal("casa").requires(STAFF)
+                        .then(Commands.argument("alvo", EntityArgument.player())
+                                .then(Commands.argument("casa", StringArgumentType.word()).suggests(HOUSES)
+                                        .executes(ctx -> setHouse(ctx, false))
+                                        .then(Commands.literal("anunciar")
+                                                .executes(ctx -> setHouse(ctx, true))))))
                 .then(Commands.literal("profissao").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("profissao", StringArgumentType.word()).suggests(PROFESSIONS)
@@ -424,6 +435,25 @@ public final class HogwartsCommand {
         return 1;
     }
 
+    private static int setHouse(CommandContext<CommandSourceStack> ctx, boolean announce) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        data(target);
+        String id = StringArgumentType.getString(ctx, "casa");
+        com.gabriel.hogwartsmod.house.House house = com.gabriel.hogwartsmod.house.House.byId(id);
+        if (house == null && !id.equalsIgnoreCase("nenhuma")) {
+            throw UNKNOWN_HOUSE.create();
+        }
+        com.gabriel.hogwartsmod.house.HouseManager.set(target, house);
+        if (house != null && announce) {
+            com.gabriel.hogwartsmod.house.SortingManager.announce(ctx.getSource().getServer(), target, house);
+        } else if (house != null) {
+            target.displayClientMessage(Component.translatable("message.hogwartsmod.house_set", house.getDisplayName()), false);
+        }
+        Component label = house == null ? Component.translatable("house.hogwartsmod.none") : house.getDisplayName();
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.house_set", target.getGameProfile().getName(), label), true);
+        return 1;
+    }
+
     private static int info(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
         MagicData data = data(target);
@@ -431,6 +461,8 @@ public final class HogwartsCommand {
         source.sendSuccess(() -> Component.translatable("command.hogwartsmod.info_header", target.getDisplayName(),
                 data.getLevel(), data.getXp(), MagicData.xpForNextLevel(data.getLevel()),
                 Math.round(data.getReserve()), Math.round(data.getMaxReserve()), data.getProfession().getDisplayName()), false);
+        source.sendSuccess(() -> Component.translatable("command.hogwartsmod.info_house",
+                data.getHouse() == null ? Component.translatable("house.hogwartsmod.none") : data.getHouse().getDisplayName()), false);
         for (String id : data.getLearned()) {
             Spell spell = Spells.get(id);
             if (spell != null) {
