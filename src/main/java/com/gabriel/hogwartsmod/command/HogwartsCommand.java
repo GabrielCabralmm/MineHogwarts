@@ -58,6 +58,13 @@ public final class HogwartsCommand {
     private static final SuggestionProvider<CommandSourceStack> HOUSES = (ctx, builder) ->
             SharedSuggestionProvider.suggest(Stream.concat(Stream.of("nenhuma"),
                     Stream.of(com.gabriel.hogwartsmod.house.House.values()).map(com.gabriel.hogwartsmod.house.House::getId)), builder);
+    private static final SuggestionProvider<CommandSourceStack> ONLY_HOUSES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.of(com.gabriel.hogwartsmod.house.House.values()).map(com.gabriel.hogwartsmod.house.House::getId), builder);
+    private static final SuggestionProvider<CommandSourceStack> HOUSES_OR_PLAYERS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.concat(Stream.of(com.gabriel.hogwartsmod.house.House.values()).map(com.gabriel.hogwartsmod.house.House::getId),
+                    ctx.getSource().getOnlinePlayerNames().stream()), builder);
+    private static final DynamicCommandExceptionType NO_HOUSE =
+            new DynamicCommandExceptionType(name -> Component.translatable("command.hogwartsmod.points_no_house", name));
     private static final SimpleCommandExceptionType UNKNOWN_HOUSE =
             new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.unknown_house"));
     private static final SimpleCommandExceptionType NO_NPC =
@@ -140,6 +147,29 @@ public final class HogwartsCommand {
                                                 .executes(ctx -> npcSpell(ctx, false)))))
                         .then(Commands.literal("remover")
                                 .executes(HogwartsCommand::removeNpc)))
+                .then(Commands.literal("pontos")
+                        .then(Commands.literal("ver")
+                                .executes(HogwartsCommand::showPoints))
+                        .then(Commands.literal("dar").requires(HogwartsCommand::canGivePoints)
+                                .then(Commands.argument("alvo", StringArgumentType.word()).suggests(HOUSES_OR_PLAYERS)
+                                        .then(Commands.argument("quantidade", IntegerArgumentType.integer(1, 1000))
+                                                .executes(ctx -> points(ctx, 1, null))
+                                                .then(Commands.argument("motivo", StringArgumentType.greedyString())
+                                                        .executes(ctx -> points(ctx, 1, StringArgumentType.getString(ctx, "motivo")))))))
+                        .then(Commands.literal("tirar").requires(HogwartsCommand::canGivePoints)
+                                .then(Commands.argument("alvo", StringArgumentType.word()).suggests(HOUSES_OR_PLAYERS)
+                                        .then(Commands.argument("quantidade", IntegerArgumentType.integer(1, 1000))
+                                                .executes(ctx -> points(ctx, -1, null))
+                                                .then(Commands.argument("motivo", StringArgumentType.greedyString())
+                                                        .executes(ctx -> points(ctx, -1, StringArgumentType.getString(ctx, "motivo")))))))
+                        .then(Commands.literal("definir").requires(STAFF)
+                                .then(Commands.argument("casa", StringArgumentType.word()).suggests(ONLY_HOUSES)
+                                        .then(Commands.argument("quantidade", IntegerArgumentType.integer(0, 1000000))
+                                                .executes(HogwartsCommand::setPoints))))
+                        .then(Commands.literal("zerar").requires(STAFF)
+                                .executes(HogwartsCommand::resetPoints))
+                        .then(Commands.literal("encerrar").requires(STAFF)
+                                .executes(HogwartsCommand::finishCup)))
                 .then(Commands.literal("casa").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("casa", StringArgumentType.word()).suggests(HOUSES)
@@ -432,6 +462,105 @@ public final class HogwartsCommand {
         data.setReserve(data.getMaxReserve());
         data.markForSync();
         ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.reserve_filled", target.getDisplayName()), true);
+        return 1;
+    }
+
+    private static boolean canGivePoints(CommandSourceStack source) {
+        if (source.hasPermission(2)) {
+            return true;
+        }
+        MagicData data = source.getPlayer() == null ? null : MagicData.get(source.getPlayer());
+        return data != null && data.isProfessor();
+    }
+
+    private static com.gabriel.hogwartsmod.house.House houseArg(CommandContext<CommandSourceStack> ctx, String arg) throws CommandSyntaxException {
+        String value = StringArgumentType.getString(ctx, arg);
+        com.gabriel.hogwartsmod.house.House house = com.gabriel.hogwartsmod.house.House.byId(value);
+        if (house != null) {
+            return house;
+        }
+        ServerPlayer player = ctx.getSource().getServer().getPlayerList().getPlayerByName(value);
+        if (player == null) {
+            throw UNKNOWN_HOUSE.create();
+        }
+        house = com.gabriel.hogwartsmod.house.HouseManager.of(player);
+        if (house == null) {
+            throw NO_HOUSE.create(player.getGameProfile().getName());
+        }
+        return house;
+    }
+
+    private static int points(CommandContext<CommandSourceStack> ctx, int sign, @Nullable String reason) throws CommandSyntaxException {
+        com.gabriel.hogwartsmod.house.House house = houseArg(ctx, "alvo");
+        int amount = IntegerArgumentType.getInteger(ctx, "quantidade");
+        com.gabriel.hogwartsmod.house.HousePoints data = com.gabriel.hogwartsmod.house.HousePoints.get(ctx.getSource().getServer());
+        int total = data.add(house, sign * amount);
+        Component who = ctx.getSource().getDisplayName();
+        Component houseName = house.getDisplayName().copy().withStyle(net.minecraft.ChatFormatting.BOLD);
+        net.minecraft.network.chat.MutableComponent message = Component.translatable(
+                sign > 0 ? "message.hogwartsmod.points_given" : "message.hogwartsmod.points_taken", who, amount, houseName)
+                .withStyle(sign > 0 ? net.minecraft.ChatFormatting.GOLD : net.minecraft.ChatFormatting.RED);
+        if (reason != null && !reason.isBlank()) {
+            message.append(Component.literal(" — " + reason.strip()).withStyle(net.minecraft.ChatFormatting.GRAY, net.minecraft.ChatFormatting.ITALIC));
+        }
+        ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(message, false);
+        for (ServerPlayer member : ctx.getSource().getServer().getPlayerList().getPlayers()) {
+            if (com.gabriel.hogwartsmod.house.HouseManager.of(member) == house) {
+                member.playNotifySound(sign > 0 ? net.minecraft.sounds.SoundEvents.EXPERIENCE_ORB_PICKUP : net.minecraft.sounds.SoundEvents.VILLAGER_NO,
+                        net.minecraft.sounds.SoundSource.PLAYERS, 0.7f, sign > 0 ? 1.2f : 0.9f);
+            }
+        }
+        return total;
+    }
+
+    private static int showPoints(CommandContext<CommandSourceStack> ctx) {
+        com.gabriel.hogwartsmod.house.HousePoints data = com.gabriel.hogwartsmod.house.HousePoints.get(ctx.getSource().getServer());
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.points_header"), false);
+        List<com.gabriel.hogwartsmod.house.House> order = new ArrayList<>(List.of(com.gabriel.hogwartsmod.house.House.values()));
+        order.sort(Comparator.comparingInt(h -> -data.get(h)));
+        for (com.gabriel.hogwartsmod.house.House house : order) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.points_line", house.getDisplayName(), data.get(house)), false);
+        }
+        return 1;
+    }
+
+    private static int setPoints(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        com.gabriel.hogwartsmod.house.House house = com.gabriel.hogwartsmod.house.House.byId(StringArgumentType.getString(ctx, "casa"));
+        if (house == null) {
+            throw UNKNOWN_HOUSE.create();
+        }
+        int value = IntegerArgumentType.getInteger(ctx, "quantidade");
+        com.gabriel.hogwartsmod.house.HousePoints.get(ctx.getSource().getServer()).set(house, value);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.points_line", house.getDisplayName(), value), true);
+        return 1;
+    }
+
+    private static int resetPoints(CommandContext<CommandSourceStack> ctx) {
+        com.gabriel.hogwartsmod.house.HousePoints.get(ctx.getSource().getServer()).reset();
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.points_reset"), true);
+        return 1;
+    }
+
+    private static int finishCup(CommandContext<CommandSourceStack> ctx) {
+        net.minecraft.server.MinecraftServer server = ctx.getSource().getServer();
+        com.gabriel.hogwartsmod.house.HousePoints data = com.gabriel.hogwartsmod.house.HousePoints.get(server);
+        com.gabriel.hogwartsmod.house.House winner = data.leader();
+        if (winner == null) {
+            ctx.getSource().sendFailure(Component.translatable("command.hogwartsmod.points_no_winner"));
+            return 0;
+        }
+        int total = data.get(winner);
+        data.finish(winner);
+        Component name = winner.getDisplayName().copy().withStyle(net.minecraft.ChatFormatting.BOLD);
+        server.getPlayerList().broadcastSystemMessage(Component.translatable("message.hogwartsmod.cup_winner", name, total)
+                .withStyle(net.minecraft.ChatFormatting.GOLD), false);
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 70, 20));
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(name));
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
+                    Component.translatable("message.hogwartsmod.cup_subtitle").withStyle(net.minecraft.ChatFormatting.GOLD)));
+            player.playNotifySound(net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, net.minecraft.sounds.SoundSource.PLAYERS, 1f, 1f);
+        }
         return 1;
     }
 

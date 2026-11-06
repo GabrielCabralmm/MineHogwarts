@@ -63,6 +63,7 @@ public final class HouseManager {
         if (own != null) {
             ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new HousePacket(player.getUUID(), own.getId()));
         }
+        HousePoints.get(player.server).sendTo(player);
         player.refreshDisplayName();
         player.refreshTabListName();
     }

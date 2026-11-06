@@ -57,7 +57,7 @@ public class GrimoireScreen extends Screen {
     private static final ResourceLocation BOOK =
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/grimoire.png");
 
-    private enum Tab { SPELLS, TEACH, APPARITION }
+    private enum Tab { SPELLS, TEACH, APPARITION, HOUSES }
 
     private int left;
     private int top;
@@ -143,6 +143,7 @@ public class GrimoireScreen extends Screen {
             case SPELLS -> drawSpellsTab(g, mouseX, mouseY);
             case TEACH -> drawTeachTab(g, mouseX, mouseY);
             case APPARITION -> drawApparitionTab(g, mouseX, mouseY);
+            case HOUSES -> drawHousesTab(g);
         }
         super.render(g, mouseX, mouseY, partialTick);
         if (dragging) {
@@ -208,6 +209,98 @@ public class GrimoireScreen extends Screen {
             if (isLocked(t)) {
                 drawLock(g, x1 - 9, y0 + h - LOCK_SPACE);
             }
+        }
+    }
+
+    // -- Casas
+
+    private static ResourceLocation crest(com.gabriel.hogwartsmod.house.House house) {
+        return ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/casa_" + house.getId() + ".png");
+    }
+
+    private static int inkOf(com.gabriel.hogwartsmod.house.House house) {
+        int rgb = house.getColor();
+        int r = (rgb >> 16 & 255) * 3 / 4;
+        int gr = (rgb >> 8 & 255) * 3 / 4;
+        int b = (rgb & 255) * 3 / 4;
+        return 0xFF000000 | r << 16 | gr << 8 | b;
+    }
+
+    private static int placeOf(int[] points, int value) {
+        int place = 1;
+        for (int p : points) {
+            if (p > value) {
+                place++;
+            }
+        }
+        return place;
+    }
+
+    private void drawHousesTab(GuiGraphics g) {
+        int lx = left + 16;
+        int pageW = BOOK_W / 2 - 26;
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.cup"), HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
+        int[] points = com.gabriel.hogwartsmod.house.HousePoints.clientPoints;
+        List<com.gabriel.hogwartsmod.house.House> order = new ArrayList<>(List.of(com.gabriel.hogwartsmod.house.House.values()));
+        order.sort((a, b) -> points[b.ordinal()] - points[a.ordinal()]);
+        int max = 1;
+        for (int p : points) {
+            max = Math.max(max, p);
+        }
+        boolean leader = points[order.get(0).ordinal()] > 0 && points[order.get(0).ordinal()] > points[order.get(1).ordinal()];
+        for (int i = 0; i < order.size(); i++) {
+            com.gabriel.hogwartsmod.house.House house = order.get(i);
+            int y = top + 32 + i * 34;
+            int value = points[house.ordinal()];
+            boolean first = i == 0 && leader;
+            if (first) {
+                g.fill(lx - 3, y - 3, lx + pageW + 3, y + 30, HIGHLIGHT);
+            }
+            HiRes.image(g, crest(house), lx, y, 23, 27);
+            String place = value > 0 ? placeOf(points, value) + "º" : "–";
+            HiRes.text(g, place, HiRes.Style.BOLD, lx + 28, y + 2, first ? GOLD : MUTED);
+            HiRes.text(g, house.getDisplayName().getString(), HiRes.Style.BOLD, lx + 42, y + 2, inkOf(house));
+            HiRes.right(g, String.valueOf(value), HiRes.Style.BOLD, lx + pageW, y + 2, INK);
+            int barX = lx + 28;
+            int barW = pageW - 28;
+            int barY = y + 16;
+            g.fill(barX, barY, barX + barW, barY + 5, NOTE_EDGE);
+            g.fill(barX + 1, barY + 1, barX + barW - 1, barY + 4, SLOT_BG);
+            int filled = Math.round((barW - 2) * (value / (float) max));
+            if (value > 0) {
+                g.fill(barX + 1, barY + 1, barX + 1 + filled, barY + 4, 0xFF000000 | house.getColor());
+            }
+        }
+
+        int rx = left + BOOK_W / 2 + 10;
+        int rw = BOOK_W / 2 - 26;
+        float cx = rx + rw / 2f;
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.your_house"), HiRes.Style.BOLD, cx, top + 17, TITLE);
+        com.gabriel.hogwartsmod.house.House mine = minecraft != null && minecraft.player != null
+                ? com.gabriel.hogwartsmod.house.HouseManager.of(minecraft.player) : null;
+        if (mine == null) {
+            HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_house1"), HiRes.Style.ITALIC, cx, top + 60, MUTED);
+            HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_house2"), HiRes.Style.ITALIC, cx, top + 71, MUTED);
+        } else {
+            HiRes.image(g, crest(mine), Math.round(cx - 28), top + 30, 56, 66);
+            HiRes.centered(g, mine.getDisplayName().getString(), HiRes.Style.BOLD, 10f, cx, top + 101, inkOf(mine));
+            int own = points[mine.ordinal()];
+            String line = own > 0 ? Component.translatable("screen.hogwartsmod.grimoire.house_points", own, placeOf(points, own)).getString()
+                    : Component.translatable("screen.hogwartsmod.grimoire.house_points_zero").getString();
+            HiRes.centered(g, line, HiRes.Style.ITALIC, cx, top + 115, MUTED);
+        }
+        g.fill(rx, top + 130, rx + rw, top + 131, PAGE_LINE);
+        com.gabriel.hogwartsmod.house.House last = com.gabriel.hogwartsmod.house.HousePoints.clientLastWinner;
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.last_cup"), HiRes.Style.BOLD, cx, top + 136, INK);
+        if (last == null) {
+            HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_cup"), HiRes.Style.ITALIC, cx, top + 149, MUTED);
+        } else {
+            String label = last.getDisplayName().getString();
+            float w = HiRes.width(label, HiRes.Style.BOLD) + 14;
+            HiRes.image(g, crest(last), Math.round(cx - w / 2), top + 147, 10, 12);
+            HiRes.text(g, label, HiRes.Style.BOLD, cx - w / 2 + 14, top + 149, inkOf(last));
+            int cups = com.gabriel.hogwartsmod.house.HousePoints.clientCups[last.ordinal()];
+            HiRes.centered(g, Component.translatable("screen.hogwartsmod.grimoire.cups", cups).getString(), HiRes.Style.ITALIC, cx, top + 162, MUTED);
         }
     }
 
