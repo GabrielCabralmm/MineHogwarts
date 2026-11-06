@@ -19,6 +19,9 @@ public final class ModKeys {
     public static final KeyMapping APPARATE = new KeyMapping("key.hogwartsmod.apparate",
             KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
 
+    public static final KeyMapping BROOM_DISMOUNT = new KeyMapping("key.hogwartsmod.broom_dismount",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_X, CATEGORY);
+
     private ModKeys() {
     }
 

@@ -178,5 +178,13 @@
   "screen.hogwartsmod.grimoire.places_full": "Place limit reached",
   "screen.hogwartsmod.grimoire.memorize": "Memorize here",
   "screen.hogwartsmod.grimoire.public_places": "Public places",
-  "screen.hogwartsmod.grimoire.no_public": "Staff hasn't created public places yet."
+  "screen.hogwartsmod.grimoire.no_public": "Staff hasn't created public places yet.",
+  "item.hogwartsmod.vassoura_esportiva": "Sport Broom (test)",
+  "item.hogwartsmod.vassoura_transporte": "Transport Broom (test)",
+  "entity.hogwartsmod.vassoura": "Broom",
+  "key.hogwartsmod.broom_dismount": "Dismount broom",
+  "message.hogwartsmod.broom_not_yours": "This broom isn't yours",
+  "message.hogwartsmod.broom_full": "There's no room on this broom",
+  "message.hogwartsmod.no_cast_flying": "You can't cast spells while flying",
+  "message.hogwartsmod.broom_mounted": "%s to get off · %s up · %s down · Ctrl boost"
 }

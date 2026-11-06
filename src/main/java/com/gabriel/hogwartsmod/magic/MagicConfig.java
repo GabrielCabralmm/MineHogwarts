@@ -16,6 +16,8 @@ public final class MagicConfig {
     public static final ForgeConfigSpec.IntValue INVITE_SECONDS;
     public static final ForgeConfigSpec.IntValue TRACE_ATTEMPTS;
     public static final ForgeConfigSpec.BooleanValue NPC_PROFESSOR_ENABLED;
+    public static final ForgeConfigSpec.IntValue BROOM_MAX_HEIGHT;
+    public static final ForgeConfigSpec.BooleanValue BROOM_THEFT;
     public static final ForgeConfigSpec.IntValue LEARN_XP_BASE;
     public static final ForgeConfigSpec.IntValue LEARN_XP_PER_LEVEL;
     public static final ForgeConfigSpec.IntValue TEACHER_XP_BASE;
@@ -44,6 +46,10 @@ public final class MagicConfig {
         LEARN_XP_PER_LEVEL = builder.comment("Experiência extra ao aprender, por nível do feitiço").defineInRange("xpAprenderPorNivel", 10, 0, 100000);
         TEACHER_XP_BASE = builder.comment("Experiência do professor por aluno aprovado").defineInRange("xpProfessorBase", 15, 0, 100000);
         TEACHER_XP_PER_LEVEL = builder.comment("Experiência extra do professor por aluno aprovado, por nível do feitiço").defineInRange("xpProfessorPorNivel", 5, 0, 100000);
+        builder.pop();
+        builder.push("vassouras");
+        BROOM_MAX_HEIGHT = builder.comment("Altura máxima (Y) que uma vassoura alcança").defineInRange("alturaMaxima", 320, -64, 2000);
+        BROOM_THEFT = builder.comment("Permite que qualquer jogador pilote vassouras de outros").define("permitirRoubo", false);
         builder.pop();
         SPEC = builder.build();
     }

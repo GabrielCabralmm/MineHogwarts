@@ -178,5 +178,13 @@
   "screen.hogwartsmod.grimoire.places_full": "Limite de locais",
   "screen.hogwartsmod.grimoire.memorize": "Memorizar aqui",
   "screen.hogwartsmod.grimoire.public_places": "Locais públicos",
-  "screen.hogwartsmod.grimoire.no_public": "A staff ainda não criou locais públicos."
+  "screen.hogwartsmod.grimoire.no_public": "A staff ainda não criou locais públicos.",
+  "item.hogwartsmod.vassoura_esportiva": "Vassoura Esportiva (teste)",
+  "item.hogwartsmod.vassoura_transporte": "Vassoura de Transporte (teste)",
+  "entity.hogwartsmod.vassoura": "Vassoura",
+  "key.hogwartsmod.broom_dismount": "Desmontar da vassoura",
+  "message.hogwartsmod.broom_not_yours": "Esta vassoura não é sua",
+  "message.hogwartsmod.broom_full": "Não há lugar nesta vassoura",
+  "message.hogwartsmod.no_cast_flying": "Não é possível conjurar feitiços voando",
+  "message.hogwartsmod.broom_mounted": "%s para descer da vassoura · %s sobe · %s desce · Ctrl impulso"
 }

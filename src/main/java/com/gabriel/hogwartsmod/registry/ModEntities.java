@@ -1,6 +1,7 @@
 package com.gabriel.hogwartsmod.registry;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.entity.BroomEntity;
 import com.gabriel.hogwartsmod.entity.ProfessorNpcEntity;
 import com.gabriel.hogwartsmod.entity.SpellProjectileEntity;
 import net.minecraft.world.entity.EntityType;
@@ -25,6 +26,12 @@ public final class ModEntities {
                     .sized(0.6f, 1.8f)
                     .clientTrackingRange(10)
                     .build("professor_npc"));
+
+    public static final RegistryObject<EntityType<BroomEntity>> BROOM = ENTITIES.register("vassoura",
+            () -> EntityType.Builder.<BroomEntity>of(BroomEntity::new, MobCategory.MISC)
+                    .sized(1.0f, 0.4f)
+                    .clientTrackingRange(10)
+                    .build("vassoura"));
 
     private ModEntities() {
     }

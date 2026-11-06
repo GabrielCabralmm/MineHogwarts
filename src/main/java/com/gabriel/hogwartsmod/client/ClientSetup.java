@@ -27,6 +27,7 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(CastAnimations::registerLayer);
+        com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
     }
 
     @SubscribeEvent
@@ -34,6 +35,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), NoopRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.PULPIT.get(), PulpitRenderer::new);
         event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), ProfessorNpcRenderer::new);
+        event.registerEntityRenderer(ModEntities.BROOM.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
     }
 
     @SubscribeEvent
@@ -60,5 +62,6 @@ public final class ClientSetup {
         event.register(ModKeys.OPEN_GRIMOIRE);
         event.register(ModKeys.DODGE);
         event.register(ModKeys.APPARATE);
+        event.register(ModKeys.BROOM_DISMOUNT);
     }
 }

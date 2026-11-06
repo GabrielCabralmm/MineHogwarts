@@ -19,6 +19,8 @@ public final class ModCreativeTabs {
                     .displayItems((params, output) -> {
                         output.accept(ModItems.WAND.get());
                         output.accept(ModBlocks.PULPIT_ITEM.get());
+                        output.accept(ModItems.BROOM_SPORT.get());
+                        output.accept(ModItems.BROOM_TRANSPORT.get());
                     })
                     .build());
 

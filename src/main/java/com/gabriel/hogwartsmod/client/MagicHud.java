@@ -95,8 +95,13 @@ public final class MagicHud implements IGuiOverlay {
 
         float max = data.getMaxReserve();
         float ratio = max <= 0 ? 0 : Math.max(0, Math.min(1, data.getReserve() / max));
+        int barColor = RESERVE;
+        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.BroomEntity broom) {
+            ratio = Math.max(0, Math.min(1, broom.getStamina() / broom.getBroomType().getStamina()));
+            barColor = 0xFFE6B43C;
+        }
         g.fill(MARGIN, barY, MARGIN + totalWidth, barY + 4, BAR_BACK);
-        g.fill(MARGIN + 1, barY + 1, MARGIN + 1 + Math.round((totalWidth - 2) * ratio), barY + 3, RESERVE);
+        g.fill(MARGIN + 1, barY + 1, MARGIN + 1 + Math.round((totalWidth - 2) * ratio), barY + 3, barColor);
     }
 
     private static java.util.List<Spell> abilities(MagicData data) {
