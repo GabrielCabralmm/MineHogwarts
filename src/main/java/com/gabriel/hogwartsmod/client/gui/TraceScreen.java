@@ -28,7 +28,7 @@ public class TraceScreen extends Screen {
     private static final int SHEET_W = 240;
     private static final int SHEET_H = 220;
     private static final int CANVAS = 140;
-    private static final float MIN_ACCURACY = 0.85f;
+    private static final float MIN_ACCURACY = 1.0f;
     private static final float SHADOW_DELAY = 1.0f;
     private static final int ORB = 16;
 
@@ -81,8 +81,8 @@ public class TraceScreen extends Screen {
         this.maxAttempts = Math.max(1, attempts);
         this.attemptsLeft = this.maxAttempts;
         this.pattern = TracePatterns.get(spell.getId());
-        this.tolerance = 6f - Math.min(2.5f, spell.getRequiredLevel() * 0.25f);
-        this.shadowSpeed = 70f + 5f * spell.getRequiredLevel();
+        this.tolerance = 4f - Math.min(1.5f, spell.getRequiredLevel() * 0.15f);
+        this.shadowSpeed = 55f + 4f * spell.getRequiredLevel();
         float length = 0;
         for (int i = 1; i < pattern.length; i++) {
             length += (float) Math.hypot(pattern[i][0] - pattern[i - 1][0], pattern[i][1] - pattern[i - 1][1]) * CANVAS;
@@ -356,7 +356,7 @@ public class TraceScreen extends Screen {
         if (button == 0 && state == State.READY) {
             float x = (float) (mx - canvasX());
             float y = (float) (my - canvasY());
-            if (Math.hypot(x - guideX(0), y - guideY(0)) <= tolerance * 1.6f) {
+            if (Math.hypot(x - guideX(0), y - guideY(0)) <= tolerance * 2f) {
                 state = State.DRAWING;
                 drawStart = System.nanoTime();
                 drawnShadow = -1;
@@ -409,10 +409,10 @@ public class TraceScreen extends Screen {
         for (int i = 0; i < pattern.length; i++) {
             nearest = Math.min(nearest, (float) Math.hypot(x - guideX(i), y - guideY(i)));
         }
-        if (nearest > tolerance * 1.7f) {
+        if (nearest > tolerance * 1.3f) {
             offPoints++;
         }
-        if (nearest > tolerance * 3.5f) {
+        if (accuracy() < MIN_ACCURACY) {
             miss(tr("screen.hogwartsmod.trace.left_path"));
             return false;
         }
