@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public record ZoneEditPacket(Action action, String name, String rule, boolean value) {
     public static final int MAX_NAME = 24;
 
-    public enum Action { CREATE, RULE, REDEFINE, REMOVE, CLEAR_SELECTION, EXPAND, UNDO_PART }
+    public enum Action { CREATE, RULE, REDEFINE, REMOVE, CLEAR_SELECTION, EXPAND, UNDO_PART, CUT }
 
     public static void encode(ZoneEditPacket packet, FriendlyByteBuf buf) {
         buf.writeEnum(packet.action);

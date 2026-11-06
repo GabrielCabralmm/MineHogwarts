@@ -119,12 +119,19 @@ public class ZoneScreen extends Screen {
             return null;
         }
         String dim = minecraft.level.dimension().location().toString();
+        Zone.Box area = Zone.Box.of(ClientZones.first, ClientZones.second);
         for (Zone zone : zones()) {
-            if (zone.contains(dim, ClientZones.first) || zone.contains(dim, ClientZones.second)) {
+            boolean hit = ClientZones.cut ? zone.touches(dim, area)
+                    : zone.contains(dim, ClientZones.first) || zone.contains(dim, ClientZones.second);
+            if (hit) {
                 return zone;
             }
         }
         return null;
+    }
+
+    private boolean cutMode() {
+        return ClientZones.cut && hasSelection();
     }
 
     private boolean hasSelection() {
@@ -183,6 +190,17 @@ public class ZoneScreen extends Screen {
         int x = left + 18;
         int w = 128;
         Zone touching = touching();
+        if (cutMode()) {
+            nameBox.visible = false;
+            nameBox.setFocused(false);
+            HiRes.text(g, tr("screen.hogwartsmod.zones.cut_title"), HiRes.Style.BOLD, x, top + 148, INK);
+            HiRes.right(g, selectionStatus(), HiRes.Style.ITALIC, x + w, top + 148, WINE);
+            String info = touching == null ? tr("screen.hogwartsmod.zones.cut_none") : tr("screen.hogwartsmod.zones.cut_inside", touching.name());
+            HiRes.text(g, HiRes.ellipsize(info, HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, x, top + 166, MUTED);
+            button(g, x, top + 181, w, touching == null ? tr("screen.hogwartsmod.zones.cut_button_none") : tr("screen.hogwartsmod.zones.cut", touching.name()),
+                    touching != null, WINE, mouseX, mouseY);
+            return;
+        }
         nameBox.visible = touching == null;
         if (touching != null && nameBox.isFocused()) {
             nameBox.setFocused(false);
@@ -234,7 +252,7 @@ public class ZoneScreen extends Screen {
 
     private boolean canCreate() {
         String name = nameBox == null ? "" : nameBox.getValue().strip();
-        if (!hasSelection() || name.isEmpty() || touching() != null) {
+        if (!hasSelection() || name.isEmpty() || cutMode() || touching() != null) {
             return false;
         }
         for (Zone zone : zones()) {
@@ -254,6 +272,7 @@ public class ZoneScreen extends Screen {
             HiRes.centered(g, tr("screen.hogwartsmod.zones.pick"), HiRes.Style.ITALIC, cx, top + 90, MUTED);
             HiRes.centered(g, tr("screen.hogwartsmod.zones.help1"), HiRes.Style.ITALIC, cx, top + 120, MUTED);
             HiRes.centered(g, tr("screen.hogwartsmod.zones.help2"), HiRes.Style.ITALIC, cx, top + 131, MUTED);
+            HiRes.centered(g, tr("screen.hogwartsmod.zones.help3"), HiRes.Style.ITALIC, cx, top + 146, 0xFF8E2A2A);
             return;
         }
         HiRes.centered(g, HiRes.ellipsize(zone.name(), HiRes.Style.BOLD, w), HiRes.Style.BOLD, 10f, cx, top + 30, TITLE);
@@ -266,7 +285,11 @@ public class ZoneScreen extends Screen {
             String coords = min.getX() + " " + min.getY() + " " + min.getZ() + "  →  " + max.getX() + " " + max.getY() + " " + max.getZ();
             HiRes.centered(g, HiRes.ellipsize(coords, HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, cx, top + 54, MUTED);
         } else {
-            HiRes.centered(g, tr("screen.hogwartsmod.zones.parts", zone.boxes().size(), String.format("%,d", zone.volume()).replace(',', '.')),
+            int cuts = zone.cuts();
+            String volume = String.format("%,d", zone.volume()).replace(',', '.');
+            HiRes.centered(g, cuts == 0 ? tr("screen.hogwartsmod.zones.parts", zone.boxes().size(), volume)
+                            : cuts == 1 ? tr("screen.hogwartsmod.zones.parts_cut", zone.boxes().size() - cuts, volume)
+                            : tr("screen.hogwartsmod.zones.parts_cuts", zone.boxes().size() - cuts, cuts, volume),
                     HiRes.Style.ITALIC, cx, top + 44, MUTED);
             String undo = tr("screen.hogwartsmod.zones.undo");
             float uw = HiRes.width(undo, HiRes.Style.BOLD);
@@ -295,7 +318,7 @@ public class ZoneScreen extends Screen {
             HiRes.text(g, tr("screen.hogwartsmod.zones.rule." + rule.getId()), HiRes.Style.REGULAR, x + 30, y + 3, zone.has(rule) ? INK : MUTED);
         }
 
-        button(g, x, top + 152, w, tr("screen.hogwartsmod.zones.redefine"), hasSelection(), TITLE, mouseX, mouseY);
+        button(g, x, top + 152, w, tr("screen.hogwartsmod.zones.redefine"), hasSelection() && !ClientZones.cut, TITLE, mouseX, mouseY);
         button(g, x, top + 172, w, confirmRemove ? tr("screen.hogwartsmod.zones.confirm_remove") : tr("screen.hogwartsmod.zones.remove"),
                 true, WINE, mouseX, mouseY);
     }
@@ -329,13 +352,21 @@ public class ZoneScreen extends Screen {
             return super.mouseClicked(mx, my, button);
         }
         Zone touching = touching();
-        if (touching != null && inside(mx, my, left + 18, top + 181, 128, 15)) {
+        if (cutMode()) {
+            if (touching != null && inside(mx, my, left + 18, top + 181, 128, 15)) {
+                send(ZoneEditPacket.Action.CUT, touching.name(), "", false);
+                selected = touching.name();
+                click();
+                return true;
+            }
+            touching = null;
+        } else if (touching != null && inside(mx, my, left + 18, top + 181, 128, 15)) {
             send(ZoneEditPacket.Action.EXPAND, touching.name(), "", false);
             selected = touching.name();
             click();
             return true;
         }
-        if (touching == null && inside(mx, my, left + 18, top + 164, 128, 13)) {
+        if (touching == null && !cutMode() && inside(mx, my, left + 18, top + 164, 128, 13)) {
             nameBox.setFocused(true);
             setFocused(nameBox);
             return super.mouseClicked(mx, my, button);
@@ -352,7 +383,7 @@ public class ZoneScreen extends Screen {
                 return true;
             }
         }
-        if (touching == null && inside(mx, my, x, top + 181, 128, 15) && canCreate()) {
+        if (touching == null && !cutMode() && inside(mx, my, x, top + 181, 128, 15) && canCreate()) {
             String name = nameBox.getValue().strip();
             send(ZoneEditPacket.Action.CREATE, name, "", false);
             selected = name;
@@ -377,7 +408,7 @@ public class ZoneScreen extends Screen {
                     return true;
                 }
             }
-            if (inside(mx, my, dx, top + 152, 126, 15) && hasSelection()) {
+            if (inside(mx, my, dx, top + 152, 126, 15) && hasSelection() && !ClientZones.cut) {
                 send(ZoneEditPacket.Action.REDEFINE, zone.name(), "", false);
                 click();
                 return true;

@@ -38,12 +38,7 @@ public final class ZoneShape {
             for (int j = 0; j < ys.length - 1; j++) {
                 for (int k = 0; k < zs.length - 1; k++) {
                     Vec3 center = new Vec3((xs[i] + xs[i + 1]) / 2.0, (ys[j] + ys[j + 1]) / 2.0, (zs[k] + zs[k + 1]) / 2.0);
-                    for (Zone.Box box : zone.boxes()) {
-                        if (box.contains(center)) {
-                            filled[i][j][k] = true;
-                            break;
-                        }
-                    }
+                    filled[i][j][k] = Zone.inside(zone.boxes(), center);
                 }
             }
         }

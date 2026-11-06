@@ -26,6 +26,8 @@ public final class ClientZones {
     @Nullable
     public static BlockPos second;
 
+    public static boolean cut;
+
     @Nullable
     public static Zone banner;
     public static boolean bannerLeaving;
@@ -84,6 +86,7 @@ public final class ClientZones {
     public static void logout(ClientPlayerNetworkEvent.LoggingOut event) {
         first = null;
         second = null;
+        cut = false;
         banner = null;
         bannerAge = -1;
         inside = new LinkedHashSet<>();

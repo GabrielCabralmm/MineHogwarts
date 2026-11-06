@@ -42,7 +42,7 @@ public class ZoneWandItem extends Item {
             return InteractionResult.FAIL;
         }
         if (player instanceof ServerPlayer sp) {
-            ZoneSelections.mark(sp, context.getClickedPos(), false);
+            ZoneSelections.mark(sp, context.getClickedPos(), false, sp.isShiftKeyDown());
         }
         return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
     }
@@ -60,13 +60,13 @@ public class ZoneWandItem extends Item {
         return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
     }
 
-    public static void markFirst(Player player, BlockPos pos) {
+    public static void markFirst(Player player, BlockPos pos, boolean cut) {
         if (!canUse(player)) {
             denied(player);
             return;
         }
         if (player instanceof ServerPlayer sp) {
-            ZoneSelections.mark(sp, pos, true);
+            ZoneSelections.mark(sp, pos, true, cut);
         }
     }
 
@@ -80,6 +80,7 @@ public class ZoneWandItem extends Item {
         tooltip.add(Component.translatable("item.hogwartsmod.varinha_zonas.tip1").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("item.hogwartsmod.varinha_zonas.tip2").withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("item.hogwartsmod.varinha_zonas.tip3").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("item.hogwartsmod.varinha_zonas.tip4").withStyle(ChatFormatting.RED));
     }
 
     private static void denied(Player player) {

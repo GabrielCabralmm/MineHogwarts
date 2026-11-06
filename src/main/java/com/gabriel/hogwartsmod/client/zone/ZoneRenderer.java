@@ -77,7 +77,12 @@ public final class ZoneRenderer {
         if (a != null && b != null) {
             AABB box = new AABB(Math.min(a.getX(), b.getX()), Math.min(a.getY(), b.getY()), Math.min(a.getZ(), b.getZ()),
                     Math.max(a.getX(), b.getX()) + 1, Math.max(a.getY(), b.getY()) + 1, Math.max(a.getZ(), b.getZ()) + 1);
-            LevelRenderer.renderLineBox(pose, lines, box.inflate(0.02), 0.95f, 0.76f, 0.25f, pulse);
+            if (ClientZones.cut) {
+                LevelRenderer.renderLineBox(pose, lines, box.inflate(0.02), 0.95f, 0.25f, 0.2f, pulse);
+                LevelRenderer.renderLineBox(pose, lines, box.inflate(0.05), 1.0f, 0.5f, 0.4f, pulse * 0.5f);
+            } else {
+                LevelRenderer.renderLineBox(pose, lines, box.inflate(0.02), 0.95f, 0.76f, 0.25f, pulse);
+            }
         }
         if (a != null) {
             LevelRenderer.renderLineBox(pose, lines, new AABB(a).inflate(0.03), 0.4f, 1.0f, 0.5f, 1f);

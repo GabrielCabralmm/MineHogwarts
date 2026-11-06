@@ -58,7 +58,8 @@ public final class ClientPacketHandler {
         ClientDodge.start(dx, dy, dz, distance, ticks);
     }
 
-    public static void handleZoneSelection(net.minecraft.core.BlockPos first, net.minecraft.core.BlockPos second) {
+    public static void handleZoneSelection(net.minecraft.core.BlockPos first, net.minecraft.core.BlockPos second, boolean cut) {
+        com.gabriel.hogwartsmod.client.zone.ClientZones.cut = cut;
         com.gabriel.hogwartsmod.client.zone.ClientZones.first = first;
         com.gabriel.hogwartsmod.client.zone.ClientZones.second = second;
     }

@@ -103,6 +103,10 @@ public final class HogwartsCommand {
                         .then(Commands.literal("remover")
                                 .then(Commands.argument("nome", StringArgumentType.greedyString()).suggests(ZONES)
                                         .executes(HogwartsCommand::removeZone)))
+                        .then(Commands.literal("recortar")
+                                .then(Commands.argument("nome", StringArgumentType.greedyString()).suggests(ZONES)
+                                        .executes(ctx -> com.gabriel.hogwartsmod.zone.ZoneEditing.cut(ctx.getSource().getPlayerOrException(),
+                                                StringArgumentType.getString(ctx, "nome").strip()) ? 1 : 0)))
                         .then(Commands.literal("expandir")
                                 .then(Commands.argument("nome", StringArgumentType.greedyString()).suggests(ZONES)
                                         .executes(ctx -> com.gabriel.hogwartsmod.zone.ZoneEditing.expand(ctx.getSource().getPlayerOrException(),

@@ -22,7 +22,7 @@ public final class ZoneEvents {
         event.setCanceled(true);
         if (event.getLevel().isClientSide && event.getAction() == PlayerInteractEvent.LeftClickBlock.Action.START) {
             if (ZoneWandItem.canUse(event.getEntity())) {
-                com.gabriel.hogwartsmod.network.ModNetwork.CHANNEL.sendToServer(new com.gabriel.hogwartsmod.network.ZoneMarkPacket(event.getPos()));
+                com.gabriel.hogwartsmod.network.ModNetwork.CHANNEL.sendToServer(new com.gabriel.hogwartsmod.network.ZoneMarkPacket(event.getPos(), event.getEntity().isShiftKeyDown()));
             } else {
                 event.getEntity().displayClientMessage(net.minecraft.network.chat.Component.translatable("message.hogwartsmod.zone_staff_only")
                         .withStyle(net.minecraft.ChatFormatting.GRAY), true);

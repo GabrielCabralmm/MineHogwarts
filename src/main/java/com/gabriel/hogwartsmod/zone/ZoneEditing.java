@@ -37,6 +37,7 @@ public final class ZoneEditing {
             }
             case CLEAR_SELECTION -> ZoneSelections.clear(player);
             case EXPAND -> expand(player, name);
+            case CUT -> cut(player, name);
             case UNDO_PART -> {
                 Zone zone = data.find(name);
                 if (zone != null && zone.boxes().size() > 1) {
@@ -49,7 +50,7 @@ public final class ZoneEditing {
 
     public static boolean create(ServerPlayer player, String name) {
         ZoneSelections.Selection selection = ZoneSelections.get(player);
-        if (selection == null || !selection.complete()) {
+        if (selection == null || !selection.complete() || selection.cut()) {
             feedback(player, Component.translatable("message.hogwartsmod.zone_need_selection"));
             return false;
         }
@@ -75,7 +76,7 @@ public final class ZoneEditing {
         if (zone == null) {
             return false;
         }
-        if (selection == null || !selection.complete()) {
+        if (selection == null || !selection.complete() || selection.cut()) {
             feedback(player, Component.translatable("message.hogwartsmod.zone_need_selection"));
             return false;
         }
@@ -92,7 +93,7 @@ public final class ZoneEditing {
         if (zone == null) {
             return false;
         }
-        if (selection == null || !selection.complete()) {
+        if (selection == null || !selection.complete() || selection.cut()) {
             feedback(player, Component.translatable("message.hogwartsmod.zone_need_selection"));
             return false;
         }
@@ -107,6 +108,36 @@ public final class ZoneEditing {
         data.put(zone.plus(selection.first(), selection.second()));
         ZoneSelections.clear(player);
         feedback(player, Component.translatable("message.hogwartsmod.zone_expanded", zone.name()));
+        return true;
+    }
+
+    public static boolean cut(ServerPlayer player, String name) {
+        ZoneSelections.Selection selection = ZoneSelections.get(player);
+        ZoneData data = ZoneData.get(player.server);
+        Zone zone = data.find(name);
+        if (zone == null) {
+            return false;
+        }
+        if (selection == null || !selection.complete() || !selection.cut()) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_need_cut"));
+            return false;
+        }
+        if (!zone.touches(selection.dimension(), Zone.Box.of(selection.first(), selection.second()))) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_cut_outside", zone.name()));
+            return false;
+        }
+        if (zone.boxes().size() >= Zone.MAX_PARTS) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_too_many", Zone.MAX_PARTS));
+            return false;
+        }
+        Zone result = zone.plus(selection.first(), selection.second(), true);
+        if (result.volume() == 0) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_cut_all", zone.name()));
+            return false;
+        }
+        data.put(result);
+        ZoneSelections.clear(player);
+        feedback(player, Component.translatable("message.hogwartsmod.zone_cut_done", zone.name()));
         return true;
     }
 

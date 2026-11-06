@@ -256,5 +256,19 @@
   "message.hogwartsmod.zone_not_touching": "Um dos cantos precisa estar dentro de %s",
   "message.hogwartsmod.zone_too_many": "Uma zona pode ter no máximo %s partes",
   "message.hogwartsmod.zone_expanded": "Seleção juntada a %s",
-  "message.hogwartsmod.zone_inside": "dentro de %s"
+  "message.hogwartsmod.zone_inside": "dentro de %s",
+  "item.hogwartsmod.varinha_zonas.tip4": "Segurando Shift: marca uma área para recortar",
+  "message.hogwartsmod.zone_cut_prefix": "Recorte",
+  "message.hogwartsmod.zone_need_cut": "Marque a área de recorte segurando Shift",
+  "message.hogwartsmod.zone_cut_outside": "A área de recorte não toca em %s",
+  "message.hogwartsmod.zone_cut_all": "Esse recorte apagaria %s inteira; use Remover zona",
+  "message.hogwartsmod.zone_cut_done": "Área recortada de %s",
+  "screen.hogwartsmod.zones.cut_title": "Recortar zona",
+  "screen.hogwartsmod.zones.cut_none": "Não toca em nenhuma zona",
+  "screen.hogwartsmod.zones.cut_inside": "O recorte atinge %s",
+  "screen.hogwartsmod.zones.cut_button_none": "Recortar",
+  "screen.hogwartsmod.zones.cut": "Recortar de %s",
+  "screen.hogwartsmod.zones.parts_cuts": "%s partes, %s recortes · %s blocos",
+  "screen.hogwartsmod.zones.help3": "Shift + cliques marcam um recorte",
+  "screen.hogwartsmod.zones.parts_cut": "%s partes, 1 recorte · %s blocos"
 }
