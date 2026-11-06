@@ -83,6 +83,8 @@ public class GrimoireScreen extends Screen {
     private UUID teachStudent;
     private int ticks;
     private int missionIndex;
+    @org.jetbrains.annotations.Nullable
+    private String cancelArmed;
 
     public GrimoireScreen() {
         super(Component.translatable("screen.hogwartsmod.grimoire"));
@@ -299,19 +301,27 @@ public class GrimoireScreen extends Screen {
             }
             int progress = missionProgress(a);
             boolean ready = progress >= a.mission().amount();
-            HiRes.text(g, HiRes.ellipsize(a.mission().title().isBlank() ? "?" : a.mission().title(), HiRes.Style.BOLD, pageW - 28),
-                    HiRes.Style.BOLD, lx + 3, y, INK);
+            boolean hoverBox = mouseX >= lx + 1 && mouseX < lx + 12 && mouseY >= y - 1 && mouseY < y + 10;
+            g.fill(lx + 3, y, lx + 11, y + 8, hoverBox ? GOLD : NOTE_EDGE);
+            g.fill(lx + 4, y + 1, lx + 10, y + 7, NOTE_ON);
+            if (a.tracked()) {
+                HiRes.image(g, ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/check.png"), lx + 3, y - 1, 9, 9);
+            }
+            HiRes.text(g, HiRes.ellipsize(a.mission().title().isBlank() ? "?" : a.mission().title(), HiRes.Style.BOLD, pageW - 40),
+                    HiRes.Style.BOLD, lx + 15, y, a.tracked() ? INK : MUTED);
             if (ready) {
                 HiRes.image(g, ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/check.png"), lx + pageW - 9, y, 9, 9);
             } else {
                 HiRes.right(g, progress + "/" + a.mission().amount(), HiRes.Style.BOLD, lx + pageW, y, GOLD);
             }
-            HiRes.text(g, HiRes.ellipsize(a.npcName(), HiRes.Style.ITALIC, pageW - 6), HiRes.Style.ITALIC, 7f, lx + 3, y + 10, MUTED);
+            HiRes.text(g, HiRes.ellipsize(a.npcName(), HiRes.Style.ITALIC, pageW - 18), HiRes.Style.ITALIC, 7f, lx + 15, y + 10, MUTED);
             int bx = lx + 3;
             int bw = pageW - 6;
             g.fill(bx, y + 19, bx + bw, y + 22, PAGE_LINE);
             g.fill(bx, y + 19, bx + Math.round(bw * Math.min(1f, progress / (float) a.mission().amount())), y + 22, ready ? GREEN : GOLD);
         }
+
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.track_hint"), HiRes.Style.ITALIC, 7f, lx + pageW / 2f, top + BOOK_H - 20, MUTED);
 
         com.gabriel.hogwartsmod.mission.ActiveMission a = list.get(missionIndex);
         com.gabriel.hogwartsmod.mission.Mission m = a.mission();
@@ -343,8 +353,17 @@ public class GrimoireScreen extends Screen {
                 : tr("screen.hogwartsmod.grimoire.mission_going");
         List<String> footerLines = HiRes.wrap(footer, HiRes.Style.ITALIC, rw);
         for (int i = 0; i < footerLines.size(); i++) {
-            HiRes.centered(g, footerLines.get(i), HiRes.Style.ITALIC, cx, top + BOOK_H - 24 - (footerLines.size() - 1 - i) * 10, ready ? GREEN : MUTED);
+            HiRes.centered(g, footerLines.get(i), HiRes.Style.ITALIC, cx, top + BOOK_H - 34 - (footerLines.size() - 1 - i) * 10, ready ? GREEN : MUTED);
         }
+        boolean armed = a.key().equals(cancelArmed);
+        String cancel = tr(armed ? "screen.hogwartsmod.grimoire.cancel_confirm" : "screen.hogwartsmod.grimoire.cancel");
+        float cw = HiRes.width(cancel, HiRes.Style.BOLD, 7.5f);
+        int cy = top + BOOK_H - 20;
+        boolean hoverCancel = mouseX >= cx - cw / 2 - 3 && mouseX < cx + cw / 2 + 3 && mouseY >= cy - 2 && mouseY < cy + 9;
+        if (hoverCancel || armed) {
+            HiRes.highlight(g, Math.round(cx - cw / 2 - 6), cy - 3, Math.round(cx + cw / 2 + 6), cy + 10, HiRes.Mark.HOVER);
+        }
+        HiRes.centered(g, cancel, HiRes.Style.BOLD, 7.5f, cx, cy, armed || hoverCancel ? WINE : TITLE);
     }
 
     private boolean missionsClicked(double mx, double my) {
@@ -353,12 +372,51 @@ public class GrimoireScreen extends Screen {
         List<com.gabriel.hogwartsmod.mission.ActiveMission> list = activeMissions();
         for (int i = 0; i < list.size(); i++) {
             int y = top + 31 + i * 27;
+            com.gabriel.hogwartsmod.mission.ActiveMission a = list.get(i);
+            if (mx >= lx + 1 && mx < lx + 12 && my >= y - 1 && my < y + 10) {
+                journal(a, a.tracked() ? com.gabriel.hogwartsmod.mission.MissionManager.JournalAction.HIDE
+                        : com.gabriel.hogwartsmod.mission.MissionManager.JournalAction.SHOW);
+                return true;
+            }
             if (mx >= lx - 2 && mx < lx + pageW + 2 && my >= y - 2 && my < y + 24) {
+                if (missionIndex != i) {
+                    cancelArmed = null;
+                }
                 missionIndex = i;
                 return true;
             }
         }
+        if (list.isEmpty()) {
+            return false;
+        }
+        com.gabriel.hogwartsmod.mission.ActiveMission a = list.get(Math.min(missionIndex, list.size() - 1));
+        float cx = left + BOOK_W / 2 + 10 + (BOOK_W / 2 - 26) / 2f;
+        boolean armed = a.key().equals(cancelArmed);
+        float cw = HiRes.width(tr(armed ? "screen.hogwartsmod.grimoire.cancel_confirm" : "screen.hogwartsmod.grimoire.cancel"), HiRes.Style.BOLD, 7.5f);
+        int cy = top + BOOK_H - 20;
+        if (mx >= cx - cw / 2 - 3 && mx < cx + cw / 2 + 3 && my >= cy - 2 && my < cy + 9) {
+            if (armed) {
+                cancelArmed = null;
+                journal(a, com.gabriel.hogwartsmod.mission.MissionManager.JournalAction.ABANDON);
+            } else {
+                cancelArmed = a.key();
+                click();
+            }
+            return true;
+        }
+        cancelArmed = null;
         return false;
+    }
+
+    private void click() {
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.get(), 1.4f, 0.35f));
+        }
+    }
+
+    private void journal(com.gabriel.hogwartsmod.mission.ActiveMission a, com.gabriel.hogwartsmod.mission.MissionManager.JournalAction action) {
+        com.gabriel.hogwartsmod.network.ModNetwork.CHANNEL.sendToServer(new com.gabriel.hogwartsmod.network.MissionJournalPacket(a.npc(), a.mission().id(), action));
+        click();
     }
 
     private void drawHousesTab(GuiGraphics g) {

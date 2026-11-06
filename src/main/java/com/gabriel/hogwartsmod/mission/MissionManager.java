@@ -33,6 +33,8 @@ public final class MissionManager {
 
     public enum Action { ACCEPT, ABANDON, COMPLETE }
 
+    public enum JournalAction { SHOW, HIDE, ABANDON }
+
     private MissionManager() {
     }
 
@@ -165,6 +167,28 @@ public final class MissionManager {
         }
         data.markForSync();
         open(player, npc);
+    }
+
+    public static void journal(ServerPlayer player, java.util.UUID npc, String missionId, JournalAction action) {
+        MagicData data = MagicData.get(player);
+        if (data == null) {
+            return;
+        }
+        ActiveMission active = data.getMissions().find(npc, missionId);
+        if (active == null) {
+            return;
+        }
+        switch (action) {
+            case SHOW -> data.getMissions().update(active.withTracked(true));
+            case HIDE -> data.getMissions().update(active.withTracked(false));
+            case ABANDON -> {
+                data.getMissions().remove(npc, missionId);
+                player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 0.8f, 0.7f);
+                player.displayClientMessage(Component.translatable("message.hogwartsmod.mission_abandoned", title(active.mission()))
+                        .withStyle(ChatFormatting.GRAY), true);
+            }
+        }
+        data.markForSync();
     }
 
     private static Component title(Mission mission) {

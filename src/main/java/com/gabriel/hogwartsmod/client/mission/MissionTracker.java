@@ -14,17 +14,18 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class MissionTracker implements IGuiOverlay {
     public static final MissionTracker INSTANCE = new MissionTracker();
-    private static final int SHOWN = 3;
     private static final int TITLE = 0xFFF3E4C4;
-    private static final int TEXT = 0xFFD8C8A4;
+    private static final int TEXT = 0xFFD2C29E;
     private static final int GOLD = 0xFFE6B43C;
     private static final int READY = 0xFF9CD06A;
-    private static final int SHADOW = 0xB0140C06;
+    private static final int SHADOW = 0xA0140C06;
+    private static final float X = 6;
+    private static final float Y = 6;
+    private static final float MAX_W = 120;
 
     private final Map<String, Integer> lastProgress = new HashMap<>();
     private final Map<String, Long> flashUntil = new HashMap<>();
@@ -42,16 +43,12 @@ public final class MissionTracker implements IGuiOverlay {
         if (data == null) {
             return;
         }
-        List<ActiveMission> active = data.getMissions().active();
-        if (active.isEmpty()) {
-            return;
-        }
         long now = System.currentTimeMillis();
-        float right = width - 8;
-        float y = height * 0.28f;
-        int start = Math.max(0, active.size() - SHOWN);
-        for (int i = active.size() - 1; i >= start; i--) {
-            ActiveMission a = active.get(i);
+        float y = Y;
+        for (ActiveMission a : data.getMissions().active()) {
+            if (!a.tracked()) {
+                continue;
+            }
             Mission m = a.mission();
             int progress = progress(mc, a);
             boolean ready = progress >= m.amount();
@@ -60,8 +57,8 @@ public final class MissionTracker implements IGuiOverlay {
                 flashUntil.put(a.key(), now + 1500);
             }
             boolean flash = flashUntil.getOrDefault(a.key(), 0L) > now;
-            String title = HiRes.ellipsize(m.title().isBlank() ? "?" : m.title(), HiRes.Style.BOLD, 140);
-            shadowed(g, title, HiRes.Style.BOLD, 8f, right, y, ready ? READY : TITLE);
+            String title = HiRes.ellipsize(m.title().isBlank() ? "?" : m.title(), HiRes.Style.BOLD, MAX_W);
+            shadowed(g, title, HiRes.Style.BOLD, 6.5f, X, y, ready ? READY : TITLE);
             String line;
             if (ready) {
                 line = Component.translatable("hud.hogwartsmod.mission_ready", a.npcName()).getString();
@@ -70,16 +67,15 @@ public final class MissionTracker implements IGuiOverlay {
             } else {
                 line = m.targetName().getString() + "  " + progress + "/" + m.amount();
             }
-            shadowed(g, HiRes.ellipsize(line, HiRes.Style.ITALIC, 150), HiRes.Style.ITALIC, 7.5f, right, y + 10, flash ? GOLD : ready ? READY : TEXT);
-            y += 25;
+            shadowed(g, HiRes.ellipsize(line, HiRes.Style.ITALIC, MAX_W), HiRes.Style.ITALIC, 6f, X, y + 8, flash ? GOLD : ready ? READY : TEXT);
+            y += 19;
         }
     }
 
-    private static void shadowed(GuiGraphics g, String text, HiRes.Style style, float size, float right, float y, int color) {
-        float w = HiRes.width(text, style, size);
+    private static void shadowed(GuiGraphics g, String text, HiRes.Style style, float size, float x, float y, int color) {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        HiRes.text(g, text, style, size, right - w + 0.6f, y + 0.6f, SHADOW);
-        HiRes.text(g, text, style, size, right - w, y, color);
+        HiRes.text(g, text, style, size, x + 0.5f, y + 0.5f, SHADOW);
+        HiRes.text(g, text, style, size, x, y, color);
     }
 
     private static int progress(Minecraft mc, ActiveMission a) {

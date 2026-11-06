@@ -396,5 +396,9 @@
   "screen.hogwartsmod.mission_editor.remove": "Remove NPC",
   "screen.hogwartsmod.mission_editor.remove_confirm": "Confirm removal",
   "hud.hogwartsmod.mission_ready": "Ready! Go back to %s",
-  "hud.hogwartsmod.mission_go": "Go to %s"
+  "hud.hogwartsmod.mission_go": "Go to %s",
+  "screen.hogwartsmod.grimoire.track_hint": "Tick to track on screen",
+  "screen.hogwartsmod.grimoire.cancel": "Cancel quest",
+  "screen.hogwartsmod.grimoire.cancel_confirm": "Click again to cancel",
+  "message.hogwartsmod.mission_abandoned": "Quest cancelled: %s"
 }
