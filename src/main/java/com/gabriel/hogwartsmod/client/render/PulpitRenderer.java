@@ -11,15 +11,49 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.client.model.BookModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.blockentity.EnchantTableRenderer;
+import net.minecraft.util.Mth;
+import com.mojang.math.Axis;
 import net.minecraft.world.phys.AABB;
 
 public class PulpitRenderer implements BlockEntityRenderer<PulpitBlockEntity> {
 
+    private final BookModel book;
+
     public PulpitRenderer(BlockEntityRendererProvider.Context context) {
+        book = new BookModel(context.bakeLayer(ModelLayers.BOOK));
     }
 
     @Override
     public void render(PulpitBlockEntity pulpit, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        renderBook(pulpit, partialTick, pose, buffers, light, overlay);
+        renderArea(pulpit, partialTick, pose, buffers);
+    }
+
+    private void renderBook(PulpitBlockEntity pulpit, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        float open = pulpit.getOpen(partialTick);
+        float ease = open * open * (3 - 2 * open);
+        float time = pulpit.getTime(partialTick);
+        Direction facing = pulpit.facing();
+        float yaw = (float) Math.atan2(facing.getStepZ(), facing.getStepX());
+        float bob = (1 - ease) * (0.06f + (float) Math.sin(time * 0.1f) * 0.04f);
+        pose.pushPose();
+        pose.translate(0.5, Mth.lerp(ease, 1.28f, 0.93f) + bob, 0.5);
+        pose.mulPose(Axis.YP.rotation(-yaw));
+        pose.translate(Mth.lerp(ease, 0f, 0.02f), 0, 0);
+        pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(ease, 80f, 67.5f)));
+        float turn = Mth.clamp(((time % 240f) - 200f) / 30f, 0f, 1f);
+        float page = turn * turn * (3 - 2 * turn);
+        book.setupAnim(time, page, 1f, ease * 1.22f);
+        VertexConsumer consumer = EnchantTableRenderer.BOOK_LOCATION.buffer(buffers, RenderType::entitySolid);
+        book.render(pose, consumer, light, overlay, 1f, 1f, 1f, 1f);
+        pose.popPose();
+    }
+
+    private void renderArea(PulpitBlockEntity pulpit, float partialTick, PoseStack pose, MultiBufferSource buffers) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || pulpit.getOwner() == null || !pulpit.getOwner().equals(mc.player.getUUID())) {
             return;

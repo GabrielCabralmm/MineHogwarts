@@ -24,6 +24,10 @@ public class PulpitBlockEntity extends BlockEntity {
     @Nullable
     private UUID owner;
     private boolean showArea = true;
+    private boolean bookOpen;
+    private float open;
+    private float openOld;
+    private int time;
 
     public PulpitBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PULPIT.get(), pos, state);
@@ -89,6 +93,43 @@ public class PulpitBlockEntity extends BlockEntity {
         }
     }
 
+    // -- Livro
+
+    public static void serverTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, PulpitBlockEntity pulpit) {
+        if (level.getGameTime() % 10 != 0) {
+            return;
+        }
+        boolean near = false;
+        for (Player player : level.players()) {
+            if (!player.isSpectator() && player.distanceToSqr(pos.getCenter()) <= 5.0 * 5.0) {
+                com.gabriel.hogwartsmod.magic.MagicData data = com.gabriel.hogwartsmod.magic.MagicData.get(player);
+                if (data != null && data.isProfessor()) {
+                    near = true;
+                    break;
+                }
+            }
+        }
+        if (near != pulpit.bookOpen) {
+            pulpit.bookOpen = near;
+            level.sendBlockUpdated(pos, state, state, 3);
+        }
+    }
+
+    public static void clientTick(net.minecraft.world.level.Level level, BlockPos pos, BlockState state, PulpitBlockEntity pulpit) {
+        pulpit.time++;
+        pulpit.openOld = pulpit.open;
+        float target = pulpit.bookOpen ? 1f : 0f;
+        pulpit.open += Math.max(-0.08f, Math.min(0.08f, target - pulpit.open));
+    }
+
+    public float getOpen(float partialTick) {
+        return openOld + (open - openOld) * partialTick;
+    }
+
+    public float getTime(float partialTick) {
+        return time + partialTick;
+    }
+
     // -- Salvamento e sincronização
 
     @Override
@@ -110,11 +151,14 @@ public class PulpitBlockEntity extends BlockEntity {
         }
         showArea = !tag.contains("ShowArea") || tag.getBoolean("ShowArea");
         owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
+        bookOpen = tag.getBoolean("BookOpen");
     }
 
     @Override
     public CompoundTag getUpdateTag() {
-        return saveWithoutMetadata();
+        CompoundTag tag = saveWithoutMetadata();
+        tag.putBoolean("BookOpen", bookOpen);
+        return tag;
     }
 
     @Override
