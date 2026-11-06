@@ -36,15 +36,27 @@ public final class BodyFx {
     private static Shape shape(int entityId, float partialTick) {
         float departure = ClientFxState.apparateProgress(entityId, partialTick);
         if (departure >= 0) {
-            float spin = 1080f * (float) Math.pow(departure, 2.4);
-            float c = Mth.clamp((departure - 0.72f) / 0.28f, 0f, 1f);
-            float ease = c * c * (3 - 2 * c);
-            return new Shape(spin, (float) Math.pow(1 - ease, 1.6) + 0.001f, 1f - 0.97f * ease);
+            float k = Mth.clamp((departure - 0.75f) / 0.25f, 0f, 1f);
+            if (k <= 0f) {
+                return null;
+            }
+            float spin = 1800f * k * k;
+            float squeeze = Mth.clamp(k / 0.8f, 0f, 1f);
+            float width = 1f - 0.94f * squeeze * squeeze * (3 - 2 * squeeze);
+            float stretch = 1f + 0.22f * squeeze;
+            float vanish = Mth.clamp((k - 0.8f) / 0.2f, 0f, 1f);
+            width *= 1f - vanish;
+            float height = stretch * (1f - 0.97f * vanish * vanish);
+            return new Shape(spin, Math.max(0.001f, width), Math.max(0.01f, height));
         }
-        float arrival = ClientFxState.arrivalProgress(entityId, partialTick);
+        float arrival = ClientFxState.arrivalProgress(entityId, partialTick, 7f);
         if (arrival >= 0) {
-            float ease = 1 - (1 - arrival) * (1 - arrival) * (1 - arrival);
-            return new Shape(-540f * (1 - ease), ease + 0.001f, 0.03f + 0.97f * ease);
+            float appear = Mth.clamp(arrival / 0.25f, 0f, 1f);
+            float open = Mth.clamp((arrival - 0.15f) / 0.85f, 0f, 1f);
+            float ease = 1 - (1 - open) * (1 - open) * (1 - open);
+            float height = (0.05f + 1.17f * appear) * (1f - 0.18f * ease);
+            float width = 0.04f + 0.96f * ease;
+            return new Shape(-1440f * (1 - ease) * (1 - ease), width, height);
         }
         return null;
     }
@@ -113,7 +125,7 @@ public final class BodyFx {
         if (departure >= 0) {
             return Mth.clamp((departure - 0.55f) / 0.45f, 0f, 1f);
         }
-        float arrival = ClientFxState.arrivalProgress(mc.player.getId(), partialTick);
+        float arrival = ClientFxState.arrivalProgress(mc.player.getId(), partialTick, 10f);
         return arrival >= 0 ? 1f - arrival : 0f;
     }
 

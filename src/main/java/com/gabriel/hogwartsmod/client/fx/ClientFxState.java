@@ -33,6 +33,19 @@ public final class ClientFxState {
         boolean apparate;
         long apparateStart;
         long arriveStart = -1000;
+        boolean arrivalAnimation;
+        boolean whoosh;
+    }
+
+    private static void animate(int entityId, String animation) {
+        ClientLevel level = Minecraft.getInstance().level;
+        Minecraft mc = Minecraft.getInstance();
+        if (level != null && level.getEntity(entityId) instanceof net.minecraft.client.player.AbstractClientPlayer player) {
+            if (player == mc.player && mc.options.getCameraType() == net.minecraft.client.CameraType.FIRST_PERSON) {
+                return;
+            }
+            com.gabriel.hogwartsmod.client.CastAnimations.play(player, animation);
+        }
     }
 
     public static float apparateProgress(int entityId, float partialTick) {
@@ -45,13 +58,13 @@ public final class ClientFxState {
         return t > 1.5f ? -1f : Math.min(1f, t);
     }
 
-    public static float arrivalProgress(int entityId, float partialTick) {
+    public static float arrivalProgress(int entityId, float partialTick, float duration) {
         State state = STATES.get(entityId);
         ClientLevel level = Minecraft.getInstance().level;
         if (state == null || level == null) {
             return -1f;
         }
-        float t = (level.getGameTime() - state.arriveStart + partialTick) / 10f;
+        float t = (level.getGameTime() - state.arriveStart + partialTick) / duration;
         return t < 0 || t >= 1 ? -1f : t;
     }
 
@@ -89,11 +102,20 @@ public final class ClientFxState {
             case ARRIVE -> {
                 state.apparate = false;
                 state.arriveStart = now;
+                state.arrivalAnimation = true;
+                if (level != null && level.getEntity(entityId) != null) {
+                    state.arrivalAnimation = false;
+                    animate(entityId, "aparatar_chegada");
+                }
             }
             case APPARATE -> {
                 state.apparate = value;
                 if (value) {
                     state.apparateStart = now;
+                    state.whoosh = false;
+                    animate(entityId, "aparatar");
+                } else {
+                    animate(entityId, "");
                 }
             }
             case DODGE -> {
@@ -147,32 +169,42 @@ public final class ClientFxState {
                     level.addParticle(ModParticles.SPARK.get().with(0xBFDFFF, 0.08f, 10), p.x, p.y, p.z, 0, 0, 0);
                 }
             }
+            if (state.arrivalAnimation) {
+                state.arrivalAnimation = false;
+                animate(entry.getKey(), "aparatar_chegada");
+            }
             if (isApparating(entry.getKey())) {
                 float t = Math.min(1f, (level.getGameTime() - state.apparateStart) / 40f);
                 Vec3 core = player.position().add(0, 1.0, 0);
-                int count = 1 + Math.round(t * t * 4);
+                if (t >= 0.72f && !state.whoosh) {
+                    state.whoosh = true;
+                    level.playLocalSound(core.x, core.y, core.z, net.minecraft.sounds.SoundEvents.ILLUSIONER_MIRROR_MOVE,
+                            net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.7f, false);
+                }
+                float k = Math.max(0f, (t - 0.7f) / 0.3f);
+                int count = level.random.nextFloat() < 0.15f ? 1 : 0;
+                count += Math.round(k * k * 6);
                 for (int i = 0; i < count; i++) {
                     double a = level.random.nextDouble() * Math.PI * 2;
-                    double radius = 0.9 + level.random.nextDouble() * 0.9;
-                    double h = (level.random.nextDouble() - 0.5) * 1.8 * (1 - 0.6 * t);
+                    double radius = 0.8 + level.random.nextDouble() * 0.8;
+                    double h = (level.random.nextDouble() - 0.5) * 2.0;
                     double px = core.x + Math.cos(a) * radius;
                     double py = core.y + h;
                     double pz = core.z + Math.sin(a) * radius;
-                    double pull = 0.06 + 0.16 * t;
-                    double swirl = 0.08 + 0.1 * t;
-                    double vx = (core.x - px) * pull - Math.sin(a) * swirl;
+                    double pull = 0.18 + 0.12 * k;
+                    double vx = (core.x - px) * pull - Math.sin(a) * 0.15;
                     double vy = (core.y - py) * pull;
-                    double vz = (core.z - pz) * pull + Math.cos(a) * swirl;
+                    double vz = (core.z - pz) * pull + Math.cos(a) * 0.15;
                     int color = level.random.nextInt(3) == 0 ? 0x4A4458 : 0x241F2C;
-                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.1f + 0.1f * t, 7 + level.random.nextInt(3)),
+                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.08f + 0.08f * k, 6 + level.random.nextInt(3)),
                             px, py, pz, vx, vy, vz);
                 }
-                if (t > 0.4f && level.random.nextFloat() < t) {
+                if (k > 0.3f && level.random.nextFloat() < k) {
                     double a = level.random.nextDouble() * Math.PI * 2;
-                    double r = 0.2 + level.random.nextDouble() * 0.5;
+                    double r = 0.15 + level.random.nextDouble() * 0.35 * (1 - k);
                     int color = level.random.nextInt(3) == 0 ? 0xA8DCFF : 0x3C9BFF;
-                    level.addParticle(ModParticles.BOLT.get().with(color, 0.1f + 0.06f * t, 2 + level.random.nextInt(2)),
-                            core.x + Math.cos(a) * r, core.y + (level.random.nextDouble() - 0.5) * 1.2 * (1 - t), core.z + Math.sin(a) * r, 0, 0, 0);
+                    level.addParticle(ModParticles.BOLT.get().with(color, 0.09f + 0.05f * k, 2),
+                            core.x + Math.cos(a) * r, core.y + (level.random.nextDouble() - 0.5) * 1.4 * (1 - k), core.z + Math.sin(a) * r, 0, 0, 0);
                 }
             }
             if (isDodging(entry.getKey())) {

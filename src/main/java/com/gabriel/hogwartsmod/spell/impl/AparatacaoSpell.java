@@ -193,13 +193,15 @@ public class AparatacaoSpell extends Spell {
 
     private void crack(ServerLevel level, Vec3 feet) {
         Vec3 center = feet.add(0, 1.0, 0);
-        SpellFx.burst(level, ModParticles.SMOKE.get(), 0x241F2C, 0.45f, 16, center, 14, 0.16);
-        SpellFx.burst(level, ModParticles.BOLT.get(), 0x3C9BFF, 0.12f, 3, center, 8, 0.1);
-        SpellFx.burst(level, ModParticles.BOLT.get(), 0xA8DCFF, 0.09f, 2, center, 5, 0.08);
-        SpellFx.particle(level, ModParticles.RING.get(), 0x5AA0FF, 1.2f, 7, center, Vec3.ZERO);
-        SpellFx.particle(level, ModParticles.GLOW.get(), 0x3C7BD8, 1.4f, 5, center, Vec3.ZERO);
-        level.playSound(null, BlockPos.containing(feet), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 1.0f, 0.6f);
-        level.playSound(null, BlockPos.containing(feet), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0f, 0.6f);
+        SpellFx.particle(level, ModParticles.RING.get(), 0x9CCBFF, 2.2f, 6, center, Vec3.ZERO);
+        SpellFx.particle(level, ModParticles.RING.get(), 0x5AA0FF, 1.6f, 8, feet.add(0, 0.05, 0), Vec3.ZERO);
+        SpellFx.particle(level, ModParticles.STAR.get(), 0xE6F2FF, 0.7f, 4, center, Vec3.ZERO);
+        SpellFx.particle(level, ModParticles.GLOW.get(), 0x3C7BD8, 1.2f, 4, center, Vec3.ZERO);
+        SpellFx.burst(level, ModParticles.SMOKE.get(), 0x241F2C, 0.3f, 12, center, 10, 0.2);
+        SpellFx.burst(level, ModParticles.BOLT.get(), 0x3C9BFF, 0.1f, 2, center, 8, 0.12);
+        SpellFx.burst(level, ModParticles.BOLT.get(), 0xA8DCFF, 0.08f, 2, center, 5, 0.1);
+        level.playSound(null, BlockPos.containing(feet), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 1.2f, 0.55f);
+        level.playSound(null, BlockPos.containing(feet), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8f, 0.6f);
     }
 
     public static String dimensionOf(ServerPlayer player) {
