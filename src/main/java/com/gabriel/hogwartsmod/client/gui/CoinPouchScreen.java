@@ -26,9 +26,6 @@ public class CoinPouchScreen extends Screen {
     private static final int HIGHLIGHT = 0x40F0C860;
     private static final int GOLD = 0xFFC9962E;
     private static final int GOLD_DIM = 0xFF6E5430;
-    private static final int BUTTON = 0xFF3A2212;
-    private static final int BUTTON_ON = 0xFF5A3618;
-    private static final int BUTTON_OFF = 0xFF2E1C10;
 
     private static final ResourceLocation SHEET = tex("bolsa_fundo");
 
@@ -108,8 +105,8 @@ public class CoinPouchScreen extends Screen {
             HiRes.centered(g, String.valueOf(CoinPouchItem.get(pouch, coin)), HiRes.Style.BOLD, 13f, cx, y + COIN + 7, INK);
             HiRes.centered(g, tr("money.hogwartsmod." + coin.getId()), HiRes.Style.ITALIC, cx, y + COIN + 22, MUTED);
             int by = y + COIN + 35;
-            button(g, cx - 39, by, 38, tr("screen.hogwartsmod.pouch.take"), CoinPouchItem.get(pouch, coin) > 0, mouseX, mouseY);
-            button(g, cx + 1, by, 38, tr("screen.hogwartsmod.pouch.put"), inInventory(coin) > 0, mouseX, mouseY);
+            button(g, cx - 41, by, tr("screen.hogwartsmod.pouch.take"), CoinPouchItem.get(pouch, coin) > 0, mouseX, mouseY);
+            button(g, cx + 1, by, tr("screen.hogwartsmod.pouch.put"), inInventory(coin) > 0, mouseX, mouseY);
             if (i < coins.length - 1) {
                 drawExchange(g, coin, coins[i + 1], colX(i + 1), y + 8, pouch, mouseX, mouseY);
             }
@@ -118,8 +115,8 @@ public class CoinPouchScreen extends Screen {
         g.fill(left + 30, ty - 5, left + W - 30, ty - 4, GOLD_DIM);
         HiRes.centered(g, totalLine(pouch), HiRes.Style.ITALIC, left + W / 2f, ty, MUTED);
         int anyCoins = inInventory(Coin.GALEAO) + inInventory(Coin.SICLE) + inInventory(Coin.NUQUE);
-        button(g, left + W / 2 - 70, ty + 14, 140, tr("screen.hogwartsmod.pouch.put_all"), anyCoins > 0, mouseX, mouseY);
-        HiRes.centered(g, tr("screen.hogwartsmod.pouch.hint"), HiRes.Style.ITALIC, 7f, left + W / 2f, top + H - 20, MUTED);
+        bigButton(g, left + W / 2 - 80, ty + 12, tr("screen.hogwartsmod.pouch.put_all"), anyCoins > 0, mouseX, mouseY);
+        HiRes.centered(g, tr("screen.hogwartsmod.pouch.hint"), HiRes.Style.ITALIC, 7f, left + W / 2f, top + H - 17, MUTED);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -140,11 +137,25 @@ public class CoinPouchScreen extends Screen {
         HiRes.image(g, tex("seta_" + dir + (enabled ? "" : "_off")), x + 1, y + 1, 8, 8);
     }
 
-    private void button(GuiGraphics g, int x, int y, int w, String label, boolean enabled, int mouseX, int mouseY) {
-        boolean hover = enabled && mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + 13;
-        g.fill(x, y, x + w, y + 13, enabled ? GOLD : GOLD_DIM);
-        g.fill(x + 1, y + 1, x + w - 1, y + 12, hover ? BUTTON_ON : enabled ? BUTTON : BUTTON_OFF);
-        HiRes.centered(g, label, HiRes.Style.BOLD, 7.5f, x + w / 2f, y + 3, enabled ? TITLE : GOLD_DIM);
+    private void button(GuiGraphics g, int x, int y, String label, boolean enabled, int mouseX, int mouseY) {
+        boolean hover = enabled && mouseX >= x && mouseX < x + 40 && mouseY >= y && mouseY < y + 15;
+        String state = !enabled ? "d" : hover ? "h" : "n";
+        HiRes.image(g, tex("botao_couro_" + state), x, y, 40, 15);
+        HiRes.centered(g, label, HiRes.Style.BOLD, 7f, x + 20, y + 3.8f, !enabled ? 0xFF6E5A40 : hover ? 0xFFFFE6A8 : 0xFFF0D49A);
+    }
+
+    private void bigButton(GuiGraphics g, int x, int y, String label, boolean enabled, int mouseX, int mouseY) {
+        boolean hover = enabled && mouseX >= x && mouseX < x + 160 && mouseY >= y && mouseY < y + 20;
+        String state = !enabled ? "d" : hover ? "h" : "n";
+        int lift = hover ? 1 : 0;
+        HiRes.image(g, tex("botao_ouro_" + state), x, y - lift, 160, 20);
+        float labelW = HiRes.width(label, HiRes.Style.BOLD, 8.5f);
+        float start = x + 80 - (labelW + 22) / 2f;
+        Coin[] coins = Coin.values();
+        for (int i = 0; i < coins.length; i++) {
+            HiRes.image(g, tex("moeda_" + coins[coins.length - 1 - i].getId()), Math.round(start + i * 5), y + 4 - lift, 10, 11);
+        }
+        HiRes.text(g, label, HiRes.Style.BOLD, 8.5f, start + 22, y + 5 - lift, enabled ? 0xFF4A2C08 : 0xFF3A2E20);
     }
 
     private String totalLine(ItemStack pouch) {
@@ -180,11 +191,11 @@ public class CoinPouchScreen extends Screen {
             int cx = colX(i) + COL / 2;
             int y = top + 53;
             int by = y + COIN + 35;
-            if (inside(mx, my, cx - 39, by, 38, 13)) {
+            if (inside(mx, my, cx - 41, by, 40, 15)) {
                 send(PouchActions.Action.WITHDRAW, coin, amount);
                 return true;
             }
-            if (inside(mx, my, cx + 1, by, 38, 13)) {
+            if (inside(mx, my, cx + 1, by, 40, 15)) {
                 send(PouchActions.Action.DEPOSIT, coin, amount);
                 return true;
             }
@@ -200,7 +211,7 @@ public class CoinPouchScreen extends Screen {
                 }
             }
         }
-        if (inside(mx, my, left + W / 2 - 70, top + 170, 140, 13)) {
+        if (inside(mx, my, left + W / 2 - 80, top + 168, 160, 20)) {
             send(PouchActions.Action.DEPOSIT_ALL, Coin.NUQUE, 1);
             return true;
         }
