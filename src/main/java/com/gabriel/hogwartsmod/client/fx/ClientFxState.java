@@ -173,6 +173,14 @@ public final class ClientFxState {
                 state.arrivalAnimation = false;
                 animate(entry.getKey(), "aparatar_chegada");
             }
+            float arriving = arrivalProgress(entry.getKey(), 0f, 8f);
+            if (arriving >= 0 && arriving < 0.75f) {
+                Vec3 core = player.position().add(0, 1.0, 0);
+                float glow = 1f - arriving / 0.75f;
+                level.addParticle(ModParticles.ORB.get().with(0xF2F8FF, 0.05f * glow + 0.02f, 2), core.x, core.y, core.z, 0, 0, 0);
+                level.addParticle(ModParticles.GLOW.get().with(0x5AA0FF, 0.18f * glow + 0.04f, 2), core.x, core.y, core.z, 0, 0, 0);
+                level.addParticle(ModParticles.STAR.get().with(0xDDEEFF, 0.2f * glow, 2), core.x, core.y, core.z, 0, 0, 0);
+            }
             if (isApparating(entry.getKey())) {
                 float t = Math.min(1f, (level.getGameTime() - state.apparateStart) / 40f);
                 Vec3 core = player.position().add(0, 1.0, 0);
@@ -198,6 +206,16 @@ public final class ClientFxState {
                     int color = level.random.nextInt(3) == 0 ? 0x4A4458 : 0x241F2C;
                     level.addParticle(ModParticles.SMOKE.get().with(color, 0.08f + 0.08f * k, 6 + level.random.nextInt(3)),
                             px, py, pz, vx, vy, vz);
+                }
+                if (k > 0f) {
+                    float pulse = 0.85f + level.random.nextFloat() * 0.3f;
+                    level.addParticle(ModParticles.ORB.get().with(0xF2F8FF, (0.03f + 0.04f * k) * pulse, 2), core.x, core.y, core.z, 0, 0, 0);
+                    level.addParticle(ModParticles.GLOW.get().with(0x5AA0FF, (0.08f + 0.12f * k) * pulse, 2), core.x, core.y, core.z, 0, 0, 0);
+                    level.addParticle(ModParticles.STAR.get().with(0xDDEEFF, (0.1f + 0.12f * k) * pulse, 2), core.x, core.y, core.z, 0, 0, 0);
+                    if (level.random.nextInt(2) == 0) {
+                        level.addParticle(ModParticles.SPARK.get().with(0xCFE4FF, 0.05f, 4), core.x, core.y, core.z,
+                                (level.random.nextFloat() - 0.5f) * 0.05, (level.random.nextFloat() - 0.5f) * 0.05, (level.random.nextFloat() - 0.5f) * 0.05);
+                    }
                 }
                 if (k > 0.3f && level.random.nextFloat() < k) {
                     double a = level.random.nextDouble() * Math.PI * 2;

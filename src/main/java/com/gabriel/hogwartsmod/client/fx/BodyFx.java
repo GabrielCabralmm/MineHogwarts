@@ -30,7 +30,7 @@ public final class BodyFx {
     private BodyFx() {
     }
 
-    private record Shape(float spin, float width, float height) {
+    private record Shape(float spin, float width, float height, float orbit) {
     }
 
     private static Shape shape(int entityId, float partialTick) {
@@ -40,23 +40,20 @@ public final class BodyFx {
             if (k <= 0f) {
                 return null;
             }
-            float spin = 1800f * k * k;
-            float squeeze = Mth.clamp(k / 0.8f, 0f, 1f);
-            float width = 1f - 0.94f * squeeze * squeeze * (3 - 2 * squeeze);
-            float stretch = 1f + 0.22f * squeeze;
-            float vanish = Mth.clamp((k - 0.8f) / 0.2f, 0f, 1f);
-            width *= 1f - vanish;
-            float height = stretch * (1f - 0.97f * vanish * vanish);
-            return new Shape(spin, Math.max(0.001f, width), Math.max(0.01f, height));
+            float spin = 1600f * k * k;
+            float out = Mth.clamp(k / 0.3f, 0f, 1f);
+            float orbit = 0.55f * out * out * (3 - 2 * out) * (1f - k) * (1f - k);
+            float shrink = k * k;
+            float width = (1f - 0.7f * shrink) * (1f - Mth.clamp((k - 0.75f) / 0.25f, 0f, 1f));
+            float height = (1f + 0.15f * Mth.clamp(k / 0.5f, 0f, 1f)) * (1f - 0.97f * shrink);
+            return new Shape(spin, Math.max(0.001f, width), Math.max(0.01f, height), orbit);
         }
-        float arrival = ClientFxState.arrivalProgress(entityId, partialTick, 7f);
+        float arrival = ClientFxState.arrivalProgress(entityId, partialTick, 8f);
         if (arrival >= 0) {
-            float appear = Mth.clamp(arrival / 0.25f, 0f, 1f);
-            float open = Mth.clamp((arrival - 0.15f) / 0.85f, 0f, 1f);
-            float ease = 1 - (1 - open) * (1 - open) * (1 - open);
-            float height = (0.05f + 1.17f * appear) * (1f - 0.18f * ease);
-            float width = 0.04f + 0.96f * ease;
-            return new Shape(-1440f * (1 - ease) * (1 - ease), width, height);
+            float ease = 1 - (1 - arrival) * (1 - arrival) * (1 - arrival);
+            float back = 1f - ease;
+            float orbit = 0.55f * back * (1f - back) * 2.2f;
+            return new Shape(-1600f * back * back, 0.03f + 0.97f * ease, 0.04f + 0.96f * ease, orbit);
         }
         return null;
     }
@@ -92,6 +89,8 @@ public final class BodyFx {
         pose.pushPose();
         pose.translate(0, 1.0, 0);
         pose.mulPose(Axis.YP.rotationDegrees(shape.spin));
+        pose.translate(shape.orbit, 0, 0);
+        pose.mulPose(Axis.YP.rotationDegrees(shape.spin * 0.5f));
         pose.scale(shape.width, shape.height, shape.width);
         pose.translate(0, -1.0, 0);
         PUSHED.add(id);
