@@ -34,6 +34,7 @@ public class MagicData {
     private final Map<String, long[]> cooldowns = new HashMap<>();
     private final Map<String, Long> teachReadyAt = new HashMap<>();
     private Profession profession = Profession.NONE;
+    private final com.gabriel.hogwartsmod.mission.MissionProgress missions = new com.gabriel.hogwartsmod.mission.MissionProgress();
     @org.jetbrains.annotations.Nullable
     private com.gabriel.hogwartsmod.house.House house;
     private long lumosUntil;
@@ -353,6 +354,10 @@ public class MagicData {
         markForSync();
     }
 
+    public com.gabriel.hogwartsmod.mission.MissionProgress getMissions() {
+        return missions;
+    }
+
     public boolean isProfessor() {
         return profession == Profession.PROFESSOR;
     }
@@ -521,6 +526,7 @@ public class MagicData {
         teachReadyAt.forEach(teachTag::putLong);
         tag.put("TeachCooldowns", teachTag);
         tag.putString("Profession", profession.getId());
+        tag.put("Missoes", missions.save());
         if (house != null) {
             tag.putString("House", house.getId());
         }
@@ -566,6 +572,7 @@ public class MagicData {
         apparitionLicense = tag.getBoolean("ApparitionLicense");
         Profession loaded = Profession.byId(tag.getString("Profession"));
         profession = loaded == null ? Profession.NONE : loaded;
+        missions.load(tag.getCompound("Missoes"));
         house = com.gabriel.hogwartsmod.house.House.byId(tag.getString("House"));
         lumosUntil = tag.getLong("LumosUntil");
         lumosLight = tag.contains("LumosLight") ? NbtUtils.readBlockPos(tag.getCompound("LumosLight")) : null;

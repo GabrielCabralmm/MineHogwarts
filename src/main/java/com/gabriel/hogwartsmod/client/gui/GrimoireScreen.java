@@ -57,7 +57,7 @@ public class GrimoireScreen extends Screen {
     private static final ResourceLocation BOOK =
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/grimoire.png");
 
-    private enum Tab { SPELLS, TEACH, APPARITION, HOUSES }
+    private enum Tab { SPELLS, TEACH, APPARITION, HOUSES, MISSIONS }
 
     private int left;
     private int top;
@@ -82,6 +82,7 @@ public class GrimoireScreen extends Screen {
     @Nullable
     private UUID teachStudent;
     private int ticks;
+    private int missionIndex;
 
     public GrimoireScreen() {
         super(Component.translatable("screen.hogwartsmod.grimoire"));
@@ -144,6 +145,7 @@ public class GrimoireScreen extends Screen {
             case TEACH -> drawTeachTab(g, mouseX, mouseY);
             case APPARITION -> drawApparitionTab(g, mouseX, mouseY);
             case HOUSES -> drawHousesTab(g);
+            case MISSIONS -> drawMissionsTab(g, mouseX, mouseY);
         }
         super.render(g, mouseX, mouseY, partialTick);
         if (dragging) {
@@ -181,7 +183,7 @@ public class GrimoireScreen extends Screen {
     }
 
     private static boolean onLeft(Tab t) {
-        return t == Tab.HOUSES;
+        return t == Tab.HOUSES || t == Tab.MISSIONS;
     }
 
     private int tabTop(Tab t) {
@@ -254,6 +256,109 @@ public class GrimoireScreen extends Screen {
             }
         }
         return place;
+    }
+
+    // -- Missões
+
+    private List<com.gabriel.hogwartsmod.mission.ActiveMission> activeMissions() {
+        MagicData data = data();
+        return data == null ? List.of() : data.getMissions().active();
+    }
+
+    private int missionProgress(com.gabriel.hogwartsmod.mission.ActiveMission active) {
+        com.gabriel.hogwartsmod.mission.Mission m = active.mission();
+        if (m.type() == com.gabriel.hogwartsmod.mission.ObjectiveType.ENTREGAR && minecraft != null && minecraft.player != null) {
+            int n = 0;
+            for (net.minecraft.world.item.ItemStack stack : minecraft.player.getInventory().items) {
+                if (stack.is(m.item())) {
+                    n += stack.getCount();
+                }
+            }
+            return Math.min(m.amount(), n);
+        }
+        return Math.min(m.amount(), active.progress());
+    }
+
+    private void drawMissionsTab(GuiGraphics g, int mouseX, int mouseY) {
+        int lx = left + 16;
+        int pageW = BOOK_W / 2 - 26;
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.missions"), HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
+        List<com.gabriel.hogwartsmod.mission.ActiveMission> list = activeMissions();
+        if (list.isEmpty()) {
+            HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_missions1"), HiRes.Style.ITALIC, lx + pageW / 2f, top + 60, MUTED);
+            HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_missions2"), HiRes.Style.ITALIC, lx + pageW / 2f, top + 71, MUTED);
+            return;
+        }
+        missionIndex = Math.min(missionIndex, list.size() - 1);
+        for (int i = 0; i < list.size(); i++) {
+            com.gabriel.hogwartsmod.mission.ActiveMission a = list.get(i);
+            int y = top + 31 + i * 27;
+            boolean hover = mouseX >= lx - 2 && mouseX < lx + pageW + 2 && mouseY >= y - 2 && mouseY < y + 24;
+            if (i == missionIndex || hover) {
+                HiRes.highlight(g, lx - 2, y - 2, lx + pageW + 2, y + 24, i == missionIndex ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
+            }
+            int progress = missionProgress(a);
+            boolean ready = progress >= a.mission().amount();
+            HiRes.text(g, HiRes.ellipsize(a.mission().title().isBlank() ? "?" : a.mission().title(), HiRes.Style.BOLD, pageW - 28),
+                    HiRes.Style.BOLD, lx + 3, y, INK);
+            if (ready) {
+                HiRes.image(g, ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/check.png"), lx + pageW - 9, y, 9, 9);
+            } else {
+                HiRes.right(g, progress + "/" + a.mission().amount(), HiRes.Style.BOLD, lx + pageW, y, GOLD);
+            }
+            HiRes.text(g, HiRes.ellipsize(a.npcName(), HiRes.Style.ITALIC, pageW - 6), HiRes.Style.ITALIC, 7f, lx + 3, y + 10, MUTED);
+            int bx = lx + 3;
+            int bw = pageW - 6;
+            g.fill(bx, y + 19, bx + bw, y + 22, PAGE_LINE);
+            g.fill(bx, y + 19, bx + Math.round(bw * Math.min(1f, progress / (float) a.mission().amount())), y + 22, ready ? GREEN : GOLD);
+        }
+
+        com.gabriel.hogwartsmod.mission.ActiveMission a = list.get(missionIndex);
+        com.gabriel.hogwartsmod.mission.Mission m = a.mission();
+        int rx = left + BOOK_W / 2 + 10;
+        int rw = BOOK_W / 2 - 26;
+        float cx = rx + rw / 2f;
+        HiRes.centered(g, HiRes.ellipsize(m.title().isBlank() ? "?" : m.title(), HiRes.Style.BOLD, rw), HiRes.Style.BOLD, 10f, cx, top + 17, TITLE);
+        HiRes.centered(g, Component.translatable("screen.hogwartsmod.grimoire.mission_from", a.npcName()).getString(), HiRes.Style.ITALIC, cx, top + 31, MUTED);
+        int y = top + 46;
+        for (String line : HiRes.wrap(m.description(), HiRes.Style.ITALIC, rw)) {
+            if (y > top + 86) {
+                break;
+            }
+            HiRes.centered(g, line, HiRes.Style.ITALIC, cx, y, INK);
+            y += 10;
+        }
+        y = Math.max(y + 4, top + 96);
+        HiRes.text(g, tr("screen.hogwartsmod.missions.objective"), HiRes.Style.BOLD, rx, y, INK);
+        y += 11;
+        for (String line : HiRes.wrap(m.objectiveText().getString(), HiRes.Style.REGULAR, rw)) {
+            HiRes.text(g, line, HiRes.Style.REGULAR, rx, y, INK);
+            y += 10;
+        }
+        y += 3;
+        HiRes.text(g, tr("screen.hogwartsmod.missions.reward"), HiRes.Style.BOLD, rx, y, INK);
+        MissionScreen.drawReward(g, rx, y + 11, m);
+        boolean ready = missionProgress(a) >= m.amount();
+        String footer = ready ? Component.translatable("screen.hogwartsmod.grimoire.mission_ready", a.npcName()).getString()
+                : tr("screen.hogwartsmod.grimoire.mission_going");
+        List<String> footerLines = HiRes.wrap(footer, HiRes.Style.ITALIC, rw);
+        for (int i = 0; i < footerLines.size(); i++) {
+            HiRes.centered(g, footerLines.get(i), HiRes.Style.ITALIC, cx, top + BOOK_H - 24 - (footerLines.size() - 1 - i) * 10, ready ? GREEN : MUTED);
+        }
+    }
+
+    private boolean missionsClicked(double mx, double my) {
+        int lx = left + 16;
+        int pageW = BOOK_W / 2 - 26;
+        List<com.gabriel.hogwartsmod.mission.ActiveMission> list = activeMissions();
+        for (int i = 0; i < list.size(); i++) {
+            int y = top + 31 + i * 27;
+            if (mx >= lx - 2 && mx < lx + pageW + 2 && my >= y - 2 && my < y + 24) {
+                missionIndex = i;
+                return true;
+            }
+        }
+        return false;
     }
 
     private void drawHousesTab(GuiGraphics g) {
@@ -858,6 +963,9 @@ public class GrimoireScreen extends Screen {
             return true;
         }
         if (tab == Tab.APPARITION && button == 0 && apparitionClicked(mx, my)) {
+            return true;
+        }
+        if (tab == Tab.MISSIONS && button == 0 && missionsClicked(mx, my)) {
             return true;
         }
         if (tab != Tab.SPELLS) {

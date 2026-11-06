@@ -131,6 +131,13 @@ public final class HogwartsCommand {
                         .then(Commands.literal("lista")
                                 .executes(HogwartsCommand::listZones)))
                 .then(Commands.literal("npc").requires(STAFF)
+                        .then(Commands.literal("missoes")
+                                .executes(ctx -> createMissionNpc(ctx, null))
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> createMissionNpc(ctx, StringArgumentType.getString(ctx, "nome")))))
+                        .then(Commands.literal("modelo")
+                                .then(Commands.argument("modelo", StringArgumentType.word())
+                                        .executes(HogwartsCommand::setNpcModel)))
                         .then(Commands.literal("criar")
                                 .executes(ctx -> createNpc(ctx, null))
                                 .then(Commands.argument("nome", StringArgumentType.greedyString())
@@ -358,6 +365,35 @@ public final class HogwartsCommand {
         npc.setCustomNameVisible(true);
         source.getLevel().addFreshEntity(npc);
         source.sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_created", npc.getNpcName()), true);
+        return 1;
+    }
+
+    private static int createMissionNpc(CommandContext<CommandSourceStack> ctx, @Nullable String name) {
+        CommandSourceStack source = ctx.getSource();
+        com.gabriel.hogwartsmod.mission.MissionNpcEntity npc = ModEntities.MISSION_NPC.get().create(source.getLevel());
+        if (npc == null) {
+            return 0;
+        }
+        Vec3 pos = source.getPosition();
+        float yaw = source.getRotation().y + 180f;
+        npc.moveTo(pos.x, pos.y, pos.z, yaw, 0f);
+        npc.setYHeadRot(yaw);
+        npc.setYBodyRot(yaw);
+        npc.setCustomName(Component.literal(name != null ? name : Component.translatable("entity.hogwartsmod.npc_missoes").getString()));
+        npc.setCustomNameVisible(true);
+        source.getLevel().addFreshEntity(npc);
+        source.sendSuccess(() -> Component.translatable("command.hogwartsmod.mission_npc_created", npc.getNpcName()), true);
+        return 1;
+    }
+
+    private static int setNpcModel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Vec3 pos = ctx.getSource().getPosition();
+        com.gabriel.hogwartsmod.npc.HogwartsNpc npc = ctx.getSource().getLevel()
+                .getEntitiesOfClass(com.gabriel.hogwartsmod.npc.HogwartsNpc.class, new AABB(pos, pos).inflate(8)).stream()
+                .min(Comparator.comparingDouble(n -> n.distanceToSqr(pos)))
+                .orElseThrow(NO_NPC::create);
+        npc.setModel(StringArgumentType.getString(ctx, "modelo"));
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_model", npc.getNpcName(), npc.getModel()), true);
         return 1;
     }
 

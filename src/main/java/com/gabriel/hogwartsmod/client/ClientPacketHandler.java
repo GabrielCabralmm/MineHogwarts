@@ -89,6 +89,19 @@ public final class ClientPacketHandler {
                 com.gabriel.hogwartsmod.house.House.byId(house)));
     }
 
+    public static void handleOpenMissions(com.gabriel.hogwartsmod.network.OpenMissionsPacket packet) {
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.screen instanceof com.gabriel.hogwartsmod.client.gui.MissionScreen screen && screen.entity() == packet.entity()) {
+            screen.update(packet);
+        } else {
+            mc.setScreen(new com.gabriel.hogwartsmod.client.gui.MissionScreen(packet));
+        }
+    }
+
+    public static void handleOpenMissionEditor(com.gabriel.hogwartsmod.network.OpenMissionEditorPacket packet) {
+        net.minecraft.client.Minecraft.getInstance().setScreen(new com.gabriel.hogwartsmod.client.gui.MissionEditorScreen(packet));
+    }
+
     public static void handlePublicLocations(List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> points) {
         com.gabriel.hogwartsmod.client.apparition.ClientApparitionState.publicPoints = List.copyOf(points);
     }

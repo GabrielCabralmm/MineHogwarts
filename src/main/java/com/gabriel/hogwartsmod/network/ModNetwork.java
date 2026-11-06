@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "14";
+    private static final String VERSION = "15";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -86,6 +86,14 @@ public final class ModNetwork {
                 .encoder(HousePointsPacket::encode).decoder(HousePointsPacket::decode).consumerMainThread(HousePointsPacket::handle).add();
         CHANNEL.messageBuilder(PouchActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PouchActionPacket::encode).decoder(PouchActionPacket::decode).consumerMainThread(PouchActionPacket::handle).add();
+        CHANNEL.messageBuilder(OpenMissionsPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenMissionsPacket::encode).decoder(OpenMissionsPacket::decode).consumerMainThread(OpenMissionsPacket::handle).add();
+        CHANNEL.messageBuilder(OpenMissionEditorPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenMissionEditorPacket::encode).decoder(OpenMissionEditorPacket::decode).consumerMainThread(OpenMissionEditorPacket::handle).add();
+        CHANNEL.messageBuilder(MissionActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(MissionActionPacket::encode).decoder(MissionActionPacket::decode).consumerMainThread(MissionActionPacket::handle).add();
+        CHANNEL.messageBuilder(SaveMissionNpcPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SaveMissionNpcPacket::encode).decoder(SaveMissionNpcPacket::decode).consumerMainThread(SaveMissionNpcPacket::handle).add();
     }
 
     public static void playAnimation(ServerPlayer player, String animation) {
