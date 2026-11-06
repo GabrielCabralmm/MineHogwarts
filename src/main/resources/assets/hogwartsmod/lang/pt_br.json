@@ -97,7 +97,7 @@
   "screen.hogwartsmod.trace": "Traçado do feitiço",
   "screen.hogwartsmod.trace.title": "Aula de %s",
   "screen.hogwartsmod.trace.teacher": "com %s",
-  "screen.hogwartsmod.trace.hint": "Segure o botão esquerdo no ponto dourado e siga o traço.",
+  "screen.hogwartsmod.trace.hint": "Siga o traço antes que a sombra te alcance.",
   "screen.hogwartsmod.trace.start_here": "Comece pelo ponto dourado.",
   "screen.hogwartsmod.trace.accuracy": "Precisão: %s%%",
   "screen.hogwartsmod.trace.left_path": "Você saiu do traço.",
@@ -106,5 +106,6 @@
   "screen.hogwartsmod.trace.failed": "Não foi desta vez.",
   "screen.hogwartsmod.trace.learned": "Você aprendeu %s!",
   "screen.hogwartsmod.trace.attempts": "Tentativas",
-  "command.hogwartsmod.no_data": "Os dados mágicos de %s não estão disponíveis agora"
+  "command.hogwartsmod.no_data": "Os dados mágicos de %s não estão disponíveis agora",
+  "screen.hogwartsmod.trace.caught": "A sombra te alcançou."
 }

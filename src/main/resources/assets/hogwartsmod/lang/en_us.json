@@ -97,7 +97,7 @@
   "screen.hogwartsmod.trace": "Spell tracing",
   "screen.hogwartsmod.trace.title": "%s Lesson",
   "screen.hogwartsmod.trace.teacher": "with %s",
-  "screen.hogwartsmod.trace.hint": "Hold the left button on the golden dot and follow the path.",
+  "screen.hogwartsmod.trace.hint": "Follow the path before the shadow catches you.",
   "screen.hogwartsmod.trace.start_here": "Start at the golden dot.",
   "screen.hogwartsmod.trace.accuracy": "Accuracy: %s%%",
   "screen.hogwartsmod.trace.left_path": "You left the path.",
@@ -106,5 +106,6 @@
   "screen.hogwartsmod.trace.failed": "Not this time.",
   "screen.hogwartsmod.trace.learned": "You learned %s!",
   "screen.hogwartsmod.trace.attempts": "Attempts",
-  "command.hogwartsmod.no_data": "%s's magic data isn't available right now"
+  "command.hogwartsmod.no_data": "%s's magic data isn't available right now",
+  "screen.hogwartsmod.trace.caught": "The shadow caught you."
 }
