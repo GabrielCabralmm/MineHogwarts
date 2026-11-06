@@ -51,6 +51,7 @@ public final class ClientSetup {
         event.registerSpriteSet(ModParticles.RING.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.RING));
         event.registerSpriteSet(ModParticles.STAR.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.STAR));
         event.registerSpriteSet(ModParticles.ORB.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.ORB));
+        event.registerSpriteSet(ModParticles.BOLT.get(), sprites -> new MagicParticle.Provider(sprites, MagicParticle.Shape.BOLT));
     }
 
     @SubscribeEvent

@@ -37,6 +37,28 @@ public final class MagicRenderTypes {
         }
     };
 
+    public static final ParticleRenderType SOFT_SMOKE = new ParticleRenderType() {
+        @Override
+        public void begin(BufferBuilder builder, TextureManager textureManager) {
+            RenderSystem.depthMask(false);
+            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+        }
+
+        @Override
+        public void end(Tesselator tesselator) {
+            tesselator.end();
+            RenderSystem.depthMask(true);
+        }
+
+        @Override
+        public String toString() {
+            return "HOGWARTSMOD_SOFT_SMOKE";
+        }
+    };
+
     private MagicRenderTypes() {
     }
 }

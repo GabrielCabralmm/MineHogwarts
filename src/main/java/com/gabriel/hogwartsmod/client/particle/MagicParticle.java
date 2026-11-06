@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class MagicParticle extends TextureSheetParticle {
 
-    public enum Shape { GLOW, SPARK, EMBER, SMOKE, FIRE, RING, STAR, ORB }
+    public enum Shape { GLOW, SPARK, EMBER, SMOKE, FIRE, RING, STAR, ORB, BOLT }
 
     private static final int FULL_BRIGHT = 0xF000F0;
 
@@ -48,7 +48,7 @@ public class MagicParticle extends TextureSheetParticle {
         this.spin = (random.nextFloat() - 0.5f) * 0.12f;
         this.roll = random.nextFloat() * Mth.TWO_PI;
         this.oRoll = roll;
-        if (shape == Shape.EMBER) {
+        if (shape == Shape.EMBER || shape == Shape.BOLT) {
             pickSprite(sprites);
         } else {
             setSpriteFromAge(sprites);
@@ -62,6 +62,7 @@ public class MagicParticle extends TextureSheetParticle {
             case RING -> { friction = 1f; gravity = 0f; }
             case STAR -> { friction = 0.8f; gravity = 0f; }
             case ORB -> { friction = 1f; gravity = 0f; }
+            case BOLT -> { friction = 0.6f; gravity = 0f; }
         }
         updateLook(0f);
     }
@@ -69,11 +70,19 @@ public class MagicParticle extends TextureSheetParticle {
     @Override
     public void tick() {
         super.tick();
-        if (shape != Shape.EMBER && isAlive()) {
-            setSpriteFromAge(sprites);
+        if (shape == Shape.BOLT) {
+            if (isAlive() && random.nextInt(2) == 0) {
+                pickSprite(sprites);
+                roll = random.nextFloat() * Mth.TWO_PI;
+            }
+            oRoll = roll;
+        } else {
+            if (shape != Shape.EMBER && isAlive()) {
+                setSpriteFromAge(sprites);
+            }
+            oRoll = shape == Shape.FIRE || shape == Shape.SMOKE ? roll : 0f;
+            roll = shape == Shape.FIRE || shape == Shape.SMOKE ? roll + spin : 0f;
         }
-        oRoll = shape == Shape.FIRE || shape == Shape.SMOKE ? roll : 0f;
-        roll = shape == Shape.FIRE || shape == Shape.SMOKE ? roll + spin : 0f;
         updateLook(age / (float) lifetime);
     }
 
@@ -107,6 +116,10 @@ public class MagicParticle extends TextureSheetParticle {
                 alpha = 1f;
                 quadSize = baseSize * (0.7f + 0.9f * t);
             }
+            case BOLT -> {
+                alpha = (0.55f + 0.45f * random.nextFloat()) * (1f - t * 0.6f);
+                quadSize = baseSize;
+            }
             case RING -> {
                 float ease = 1f - (1f - t) * (1f - t) * (1f - t);
                 alpha = 1f;
@@ -117,7 +130,7 @@ public class MagicParticle extends TextureSheetParticle {
 
     @Override
     public ParticleRenderType getRenderType() {
-        return shape == Shape.SMOKE ? ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT : MagicRenderTypes.ADDITIVE;
+        return shape == Shape.SMOKE ? MagicRenderTypes.SOFT_SMOKE : MagicRenderTypes.ADDITIVE;
     }
 
     @Override

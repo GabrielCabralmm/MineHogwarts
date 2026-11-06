@@ -119,6 +119,14 @@ public final class ClientFxState {
                     level.addParticle(ModParticles.SMOKE.get().with(color, 0.4f + level.random.nextFloat() * 0.3f, 14 + level.random.nextInt(8)),
                             base.x + ox, base.y + oy, base.z + oz, -motion.x * 0.15, 0.01, -motion.z * 0.15);
                 }
+                for (int i = 0; i < 3; i++) {
+                    double bx = base.x + (level.random.nextDouble() - 0.5) * 0.7;
+                    double by = base.y + 0.2 + level.random.nextDouble() * 1.5;
+                    double bz = base.z + (level.random.nextDouble() - 0.5) * 0.7;
+                    int color = level.random.nextInt(3) == 0 ? 0xA8DCFF : 0x3C9BFF;
+                    level.addParticle(ModParticles.BOLT.get().with(color, 0.22f + level.random.nextFloat() * 0.16f, 3 + level.random.nextInt(3)),
+                            bx, by, bz, 0, 0, 0);
+                }
                 if (level.random.nextInt(2) == 0) {
                     level.addParticle(ModParticles.SPARK.get().with(0x8A7FA8, 0.08f, 12), base.x, base.y + 1.0, base.z,
                             (level.random.nextFloat() - 0.5f) * 0.1, 0.03, (level.random.nextFloat() - 0.5f) * 0.1);

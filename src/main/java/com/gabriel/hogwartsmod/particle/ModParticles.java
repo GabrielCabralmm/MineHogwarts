@@ -18,6 +18,7 @@ public final class ModParticles {
     public static final RegistryObject<MagicParticleType> RING = PARTICLES.register("ring", MagicParticleType::new);
     public static final RegistryObject<MagicParticleType> STAR = PARTICLES.register("star", MagicParticleType::new);
     public static final RegistryObject<MagicParticleType> ORB = PARTICLES.register("orb", MagicParticleType::new);
+    public static final RegistryObject<MagicParticleType> BOLT = PARTICLES.register("bolt", MagicParticleType::new);
 
     private ModParticles() {
     }
