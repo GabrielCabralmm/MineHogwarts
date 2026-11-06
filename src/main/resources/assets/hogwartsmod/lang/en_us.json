@@ -326,5 +326,5 @@
   "screen.hogwartsmod.pouch.put_all": "Store all coins",
   "screen.hogwartsmod.pouch.empty": "The pouch is empty",
   "screen.hogwartsmod.pouch.total": "In total: %s Galleons, %s Sickles and %s Knuts",
-  "screen.hogwartsmod.pouch.hint": "Shift + click: 10 at once  ·  arrows: exchange coins"
+  "screen.hogwartsmod.pouch.hint": "Click a coin to choose it  ·  Shift: 10 at once  ·  arrows: exchange"
 }

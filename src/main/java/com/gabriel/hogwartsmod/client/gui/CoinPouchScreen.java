@@ -30,6 +30,7 @@ public class CoinPouchScreen extends Screen {
     private static final ResourceLocation SHEET = tex("bolsa_fundo");
 
     private final InteractionHand hand;
+    private Coin selected = Coin.GALEAO;
     private int left;
     private int top;
 
@@ -101,22 +102,27 @@ public class CoinPouchScreen extends Screen {
             Coin coin = coins[i];
             int cx = colX(i) + COL / 2;
             int y = top + 53;
+            boolean chosen = coin == selected;
+            boolean hover = !chosen && inside(mouseX, mouseY, cx - 26, top + 49, 52, 74);
+            if (chosen || hover) {
+                HiRes.image(g, tex(chosen ? "anel_selecao" : "anel_hover"), cx - 30, top + 45, 60, 60);
+            }
             HiRes.image(g, tex("moeda_" + coin.getId()), cx - COIN / 2, y, COIN, COIN + 2);
-            HiRes.centered(g, String.valueOf(CoinPouchItem.get(pouch, coin)), HiRes.Style.BOLD, 13f, cx, y + COIN + 7, INK);
-            HiRes.centered(g, tr("money.hogwartsmod." + coin.getId()), HiRes.Style.ITALIC, cx, y + COIN + 22, MUTED);
-            int by = y + COIN + 35;
-            button(g, cx - 41, by, tr("screen.hogwartsmod.pouch.take"), CoinPouchItem.get(pouch, coin) > 0, mouseX, mouseY);
-            button(g, cx + 1, by, tr("screen.hogwartsmod.pouch.put"), inInventory(coin) > 0, mouseX, mouseY);
+            HiRes.centered(g, String.valueOf(CoinPouchItem.get(pouch, coin)), HiRes.Style.BOLD, 13f, cx, y + COIN + 7, chosen ? TITLE : INK);
+            HiRes.centered(g, tr("money.hogwartsmod." + coin.getId()), HiRes.Style.ITALIC, cx, y + COIN + 22, chosen ? INK : MUTED);
             if (i < coins.length - 1) {
                 drawExchange(g, coin, coins[i + 1], colX(i + 1), y + 8, pouch, mouseX, mouseY);
             }
         }
+        int by = top + 130;
+        button(g, left + W / 2 - 73, by, tr("screen.hogwartsmod.pouch.take"), CoinPouchItem.get(pouch, selected) > 0, mouseX, mouseY);
+        button(g, left + W / 2 + 3, by, tr("screen.hogwartsmod.pouch.put"), inInventory(selected) > 0, mouseX, mouseY);
         int ty = top + 156;
         g.fill(left + 30, ty - 5, left + W - 30, ty - 4, GOLD_DIM);
         HiRes.centered(g, totalLine(pouch), HiRes.Style.ITALIC, left + W / 2f, ty, MUTED);
         int anyCoins = inInventory(Coin.GALEAO) + inInventory(Coin.SICLE) + inInventory(Coin.NUQUE);
         bigButton(g, left + W / 2 - 80, ty + 12, tr("screen.hogwartsmod.pouch.put_all"), anyCoins > 0, mouseX, mouseY);
-        HiRes.centered(g, tr("screen.hogwartsmod.pouch.hint"), HiRes.Style.ITALIC, 7f, left + W / 2f, top + H - 17, MUTED);
+        HiRes.centered(g, tr("screen.hogwartsmod.pouch.hint"), HiRes.Style.ITALIC, 7f, left + W / 2f, top + H - 19, MUTED);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -138,10 +144,13 @@ public class CoinPouchScreen extends Screen {
     }
 
     private void button(GuiGraphics g, int x, int y, String label, boolean enabled, int mouseX, int mouseY) {
-        boolean hover = enabled && mouseX >= x && mouseX < x + 40 && mouseY >= y && mouseY < y + 15;
+        boolean hover = enabled && mouseX >= x && mouseX < x + 70 && mouseY >= y && mouseY < y + 15;
         String state = !enabled ? "d" : hover ? "h" : "n";
-        HiRes.image(g, tex("botao_couro_" + state), x, y, 40, 15);
-        HiRes.centered(g, label, HiRes.Style.BOLD, 7f, x + 20, y + 3.8f, !enabled ? 0xFF6E5A40 : hover ? 0xFFFFE6A8 : 0xFFF0D49A);
+        HiRes.image(g, tex("botao_couro_largo_" + state), x, y, 70, 15);
+        float textW = HiRes.width(label, HiRes.Style.BOLD, 7.5f);
+        float start = x + 35 - (textW + 11) / 2f;
+        HiRes.image(g, tex("moeda_" + selected.getId()), Math.round(start), y + 3, 9, 10);
+        HiRes.text(g, label, HiRes.Style.BOLD, 7.5f, start + 11, y + 3.5f, !enabled ? 0xFF6E5A40 : hover ? 0xFFFFE6A8 : 0xFFF0D49A);
     }
 
     private void bigButton(GuiGraphics g, int x, int y, String label, boolean enabled, int mouseX, int mouseY) {
@@ -190,13 +199,14 @@ public class CoinPouchScreen extends Screen {
             Coin coin = coins[i];
             int cx = colX(i) + COL / 2;
             int y = top + 53;
-            int by = y + COIN + 35;
-            if (inside(mx, my, cx - 41, by, 40, 15)) {
-                send(PouchActions.Action.WITHDRAW, coin, amount);
-                return true;
-            }
-            if (inside(mx, my, cx + 1, by, 40, 15)) {
-                send(PouchActions.Action.DEPOSIT, coin, amount);
+            if (inside(mx, my, cx - 26, top + 49, 52, 74)) {
+                if (selected != coin) {
+                    selected = coin;
+                    if (minecraft != null) {
+                        minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
+                                net.minecraft.sounds.SoundEvents.CHAIN_STEP, 1.8f, 0.4f));
+                    }
+                }
                 return true;
             }
             if (i < coins.length - 1) {
@@ -210,6 +220,14 @@ public class CoinPouchScreen extends Screen {
                     return true;
                 }
             }
+        }
+        if (inside(mx, my, left + W / 2 - 73, top + 130, 70, 15)) {
+            send(PouchActions.Action.WITHDRAW, selected, amount);
+            return true;
+        }
+        if (inside(mx, my, left + W / 2 + 3, top + 130, 70, 15)) {
+            send(PouchActions.Action.DEPOSIT, selected, amount);
+            return true;
         }
         if (inside(mx, my, left + W / 2 - 80, top + 168, 160, 20)) {
             send(PouchActions.Action.DEPOSIT_ALL, Coin.NUQUE, 1);

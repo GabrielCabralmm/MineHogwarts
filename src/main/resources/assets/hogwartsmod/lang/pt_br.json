@@ -326,5 +326,5 @@
   "screen.hogwartsmod.pouch.put_all": "Guardar todas as moedas",
   "screen.hogwartsmod.pouch.empty": "A bolsa está vazia",
   "screen.hogwartsmod.pouch.total": "Ao todo: %s Galeões, %s Sicles e %s Nuques",
-  "screen.hogwartsmod.pouch.hint": "Shift + clique: 10 de uma vez  ·  setas: trocar moedas"
+  "screen.hogwartsmod.pouch.hint": "Clique numa moeda para escolher  ·  Shift: 10 de uma vez  ·  setas: trocar"
 }
