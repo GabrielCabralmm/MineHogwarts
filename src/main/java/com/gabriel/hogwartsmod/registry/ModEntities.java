@@ -27,6 +27,12 @@ public final class ModEntities {
                     .clientTrackingRange(10)
                     .build("npc_missoes"));
 
+    public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.shop.ShopNpcEntity>> SHOP_NPC = ENTITIES.register("npc_loja",
+            () -> EntityType.Builder.<com.gabriel.hogwartsmod.shop.ShopNpcEntity>of(com.gabriel.hogwartsmod.shop.ShopNpcEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(10)
+                    .build("npc_loja"));
+
     public static final RegistryObject<EntityType<ProfessorNpcEntity>> PROFESSOR_NPC = ENTITIES.register("professor_npc",
             () -> EntityType.Builder.<ProfessorNpcEntity>of(ProfessorNpcEntity::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f)

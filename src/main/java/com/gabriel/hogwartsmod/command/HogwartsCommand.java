@@ -135,6 +135,10 @@ public final class HogwartsCommand {
                                 .executes(ctx -> createMissionNpc(ctx, null))
                                 .then(Commands.argument("nome", StringArgumentType.greedyString())
                                         .executes(ctx -> createMissionNpc(ctx, StringArgumentType.getString(ctx, "nome")))))
+                        .then(Commands.literal("loja")
+                                .executes(ctx -> createShopNpc(ctx, null))
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> createShopNpc(ctx, StringArgumentType.getString(ctx, "nome")))))
                         .then(Commands.literal("modelo")
                                 .then(Commands.argument("modelo", StringArgumentType.word())
                                         .executes(HogwartsCommand::setNpcModel)))
@@ -383,6 +387,24 @@ public final class HogwartsCommand {
         npc.setCustomNameVisible(true);
         source.getLevel().addFreshEntity(npc);
         source.sendSuccess(() -> Component.translatable("command.hogwartsmod.mission_npc_created", npc.getNpcName()), true);
+        return 1;
+    }
+
+    private static int createShopNpc(CommandContext<CommandSourceStack> ctx, @Nullable String name) {
+        CommandSourceStack source = ctx.getSource();
+        com.gabriel.hogwartsmod.shop.ShopNpcEntity npc = ModEntities.SHOP_NPC.get().create(source.getLevel());
+        if (npc == null) {
+            return 0;
+        }
+        Vec3 pos = source.getPosition();
+        float yaw = source.getRotation().y + 180f;
+        npc.moveTo(pos.x, pos.y, pos.z, yaw, 0f);
+        npc.setYHeadRot(yaw);
+        npc.setYBodyRot(yaw);
+        npc.setCustomName(Component.literal(name != null ? name : Component.translatable("entity.hogwartsmod.npc_loja").getString()));
+        npc.setCustomNameVisible(true);
+        source.getLevel().addFreshEntity(npc);
+        source.sendSuccess(() -> Component.translatable("command.hogwartsmod.shop_npc_created", npc.getNpcName()), true);
         return 1;
     }
 

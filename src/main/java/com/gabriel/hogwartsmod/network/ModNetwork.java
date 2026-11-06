@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "17";
+    private static final String VERSION = "18";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -94,6 +94,14 @@ public final class ModNetwork {
                 .encoder(MissionActionPacket::encode).decoder(MissionActionPacket::decode).consumerMainThread(MissionActionPacket::handle).add();
         CHANNEL.messageBuilder(MissionJournalPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(MissionJournalPacket::encode).decoder(MissionJournalPacket::decode).consumerMainThread(MissionJournalPacket::handle).add();
+        CHANNEL.messageBuilder(OpenShopPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenShopPacket::encode).decoder(OpenShopPacket::decode).consumerMainThread(OpenShopPacket::handle).add();
+        CHANNEL.messageBuilder(OpenShopEditorPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenShopEditorPacket::encode).decoder(OpenShopEditorPacket::decode).consumerMainThread(OpenShopEditorPacket::handle).add();
+        CHANNEL.messageBuilder(ShopBuyPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ShopBuyPacket::encode).decoder(ShopBuyPacket::decode).consumerMainThread(ShopBuyPacket::handle).add();
+        CHANNEL.messageBuilder(SaveShopNpcPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SaveShopNpcPacket::encode).decoder(SaveShopNpcPacket::decode).consumerMainThread(SaveShopNpcPacket::handle).add();
         CHANNEL.messageBuilder(SaveMissionNpcPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(SaveMissionNpcPacket::encode).decoder(SaveMissionNpcPacket::decode).consumerMainThread(SaveMissionNpcPacket::handle).add();
         CHANNEL.messageBuilder(RemoveNpcPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)

@@ -13,6 +13,7 @@ public final class ModEntityAttributes {
     public static void register(EntityAttributeCreationEvent event) {
         event.put(ModEntities.PROFESSOR_NPC.get(), ProfessorNpcEntity.createAttributes().build());
         event.put(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.npc.HogwartsNpc.createAttributes().build());
+        event.put(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.npc.HogwartsNpc.createAttributes().build());
     }
 
     private ModEntityAttributes() {

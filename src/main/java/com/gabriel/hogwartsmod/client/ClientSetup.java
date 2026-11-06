@@ -35,6 +35,7 @@ public final class ClientSetup {
         event.registerBlockEntityRenderer(ModBlockEntities.PULPIT.get(), PulpitRenderer::new);
         event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
+        event.registerEntityRenderer(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.BROOM.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
     }
 

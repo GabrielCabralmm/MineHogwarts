@@ -98,6 +98,14 @@ public final class ClientPacketHandler {
         }
     }
 
+    public static void handleOpenShop(com.gabriel.hogwartsmod.network.OpenShopPacket packet) {
+        net.minecraft.client.Minecraft.getInstance().setScreen(new com.gabriel.hogwartsmod.client.gui.ShopScreen(packet));
+    }
+
+    public static void handleOpenShopEditor(com.gabriel.hogwartsmod.network.OpenShopEditorPacket packet) {
+        net.minecraft.client.Minecraft.getInstance().setScreen(new com.gabriel.hogwartsmod.client.gui.ShopEditorScreen(packet));
+    }
+
     public static void handleOpenMissionEditor(com.gabriel.hogwartsmod.network.OpenMissionEditorPacket packet) {
         net.minecraft.client.Minecraft.getInstance().setScreen(new com.gabriel.hogwartsmod.client.gui.MissionEditorScreen(packet));
     }
