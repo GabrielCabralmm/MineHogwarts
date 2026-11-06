@@ -16,7 +16,10 @@ public final class ModCreativeTabs {
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.hogwartsmod"))
                     .icon(() -> new ItemStack(ModItems.WAND.get()))
-                    .displayItems((params, output) -> output.accept(ModItems.WAND.get()))
+                    .displayItems((params, output) -> {
+                        output.accept(ModItems.WAND.get());
+                        output.accept(ModBlocks.PULPIT_ITEM.get());
+                    })
                     .build());
 
     private ModCreativeTabs() {

@@ -107,5 +107,21 @@
   "screen.hogwartsmod.trace.learned": "You learned %s!",
   "screen.hogwartsmod.trace.attempts": "Attempts",
   "command.hogwartsmod.no_data": "%s's magic data isn't available right now",
-  "screen.hogwartsmod.trace.caught": "The shadow caught you."
+  "screen.hogwartsmod.trace.caught": "The shadow caught you.",
+  "block.hogwartsmod.pulpito_professor": "Professor's Pulpit",
+  "block.hogwartsmod.pulpito_professor.only_professor": "Only professors can use the pulpit",
+  "block.hogwartsmod.pulpito_professor.only_professor_class": "Only professors can teach at the pulpit",
+  "screen.hogwartsmod.pulpit.spell": "Lesson spell",
+  "screen.hogwartsmod.pulpit.students": "Students in the room",
+  "screen.hogwartsmod.pulpit.pick_spell": "Pick the lesson spell.",
+  "screen.hogwartsmod.pulpit.empty": "No students inside the room.",
+  "screen.hogwartsmod.pulpit.count": "%s of %s can learn",
+  "screen.hogwartsmod.pulpit.area": "Room area",
+  "screen.hogwartsmod.pulpit.height": "Height",
+  "screen.hogwartsmod.pulpit.size": "Room of %s × %s × %s blocks",
+  "screen.hogwartsmod.pulpit.show": "Show area in the world",
+  "screen.hogwartsmod.pulpit.start": "Start lesson",
+  "screen.hogwartsmod.pulpit.need_professor": "Professors only",
+  "teach.hogwartsmod.class_empty": "No student in the room can learn this spell",
+  "teach.hogwartsmod.class_started": "%s lesson started: %s student(s) invited"
 }

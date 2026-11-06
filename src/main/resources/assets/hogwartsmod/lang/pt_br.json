@@ -107,5 +107,21 @@
   "screen.hogwartsmod.trace.learned": "Você aprendeu %s!",
   "screen.hogwartsmod.trace.attempts": "Tentativas",
   "command.hogwartsmod.no_data": "Os dados mágicos de %s não estão disponíveis agora",
-  "screen.hogwartsmod.trace.caught": "A sombra te alcançou."
+  "screen.hogwartsmod.trace.caught": "A sombra te alcançou.",
+  "block.hogwartsmod.pulpito_professor": "Púlpito do Professor",
+  "block.hogwartsmod.pulpito_professor.only_professor": "Só professores podem usar o púlpito",
+  "block.hogwartsmod.pulpito_professor.only_professor_class": "Só professores podem dar aula no púlpito",
+  "screen.hogwartsmod.pulpit.spell": "Feitiço da aula",
+  "screen.hogwartsmod.pulpit.students": "Alunos na sala",
+  "screen.hogwartsmod.pulpit.pick_spell": "Escolha o feitiço da aula.",
+  "screen.hogwartsmod.pulpit.empty": "Nenhum aluno dentro da sala.",
+  "screen.hogwartsmod.pulpit.count": "%s de %s podem aprender",
+  "screen.hogwartsmod.pulpit.area": "Área da sala",
+  "screen.hogwartsmod.pulpit.height": "Altura",
+  "screen.hogwartsmod.pulpit.size": "Sala de %s × %s × %s blocos",
+  "screen.hogwartsmod.pulpit.show": "Mostrar área no mundo",
+  "screen.hogwartsmod.pulpit.start": "Iniciar aula",
+  "screen.hogwartsmod.pulpit.need_professor": "Só professores",
+  "teach.hogwartsmod.class_empty": "Nenhum aluno na sala pode aprender esse feitiço",
+  "teach.hogwartsmod.class_started": "Aula de %s iniciada: %s aluno(s) convidado(s)"
 }

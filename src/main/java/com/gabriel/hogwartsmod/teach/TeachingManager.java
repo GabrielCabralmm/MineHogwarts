@@ -1,5 +1,6 @@
 package com.gabriel.hogwartsmod.teach;
 
+import com.gabriel.hogwartsmod.block.PulpitBlockEntity;
 import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.magic.MagicConfig;
 import com.gabriel.hogwartsmod.magic.MagicData;
@@ -19,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
@@ -31,10 +33,10 @@ import java.util.Map;
 import java.util.UUID;
 
 public final class TeachingManager {
-    private record Invite(UUID teacher, String spell, boolean professor, long expiresAt) {
+    private record Invite(UUID teacher, String spell, boolean professor, boolean group, long expiresAt) {
     }
 
-    private record Session(UUID teacher, String spell, boolean professor) {
+    private record Session(UUID teacher, String spell, boolean professor, boolean group) {
     }
 
     private static final Map<UUID, Invite> INVITES = new HashMap<>();
@@ -96,8 +98,14 @@ public final class TeachingManager {
             teacher.displayClientMessage(Component.translatable(status.key()).append(" · ").append(student.getDisplayName()), true);
             return;
         }
+        sendInvite(teacher, student, spell, teacherData.isProfessor(), false, now);
+        teacher.displayClientMessage(Component.translatable("teach.hogwartsmod.invite_sent", student.getDisplayName()), true);
+        sendNearby(teacher, spell);
+    }
+
+    private static void sendInvite(ServerPlayer teacher, ServerPlayer student, Spell spell, boolean professor, boolean group, long now) {
         long expiresAt = now + MagicConfig.INVITE_SECONDS.get() * 20L;
-        INVITES.put(student.getUUID(), new Invite(teacher.getUUID(), spell.getId(), teacherData.isProfessor(), expiresAt));
+        INVITES.put(student.getUUID(), new Invite(teacher.getUUID(), spell.getId(), professor, group, expiresAt));
 
         MutableComponent accept = Component.translatable("teach.hogwartsmod.accept").withStyle(Style.EMPTY
                 .withColor(ChatFormatting.GREEN).withBold(true)
@@ -110,8 +118,52 @@ public final class TeachingManager {
                 spell.getDisplayName().copy().withStyle(ChatFormatting.GOLD)));
         student.sendSystemMessage(Component.literal("  ").append(accept).append("  ").append(decline));
         student.playNotifySound(SoundEvents.NOTE_BLOCK_CHIME.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
-        teacher.displayClientMessage(Component.translatable("teach.hogwartsmod.invite_sent", student.getDisplayName()), true);
-        sendNearby(teacher, spell);
+    }
+
+    // -- Aula no Púlpito
+
+    private static List<ServerPlayer> inArea(ServerPlayer teacher, PulpitBlockEntity pulpit) {
+        AABB area = pulpit.area();
+        return teacher.serverLevel().players().stream()
+                .filter(p -> p != teacher && !p.isSpectator() && area.contains(p.position()))
+                .sorted(Comparator.comparing(p -> p.getGameProfile().getName()))
+                .toList();
+    }
+
+    public static void sendInArea(ServerPlayer teacher, PulpitBlockEntity pulpit, Spell spell) {
+        List<StudentsPacket.Entry> entries = new ArrayList<>();
+        for (ServerPlayer p : inArea(teacher, pulpit)) {
+            entries.add(new StudentsPacket.Entry(p.getUUID(), p.getGameProfile().getName(), status(p, spell, teacher.getUUID())));
+        }
+        ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> teacher), new StudentsPacket(spell.getId(), entries));
+    }
+
+    public static void startClass(ServerPlayer teacher, PulpitBlockEntity pulpit, Spell spell) {
+        MagicData data = MagicData.get(teacher);
+        if (data == null || !data.isProfessor()) {
+            teacher.displayClientMessage(Component.translatable("block.hogwartsmod.pulpito_professor.only_professor_class"), true);
+            return;
+        }
+        long now = teacher.level().getGameTime();
+        TeachRules.Check check = TeachRules.check(data, spell, TeachRules.Limits.fromConfig(), now);
+        if (check != TeachRules.Check.OK) {
+            teacher.displayClientMessage(Component.translatable(check.key(), spell.getDisplayName()), true);
+            return;
+        }
+        int invited = 0;
+        for (ServerPlayer student : inArea(teacher, pulpit)) {
+            if (status(student, spell, teacher.getUUID()) == StudentStatus.CAN_LEARN) {
+                sendInvite(teacher, student, spell, true, true, now);
+                invited++;
+            }
+        }
+        if (invited == 0) {
+            teacher.displayClientMessage(Component.translatable("teach.hogwartsmod.class_empty"), true);
+            return;
+        }
+        data.setTeachCooldown(spell, now + TeachRules.cooldownTicks(data));
+        teacher.displayClientMessage(Component.translatable("teach.hogwartsmod.class_started", spell.getDisplayName(), invited), false);
+        sendInArea(teacher, pulpit, spell);
     }
 
     @Nullable
@@ -142,7 +194,7 @@ public final class TeachingManager {
             student.displayClientMessage(Component.translatable("teach.hogwartsmod.not_eligible", spell.getDisplayName()), false);
             return false;
         }
-        SESSIONS.put(student.getUUID(), new Session(invite.teacher(), invite.spell(), invite.professor()));
+        SESSIONS.put(student.getUUID(), new Session(invite.teacher(), invite.spell(), invite.professor(), invite.group()));
         ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> student),
                 new OpenTracePacket(spell.getId(), teacher.getGameProfile().getName(), MagicConfig.TRACE_ATTEMPTS.get()));
         teacher.displayClientMessage(Component.translatable("teach.hogwartsmod.accepted", student.getDisplayName(), spell.getDisplayName()), true);
@@ -195,7 +247,9 @@ public final class TeachingManager {
         if (teacher != null) {
             MagicData teacherData = MagicData.get(teacher);
             if (teacherData != null) {
-                teacherData.setTeachCooldown(spell, teacher.level().getGameTime() + TeachRules.cooldownTicks(teacherData));
+                if (!session.group()) {
+                    teacherData.setTeachCooldown(spell, teacher.level().getGameTime() + TeachRules.cooldownTicks(teacherData));
+                }
                 if (session.professor()) {
                     teacherData.addXp(MagicConfig.TEACHER_XP_BASE.get() + MagicConfig.TEACHER_XP_PER_LEVEL.get() * spell.getRequiredLevel());
                 }

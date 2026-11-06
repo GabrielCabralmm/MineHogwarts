@@ -7,6 +7,9 @@ import com.gabriel.hogwartsmod.network.PlayerFxPacket;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 import com.gabriel.hogwartsmod.client.gui.TraceScreen;
+import com.gabriel.hogwartsmod.client.gui.PulpitScreen;
+import com.gabriel.hogwartsmod.block.PulpitBlockEntity;
+import net.minecraft.core.BlockPos;
 import com.gabriel.hogwartsmod.client.trace.ClientTeachState;
 import com.gabriel.hogwartsmod.network.StudentsPacket;
 import com.gabriel.hogwartsmod.spell.Spell;
@@ -37,6 +40,13 @@ public final class ClientPacketHandler {
     public static void handleStudents(String spell, List<StudentsPacket.Entry> students) {
         ClientTeachState.spell = spell;
         ClientTeachState.students = students;
+    }
+
+    public static void handleOpenPulpit(BlockPos pos, boolean canEdit) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.level != null && mc.level.getBlockEntity(pos) instanceof PulpitBlockEntity pulpit) {
+            mc.setScreen(new PulpitScreen(pos, canEdit, pulpit));
+        }
     }
 
     public static void handleOpenTrace(String spell, String teacher, int attempts) {

@@ -3,6 +3,8 @@ package com.gabriel.hogwartsmod;
 import com.gabriel.hogwartsmod.magic.MagicConfig;
 import com.gabriel.hogwartsmod.network.ModNetwork;
 import com.gabriel.hogwartsmod.particle.ModParticles;
+import com.gabriel.hogwartsmod.registry.ModBlockEntities;
+import com.gabriel.hogwartsmod.registry.ModBlocks;
 import com.gabriel.hogwartsmod.registry.ModCreativeTabs;
 import com.gabriel.hogwartsmod.registry.ModEntities;
 import com.gabriel.hogwartsmod.registry.ModItems;
@@ -19,6 +21,8 @@ public class HogwartsMod {
 
     public HogwartsMod(FMLJavaModLoadingContext context) {
         IEventBus modBus = context.getModEventBus();
+        ModBlocks.BLOCKS.register(modBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);

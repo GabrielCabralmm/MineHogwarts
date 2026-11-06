@@ -1,0 +1,289 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "minecraft:block/dark_oak_planks",
+    "planks": "minecraft:block/dark_oak_planks",
+    "log": "minecraft:block/stripped_dark_oak_log",
+    "top": "hogwartsmod:block/pulpito_top"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        2,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#planks"
+        },
+        "south": {
+          "texture": "#planks"
+        },
+        "east": {
+          "texture": "#planks"
+        },
+        "west": {
+          "texture": "#planks"
+        },
+        "up": {
+          "texture": "#planks"
+        },
+        "down": {
+          "texture": "#planks"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        2,
+        4
+      ],
+      "to": [
+        13,
+        11,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "down": {
+          "texture": "#log"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        2,
+        12
+      ],
+      "to": [
+        14,
+        12,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#planks"
+        },
+        "south": {
+          "texture": "#planks"
+        },
+        "east": {
+          "texture": "#planks"
+        },
+        "west": {
+          "texture": "#planks"
+        },
+        "up": {
+          "texture": "#planks"
+        },
+        "down": {
+          "texture": "#planks"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        10,
+        3
+      ],
+      "to": [
+        14,
+        11,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#planks"
+        },
+        "south": {
+          "texture": "#planks"
+        },
+        "east": {
+          "texture": "#planks"
+        },
+        "west": {
+          "texture": "#planks"
+        },
+        "up": {
+          "texture": "#planks"
+        },
+        "down": {
+          "texture": "#planks"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        11,
+        1.5
+      ],
+      "to": [
+        15,
+        13,
+        15
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          8,
+          12,
+          8
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#planks"
+        },
+        "south": {
+          "texture": "#planks"
+        },
+        "east": {
+          "texture": "#planks"
+        },
+        "west": {
+          "texture": "#planks"
+        },
+        "down": {
+          "texture": "#planks"
+        },
+        "up": {
+          "texture": "#top",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        13,
+        1.5
+      ],
+      "to": [
+        15,
+        14,
+        2.5
+      ],
+      "rotation": {
+        "angle": -22.5,
+        "axis": "x",
+        "origin": [
+          8,
+          12,
+          8
+        ]
+      },
+      "faces": {
+        "north": {
+          "texture": "#log"
+        },
+        "south": {
+          "texture": "#log"
+        },
+        "east": {
+          "texture": "#log"
+        },
+        "west": {
+          "texture": "#log"
+        },
+        "up": {
+          "texture": "#log"
+        },
+        "down": {
+          "texture": "#log"
+        }
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        30,
+        225,
+        0
+      ],
+      "scale": [
+        0.625,
+        0.625,
+        0.625
+      ]
+    },
+    "ground": {
+      "translation": [
+        0,
+        3,
+        0
+      ],
+      "scale": [
+        0.25,
+        0.25,
+        0.25
+      ]
+    },
+    "fixed": {
+      "scale": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        75,
+        45,
+        0
+      ],
+      "translation": [
+        0,
+        2.5,
+        0
+      ],
+      "scale": [
+        0.375,
+        0.375,
+        0.375
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        45,
+        0
+      ],
+      "scale": [
+        0.4,
+        0.4,
+        0.4
+      ]
+    }
+  }
+}

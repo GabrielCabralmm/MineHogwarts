@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hogwartsmod:block/pulpito_professor"
+    },
+    "facing=east": {
+      "model": "hogwartsmod:block/pulpito_professor",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hogwartsmod:block/pulpito_professor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hogwartsmod:block/pulpito_professor",
+      "y": 270
+    }
+  }
+}
