@@ -25,7 +25,8 @@ public final class MissionTracker implements IGuiOverlay {
     private static final int SHADOW = 0xA0140C06;
     private static final float X = 6;
     private static final float Y = 6;
-    private static final float MAX_W = 120;
+    private static final float SIZE = 5.5f;
+    private static final float MAX_W = 150;
 
     private final Map<String, Integer> lastProgress = new HashMap<>();
     private final Map<String, Long> flashUntil = new HashMap<>();
@@ -57,8 +58,8 @@ public final class MissionTracker implements IGuiOverlay {
                 flashUntil.put(a.key(), now + 1500);
             }
             boolean flash = flashUntil.getOrDefault(a.key(), 0L) > now;
-            String title = HiRes.ellipsize(m.title().isBlank() ? "?" : m.title(), HiRes.Style.BOLD, MAX_W);
-            shadowed(g, title, HiRes.Style.BOLD, 6.5f, X, y, ready ? READY : TITLE);
+            String title = fit(m.title().isBlank() ? "?" : m.title(), HiRes.Style.BOLD);
+            shadowed(g, title, HiRes.Style.BOLD, SIZE, X, y, ready ? READY : TITLE);
             String line;
             if (ready) {
                 line = Component.translatable("hud.hogwartsmod.mission_ready", a.npcName()).getString();
@@ -67,9 +68,13 @@ public final class MissionTracker implements IGuiOverlay {
             } else {
                 line = m.targetName().getString() + "  " + progress + "/" + m.amount();
             }
-            shadowed(g, HiRes.ellipsize(line, HiRes.Style.ITALIC, MAX_W), HiRes.Style.ITALIC, 6f, X, y + 8, flash ? GOLD : ready ? READY : TEXT);
-            y += 19;
+            shadowed(g, fit(line, HiRes.Style.ITALIC), HiRes.Style.ITALIC, SIZE, X, y + 7, flash ? GOLD : ready ? READY : TEXT);
+            y += 16;
         }
+    }
+
+    private static String fit(String text, HiRes.Style style) {
+        return HiRes.ellipsize(text, style, MAX_W * HiRes.width(text, style) / Math.max(0.01f, HiRes.width(text, style, SIZE)));
     }
 
     private static void shadowed(GuiGraphics g, String text, HiRes.Style style, float size, float x, float y, int color) {
