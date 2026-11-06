@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = HogwartsMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientBroom {
     private static boolean wasRiding;
+    private static final java.util.Set<Integer> FLYING = new java.util.HashSet<>();
     private static float fovBoost;
     private static float fovBoostOld;
 
@@ -42,6 +43,20 @@ public final class ClientBroom {
             if (mc.player.getVehicle() instanceof BroomEntity) {
                 ModNetwork.CHANNEL.sendToServer(new BroomDismountPacket());
             }
+        }
+        if (mc.level != null) {
+            java.util.Set<Integer> seen = new java.util.HashSet<>();
+            for (net.minecraft.client.player.AbstractClientPlayer other : mc.level.players()) {
+                if (other.getVehicle() instanceof BroomEntity) {
+                    seen.add(other.getId());
+                    if (FLYING.add(other.getId())) {
+                        CastAnimations.play(other, "voo_vassoura");
+                    }
+                } else if (FLYING.remove(other.getId())) {
+                    CastAnimations.play(other, "");
+                }
+            }
+            FLYING.retainAll(seen);
         }
         boolean riding = mc.player.getVehicle() instanceof BroomEntity;
         if (riding && !wasRiding) {

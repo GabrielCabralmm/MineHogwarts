@@ -28,7 +28,7 @@ public class BroomRenderer extends EntityRenderer<BroomEntity> {
     public void render(BroomEntity broom, float yaw, float partialTick, PoseStack pose, MultiBufferSource buffers, int light) {
         ItemStack stack = new ItemStack(broom.getBroomType() == BroomType.SPORT ? ModItems.BROOM_SPORT.get() : ModItems.BROOM_TRANSPORT.get());
         pose.pushPose();
-        pose.translate(0, 0.25, 0);
+        pose.translate(0, 0.42, 0);
         pose.mulPose(Axis.YP.rotationDegrees(-yaw));
         pose.mulPose(Axis.ZP.rotationDegrees(broom.getRoll(partialTick)));
         pose.mulPose(Axis.YP.rotationDegrees(90));
