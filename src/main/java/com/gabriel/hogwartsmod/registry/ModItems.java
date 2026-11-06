@@ -21,6 +21,9 @@ public final class ModItems {
     public static final RegistryObject<Item> BROOM_TRANSPORT = ITEMS.register("vassoura_transporte",
             () -> new BroomItem(BroomType.TRANSPORT, new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> ZONE_WAND = ITEMS.register("varinha_zonas",
+            () -> new com.gabriel.hogwartsmod.item.ZoneWandItem(new Item.Properties().stacksTo(1)));
+
     private ModItems() {
     }
 }

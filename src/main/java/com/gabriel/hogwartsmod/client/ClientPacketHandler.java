@@ -58,6 +58,11 @@ public final class ClientPacketHandler {
         ClientDodge.start(dx, dy, dz, distance, ticks);
     }
 
+    public static void handleZoneSelection(net.minecraft.core.BlockPos first, net.minecraft.core.BlockPos second) {
+        com.gabriel.hogwartsmod.client.zone.ClientZones.first = first;
+        com.gabriel.hogwartsmod.client.zone.ClientZones.second = second;
+    }
+
     public static void handlePublicLocations(List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> points) {
         com.gabriel.hogwartsmod.client.apparition.ClientApparitionState.publicPoints = List.copyOf(points);
     }

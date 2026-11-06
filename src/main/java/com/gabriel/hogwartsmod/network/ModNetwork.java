@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "10";
+    private static final String VERSION = "11";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -66,6 +66,14 @@ public final class ModNetwork {
                 .encoder(BroomBoostPacket::encode).decoder(BroomBoostPacket::decode).consumerMainThread(BroomBoostPacket::handle).add();
         CHANNEL.messageBuilder(PulpitLessonPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PulpitLessonPacket::encode).decoder(PulpitLessonPacket::decode).consumerMainThread(PulpitLessonPacket::handle).add();
+        CHANNEL.messageBuilder(ZonesPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ZonesPacket::encode).decoder(ZonesPacket::decode).consumerMainThread(ZonesPacket::handle).add();
+        CHANNEL.messageBuilder(ZoneSelectionPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(ZoneSelectionPacket::encode).decoder(ZoneSelectionPacket::decode).consumerMainThread(ZoneSelectionPacket::handle).add();
+        CHANNEL.messageBuilder(ZoneMarkPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ZoneMarkPacket::encode).decoder(ZoneMarkPacket::decode).consumerMainThread(ZoneMarkPacket::handle).add();
+        CHANNEL.messageBuilder(ZoneEditPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(ZoneEditPacket::encode).decoder(ZoneEditPacket::decode).consumerMainThread(ZoneEditPacket::handle).add();
     }
 
     public static void playAnimation(ServerPlayer player, String animation) {

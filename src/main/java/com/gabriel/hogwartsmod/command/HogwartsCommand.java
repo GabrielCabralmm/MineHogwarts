@@ -50,6 +50,11 @@ public final class HogwartsCommand {
             new DynamicCommandExceptionType(name -> Component.translatable("command.hogwartsmod.no_data", name));
     private static final SuggestionProvider<CommandSourceStack> PUBLIC_PLACES = (ctx, builder) ->
             SharedSuggestionProvider.suggest(PublicLocations.get(ctx.getSource().getServer()).all().stream().map(ApparitionPoint::name), builder);
+    private static final SuggestionProvider<CommandSourceStack> ZONES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(com.gabriel.hogwartsmod.zone.ZoneData.get(ctx.getSource().getServer()).all().stream()
+                    .map(com.gabriel.hogwartsmod.zone.Zone::name), builder);
+    private static final SuggestionProvider<CommandSourceStack> ZONE_RULES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.of(com.gabriel.hogwartsmod.zone.ZoneRule.values()).map(com.gabriel.hogwartsmod.zone.ZoneRule::getId), builder);
     private static final SimpleCommandExceptionType NO_NPC =
             new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.no_npc"));
     private static final SimpleCommandExceptionType UNKNOWN_PROFESSION =
@@ -90,6 +95,21 @@ public final class HogwartsCommand {
                                                 .executes(HogwartsCommand::removePublic)))
                                 .then(Commands.literal("lista")
                                         .executes(HogwartsCommand::listPublic))))
+                .then(Commands.literal("zona").requires(STAFF)
+                        .then(Commands.literal("criar")
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> com.gabriel.hogwartsmod.zone.ZoneEditing.create(ctx.getSource().getPlayerOrException(),
+                                                StringArgumentType.getString(ctx, "nome").strip()) ? 1 : 0)))
+                        .then(Commands.literal("remover")
+                                .then(Commands.argument("nome", StringArgumentType.greedyString()).suggests(ZONES)
+                                        .executes(HogwartsCommand::removeZone)))
+                        .then(Commands.literal("regra")
+                                .then(Commands.argument("regra", StringArgumentType.word()).suggests(ZONE_RULES)
+                                        .then(Commands.argument("ativa", BoolArgumentType.bool())
+                                                .then(Commands.argument("nome", StringArgumentType.greedyString()).suggests(ZONES)
+                                                        .executes(HogwartsCommand::zoneRule)))))
+                        .then(Commands.literal("lista")
+                                .executes(HogwartsCommand::listZones)))
                 .then(Commands.literal("npc").requires(STAFF)
                         .then(Commands.literal("criar")
                                 .executes(ctx -> createNpc(ctx, null))
@@ -227,6 +247,43 @@ public final class HogwartsCommand {
         List<ApparitionPoint> all = PublicLocations.get(ctx.getSource().getServer()).all();
         String list = all.stream().map(ApparitionPoint::name).collect(Collectors.joining(", "));
         ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.public_list", list.isEmpty() ? "-" : list), false);
+        return all.size();
+    }
+
+    private static int removeZone(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "nome").strip();
+        if (!com.gabriel.hogwartsmod.zone.ZoneData.get(ctx.getSource().getServer()).remove(name)) {
+            ctx.getSource().sendFailure(Component.translatable("command.hogwartsmod.zone_unknown", name));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("message.hogwartsmod.zone_removed", name), true);
+        return 1;
+    }
+
+    private static int zoneRule(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "nome").strip();
+        com.gabriel.hogwartsmod.zone.ZoneData data = com.gabriel.hogwartsmod.zone.ZoneData.get(ctx.getSource().getServer());
+        com.gabriel.hogwartsmod.zone.Zone zone = data.find(name);
+        com.gabriel.hogwartsmod.zone.ZoneRule rule = com.gabriel.hogwartsmod.zone.ZoneRule.byId(StringArgumentType.getString(ctx, "regra"));
+        if (zone == null) {
+            ctx.getSource().sendFailure(Component.translatable("command.hogwartsmod.zone_unknown", name));
+            return 0;
+        }
+        if (rule == null) {
+            ctx.getSource().sendFailure(Component.translatable("command.hogwartsmod.zone_unknown_rule"));
+            return 0;
+        }
+        boolean on = BoolArgumentType.getBool(ctx, "ativa");
+        data.put(zone.with(rule, on));
+        ctx.getSource().sendSuccess(() -> Component.translatable(on ? "command.hogwartsmod.zone_rule_on" : "command.hogwartsmod.zone_rule_off",
+                Component.translatable(rule.key()), zone.name()), true);
+        return 1;
+    }
+
+    private static int listZones(CommandContext<CommandSourceStack> ctx) {
+        List<com.gabriel.hogwartsmod.zone.Zone> all = com.gabriel.hogwartsmod.zone.ZoneData.get(ctx.getSource().getServer()).all();
+        String list = all.stream().map(com.gabriel.hogwartsmod.zone.Zone::name).collect(Collectors.joining(", "));
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.zone_list", list.isEmpty() ? "-" : list), false);
         return all.size();
     }
 

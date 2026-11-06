@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "hogwartsmod:item/varinha_zonas"
+  }
+}

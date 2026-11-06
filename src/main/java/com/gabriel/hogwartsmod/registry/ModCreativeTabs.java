@@ -21,6 +21,7 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.PULPIT_ITEM.get());
                         output.accept(ModItems.BROOM_SPORT.get());
                         output.accept(ModItems.BROOM_TRANSPORT.get());
+                        output.accept(ModItems.ZONE_WAND.get());
                     })
                     .build());
 
