@@ -17,6 +17,7 @@ public final class TracePatterns {
         PATTERNS.put("accio", spiral());
         PATTERNS.put("incendio", flame());
         PATTERNS.put("arresto_momentum", wave());
+        PATTERNS.put("aparatacao", vortex());
         PATTERNS.put("esquiva", new Path(0.12f, 0.78f).line(0.42f, 0.62f).arc(0.56f, 0.44f, 0.14f, 135, 300).line(0.9f, 0.3f).build());
     }
 
@@ -47,6 +48,17 @@ public final class TracePatterns {
             path.line((float) x, (float) (0.94 - 0.86 * t));
         }
         return path.build();
+    }
+
+    private static float[][] vortex() {
+        Path path = new Path(0.5f, 0.42f);
+        for (int i = 1; i <= 160; i++) {
+            double t = i / 160.0;
+            double angle = -Math.PI / 2 + t * Math.PI * 3;
+            double r = 0.04 + 0.28 * t;
+            path.line((float) (0.5 + Math.cos(angle) * r), (float) (0.42 + Math.sin(angle) * r));
+        }
+        return path.line(0.5f, 0.94f).build();
     }
 
     private static float[][] wave() {

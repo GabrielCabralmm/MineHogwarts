@@ -4,6 +4,8 @@ import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.magic.MagicData;
 import com.gabriel.hogwartsmod.client.trace.ClientTeachState;
 import com.gabriel.hogwartsmod.network.InviteStudentPacket;
+import com.gabriel.hogwartsmod.network.PlaceEditPacket;
+import net.minecraft.client.gui.components.EditBox;
 import com.gabriel.hogwartsmod.network.ModNetwork;
 import com.gabriel.hogwartsmod.network.RequestStudentsPacket;
 import com.gabriel.hogwartsmod.network.StudentsPacket;
@@ -72,6 +74,10 @@ public class GrimoireScreen extends Screen {
     private double pressY;
     private boolean dragging;
     @Nullable
+    private EditBox nameBox;
+    private int renaming = -1;
+    private int publicPage;
+    @Nullable
     private Spell teachSpell;
     @Nullable
     private UUID teachStudent;
@@ -85,6 +91,13 @@ public class GrimoireScreen extends Screen {
     protected void init() {
         left = (width - BOOK_W) / 2 - 8;
         top = (height - BOOK_H) / 2;
+        nameBox = new EditBox(font, left + 19, top + BOOK_H - 41, BOOK_W / 2 - 32, 10, Component.empty());
+        nameBox.setBordered(false);
+        nameBox.setMaxLength(PlaceEditPacket.MAX_NAME);
+        nameBox.setTextColor(0xFF38261A);
+        nameBox.setHint(Component.translatable("screen.hogwartsmod.grimoire.place_hint").withStyle(s -> s.withColor(0xA08A6E)));
+        nameBox.visible = tab == Tab.APPARITION;
+        addRenderableWidget(nameBox);
         MagicData data = data();
         if (data != null && selected == null) {
             selected = data.getActiveSpell() != null ? data.getActiveSpell() : learned().stream().findFirst().orElse(null);
@@ -129,8 +142,7 @@ public class GrimoireScreen extends Screen {
         switch (tab) {
             case SPELLS -> drawSpellsTab(g, mouseX, mouseY);
             case TEACH -> drawTeachTab(g, mouseX, mouseY);
-            case APPARITION -> {
-            }
+            case APPARITION -> drawApparitionTab(g, mouseX, mouseY);
         }
         super.render(g, mouseX, mouseY, partialTick);
         if (dragging) {
@@ -154,8 +166,9 @@ public class GrimoireScreen extends Screen {
         HiRes.image(g, BOOK, left, top, BOOK_W, BOOK_H);
     }
 
-    private static boolean isLocked(Tab t) {
-        return t == Tab.APPARITION;
+    private boolean isLocked(Tab t) {
+        MagicData data = data();
+        return t == Tab.APPARITION && (data == null || !data.knows(Spells.APARATACAO));
     }
 
     private String tabLabel(Tab t) {
@@ -464,6 +477,164 @@ public class GrimoireScreen extends Screen {
         return false;
     }
 
+    // -- Aba Aparatação
+
+    private static final int PLACE_ROW = 21;
+    private static final int PUBLIC_ROWS = 6;
+
+    private String placeDetail(com.gabriel.hogwartsmod.apparition.ApparitionPoint point) {
+        if (minecraft == null || minecraft.player == null || minecraft.level == null) {
+            return "";
+        }
+        if (!point.dimension().equals(minecraft.level.dimension().location().toString())) {
+            return tr("screen.hogwartsmod.wheel.other_dimension");
+        }
+        double distance = minecraft.player.position().distanceTo(point.position());
+        return Component.translatable("screen.hogwartsmod.grimoire.place_detail", Math.round(distance),
+                Math.round(com.gabriel.hogwartsmod.spell.impl.AparatacaoSpell.costFor(distance))).getString();
+    }
+
+    private void drawApparitionTab(GuiGraphics g, int mouseX, int mouseY) {
+        MagicData data = data();
+        if (data == null) {
+            return;
+        }
+        int lx = left + 16;
+        int pageW = BOOK_W / 2 - 26;
+        List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> places = data.getPlaces();
+        int limit = Spells.APARATACAO.getPlaceLimit(data);
+        HiRes.centered(g, Component.translatable("screen.hogwartsmod.grimoire.my_places", places.size(), limit).getString(),
+                HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
+        for (int i = 0; i < places.size(); i++) {
+            var point = places.get(i);
+            int y = top + 30 + i * PLACE_ROW;
+            if (i == renaming) {
+                g.fill(lx - 2, y - 1, lx + pageW + 2, y + PLACE_ROW - 2, HIGHLIGHT);
+            }
+            String rename = tr("screen.hogwartsmod.grimoire.rename");
+            String forget = tr("screen.hogwartsmod.grimoire.forget");
+            float fw = HiRes.width(forget, HiRes.Style.BOLD, 7f);
+            float rw = HiRes.width(rename, HiRes.Style.BOLD, 7f);
+            boolean hoverForget = mouseY >= y - 1 && mouseY < y + 8 && mouseX >= lx + pageW - fw && mouseX < lx + pageW;
+            boolean hoverRename = mouseY >= y - 1 && mouseY < y + 8 && mouseX >= lx + pageW - fw - 6 - rw && mouseX < lx + pageW - fw - 6;
+            HiRes.text(g, HiRes.ellipsize(point.name(), HiRes.Style.REGULAR, pageW - fw - rw - 10), HiRes.Style.REGULAR, lx, y, INK);
+            HiRes.text(g, placeDetail(point), HiRes.Style.ITALIC, 7f, lx, y + 9.5f, MUTED);
+            HiRes.text(g, forget, HiRes.Style.BOLD, 7f, lx + pageW - fw, y + 1, hoverForget ? WINE : TITLE);
+            HiRes.text(g, rename, HiRes.Style.BOLD, 7f, lx + pageW - fw - 6 - rw, y + 1, hoverRename ? GOLD : TITLE);
+        }
+        if (places.isEmpty()) {
+            wrapped(g, tr("screen.hogwartsmod.grimoire.no_places"), HiRes.Style.ITALIC, lx + pageW / 2f, top + 60, pageW, MUTED);
+        }
+        int boxY = top + BOOK_H - 44;
+        g.fill(lx, boxY, lx + pageW, boxY + 13, NOTE_EDGE);
+        g.fill(lx + 1, boxY + 1, lx + pageW - 1, boxY + 12, nameBox != null && nameBox.isFocused() ? NOTE_ON : SLOT_BG);
+        int by = top + BOOK_H - 28;
+        boolean full = renaming < 0 && places.size() >= limit;
+        boolean hover = !full && mouseX >= lx && mouseX < lx + pageW && mouseY >= by && mouseY < by + 14;
+        g.fill(lx, by, lx + pageW, by + 14, full ? NOTE_EDGE : COVER);
+        g.fill(lx + 1, by + 1, lx + pageW - 1, by + 13, hover ? NOTE_ON : full ? SLOT_BG : NOTE);
+        String label = renaming >= 0 ? tr("screen.hogwartsmod.grimoire.save_name")
+                : full ? tr("screen.hogwartsmod.grimoire.places_full") : tr("screen.hogwartsmod.grimoire.memorize");
+        HiRes.centered(g, label, HiRes.Style.BOLD, lx + pageW / 2f, by + 3, full ? MUTED : TITLE);
+
+        int rx = left + BOOK_W / 2 + 10;
+        int rw = BOOK_W / 2 - 26;
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.public_places"), HiRes.Style.BOLD, rx + rw / 2f, top + 17, TITLE);
+        List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> publics = com.gabriel.hogwartsmod.client.apparition.ClientApparitionState.publicPoints;
+        int pages = Math.max(1, (publics.size() + PUBLIC_ROWS - 1) / PUBLIC_ROWS);
+        publicPage = Math.min(publicPage, pages - 1);
+        for (int i = 0; i < PUBLIC_ROWS; i++) {
+            int index = publicPage * PUBLIC_ROWS + i;
+            if (index >= publics.size()) {
+                break;
+            }
+            var point = publics.get(index);
+            int y = top + 30 + i * (PLACE_ROW - 1);
+            HiRes.text(g, HiRes.ellipsize(point.name(), HiRes.Style.REGULAR, rw), HiRes.Style.REGULAR, rx, y, INK);
+            HiRes.text(g, placeDetail(point), HiRes.Style.ITALIC, 7f, rx, y + 9.5f, MUTED);
+        }
+        if (publics.isEmpty()) {
+            wrapped(g, tr("screen.hogwartsmod.grimoire.no_public"), HiRes.Style.ITALIC, rx + rw / 2f, top + 60, rw, MUTED);
+        }
+        if (pages > 1) {
+            HiRes.centered(g, "‹  " + (publicPage + 1) + " / " + pages + "  ›", HiRes.Style.BOLD, rx + rw / 2f, top + BOOK_H - 24, TITLE);
+        }
+    }
+
+    private void submitPlace() {
+        if (nameBox == null) {
+            return;
+        }
+        String name = nameBox.getValue().strip();
+        if (name.isEmpty()) {
+            nameBox.setFocused(true);
+            return;
+        }
+        if (renaming >= 0) {
+            ModNetwork.CHANNEL.sendToServer(new PlaceEditPacket(PlaceEditPacket.Action.RENAME, renaming, name));
+            renaming = -1;
+        } else {
+            ModNetwork.CHANNEL.sendToServer(new PlaceEditPacket(PlaceEditPacket.Action.MEMORIZE, -1, name));
+        }
+        nameBox.setValue("");
+        nameBox.setFocused(false);
+        if (minecraft != null) {
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
+        }
+    }
+
+    private boolean apparitionClicked(double mx, double my) {
+        MagicData data = data();
+        if (data == null || nameBox == null) {
+            return false;
+        }
+        int lx = left + 16;
+        int pageW = BOOK_W / 2 - 26;
+        int boxY = top + BOOK_H - 44;
+        if (mx >= lx && mx < lx + pageW && my >= boxY && my < boxY + 13) {
+            nameBox.setFocused(true);
+            setFocused(nameBox);
+            return true;
+        }
+        nameBox.setFocused(false);
+        int by = top + BOOK_H - 28;
+        if (mx >= lx && mx < lx + pageW && my >= by && my < by + 14) {
+            if (renaming >= 0 || data.getPlaces().size() < Spells.APARATACAO.getPlaceLimit(data)) {
+                submitPlace();
+            }
+            return true;
+        }
+        List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> places = data.getPlaces();
+        for (int i = 0; i < places.size(); i++) {
+            int y = top + 30 + i * PLACE_ROW;
+            if (my < y - 1 || my >= y + 8) {
+                continue;
+            }
+            float fw = HiRes.width(tr("screen.hogwartsmod.grimoire.forget"), HiRes.Style.BOLD, 7f);
+            float rw = HiRes.width(tr("screen.hogwartsmod.grimoire.rename"), HiRes.Style.BOLD, 7f);
+            if (mx >= lx + pageW - fw && mx < lx + pageW) {
+                ModNetwork.CHANNEL.sendToServer(new PlaceEditPacket(PlaceEditPacket.Action.FORGET, i, ""));
+                renaming = -1;
+                return true;
+            }
+            if (mx >= lx + pageW - fw - 6 - rw && mx < lx + pageW - fw - 6) {
+                renaming = i;
+                nameBox.setValue(places.get(i).name());
+                nameBox.setFocused(true);
+                setFocused(nameBox);
+                return true;
+            }
+        }
+        int rx = left + BOOK_W / 2 + 10;
+        int rw = BOOK_W / 2 - 26;
+        int pages = Math.max(1, (com.gabriel.hogwartsmod.client.apparition.ClientApparitionState.publicPoints.size() + PUBLIC_ROWS - 1) / PUBLIC_ROWS);
+        if (pages > 1 && my >= top + BOOK_H - 26 && my < top + BOOK_H - 14 && mx >= rx && mx < rx + rw) {
+            publicPage = mx < rx + rw / 2f ? Math.max(0, publicPage - 1) : Math.min(pages - 1, publicPage + 1);
+            return true;
+        }
+        return false;
+    }
+
     private void drawPagination(GuiGraphics g, int cx, int y) {
         int count = pageCount();
         int startX = cx - (count - 1) * 7;
@@ -561,11 +732,18 @@ public class GrimoireScreen extends Screen {
                     if (t == Tab.TEACH) {
                         requestStudents();
                     }
+                    if (nameBox != null) {
+                        nameBox.visible = t == Tab.APPARITION;
+                        nameBox.setFocused(false);
+                    }
                 }
                 return true;
             }
         }
         if (tab == Tab.TEACH && button == 0 && teachClicked(mx, my)) {
+            return true;
+        }
+        if (tab == Tab.APPARITION && button == 0 && apparitionClicked(mx, my)) {
             return true;
         }
         if (tab != Tab.SPELLS) {
@@ -653,6 +831,15 @@ public class GrimoireScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (nameBox != null && nameBox.isFocused() && nameBox.visible) {
+            if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_KP_ENTER) {
+                submitPlace();
+                return true;
+            }
+            if (keyCode != org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) {
+                return nameBox.keyPressed(keyCode, scanCode, modifiers) || nameBox.canConsumeInput();
+            }
+        }
         if (com.gabriel.hogwartsmod.client.ModKeys.OPEN_GRIMOIRE.matches(keyCode, scanCode)) {
             onClose();
             return true;

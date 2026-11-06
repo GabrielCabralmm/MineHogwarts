@@ -58,6 +58,10 @@ public final class ClientPacketHandler {
         ClientDodge.start(dx, dz, distance, ticks);
     }
 
+    public static void handlePublicLocations(List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> points) {
+        com.gabriel.hogwartsmod.client.apparition.ClientApparitionState.publicPoints = List.copyOf(points);
+    }
+
     public static void handleOpenTrace(String spell, String teacher, int attempts) {
         Spell resolved = Spells.get(spell);
         if (resolved != null) {

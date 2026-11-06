@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 public record PlayerFxPacket(int entityId, Kind kind, boolean value) {
 
-    public enum Kind { LUMOS, SHIELD, SHIELD_HIT, DODGE }
+    public enum Kind { LUMOS, SHIELD, SHIELD_HIT, DODGE, APPARATE }
 
     public static void encode(PlayerFxPacket packet, FriendlyByteBuf buf) {
         buf.writeVarInt(packet.entityId);

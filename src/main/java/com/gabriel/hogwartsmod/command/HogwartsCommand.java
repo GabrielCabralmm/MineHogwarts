@@ -1,6 +1,10 @@
 package com.gabriel.hogwartsmod.command;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.apparition.ApparitionPoint;
+import com.gabriel.hogwartsmod.apparition.PublicLocations;
+import com.gabriel.hogwartsmod.spell.impl.AparatacaoSpell;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.gabriel.hogwartsmod.entity.ProfessorNpcEntity;
 import com.gabriel.hogwartsmod.magic.MagicData;
 import com.gabriel.hogwartsmod.registry.ModEntities;
@@ -44,6 +48,8 @@ public final class HogwartsCommand {
             SharedSuggestionProvider.suggest(Stream.of(Profession.values()).map(Profession::getId), builder);
     private static final DynamicCommandExceptionType NO_DATA =
             new DynamicCommandExceptionType(name -> Component.translatable("command.hogwartsmod.no_data", name));
+    private static final SuggestionProvider<CommandSourceStack> PUBLIC_PLACES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(PublicLocations.get(ctx.getSource().getServer()).all().stream().map(ApparitionPoint::name), builder);
     private static final SimpleCommandExceptionType NO_NPC =
             new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.no_npc"));
     private static final SimpleCommandExceptionType UNKNOWN_PROFESSION =
@@ -70,6 +76,20 @@ public final class HogwartsCommand {
                                 .executes(ctx -> TeachingManager.accept(ctx.getSource().getPlayerOrException()) ? 1 : 0))
                         .then(Commands.literal("recusar")
                                 .executes(ctx -> TeachingManager.decline(ctx.getSource().getPlayerOrException()) ? 1 : 0)))
+                .then(Commands.literal("aparatacao")
+                        .then(Commands.literal("licenca").requires(STAFF)
+                                .then(Commands.argument("alvo", EntityArgument.player())
+                                        .then(Commands.argument("ativa", BoolArgumentType.bool())
+                                                .executes(HogwartsCommand::setLicense))))
+                        .then(Commands.literal("publico").requires(HogwartsCommand::canManagePublic)
+                                .then(Commands.literal("criar")
+                                        .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                                .executes(HogwartsCommand::createPublic)))
+                                .then(Commands.literal("remover")
+                                        .then(Commands.argument("nome", StringArgumentType.greedyString()).suggests(PUBLIC_PLACES)
+                                                .executes(HogwartsCommand::removePublic)))
+                                .then(Commands.literal("lista")
+                                        .executes(HogwartsCommand::listPublic))))
                 .then(Commands.literal("npc").requires(STAFF)
                         .then(Commands.literal("criar")
                                 .executes(ctx -> createNpc(ctx, null))
@@ -158,6 +178,56 @@ public final class HogwartsCommand {
         String key = learn ? "command.hogwartsmod.learned" : "command.hogwartsmod.forgot";
         ctx.getSource().sendSuccess(() -> Component.translatable(key, spells.size(), target.getDisplayName()), true);
         return spells.size();
+    }
+
+    private static boolean canManagePublic(CommandSourceStack source) {
+        if (source.hasPermission(2)) {
+            return true;
+        }
+        MagicData data = source.getPlayer() == null ? null : MagicData.get(source.getPlayer());
+        return data != null && data.hasApparitionLicense();
+    }
+
+    private static int setLicense(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        boolean value = BoolArgumentType.getBool(ctx, "ativa");
+        data(target).setApparitionLicense(value);
+        ctx.getSource().sendSuccess(() -> Component.translatable(value ? "command.hogwartsmod.license_on" : "command.hogwartsmod.license_off",
+                target.getDisplayName()), true);
+        return 1;
+    }
+
+    private static int createPublic(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String name = StringArgumentType.getString(ctx, "nome").strip();
+        if (name.length() > 24) {
+            name = name.substring(0, 24);
+        }
+        PublicLocations places = PublicLocations.get(player.server);
+        places.put(new ApparitionPoint(name, AparatacaoSpell.dimensionOf(player), player.getX(), player.getY(), player.getZ(), player.getYRot()));
+        places.sendToAll();
+        String created = name;
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.public_created", created), true);
+        return 1;
+    }
+
+    private static int removePublic(CommandContext<CommandSourceStack> ctx) {
+        String name = StringArgumentType.getString(ctx, "nome").strip();
+        PublicLocations places = PublicLocations.get(ctx.getSource().getServer());
+        if (!places.remove(name)) {
+            ctx.getSource().sendFailure(Component.translatable("command.hogwartsmod.public_unknown", name));
+            return 0;
+        }
+        places.sendToAll();
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.public_removed", name), true);
+        return 1;
+    }
+
+    private static int listPublic(CommandContext<CommandSourceStack> ctx) {
+        List<ApparitionPoint> all = PublicLocations.get(ctx.getSource().getServer()).all();
+        String list = all.stream().map(ApparitionPoint::name).collect(Collectors.joining(", "));
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.public_list", list.isEmpty() ? "-" : list), false);
+        return all.size();
     }
 
     private static ProfessorNpcEntity nearestNpc(CommandSourceStack source) throws CommandSyntaxException {

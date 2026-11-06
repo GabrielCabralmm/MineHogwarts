@@ -59,5 +59,6 @@ public final class ClientSetup {
         event.register(ModKeys.SPELL_MODIFIER);
         event.register(ModKeys.OPEN_GRIMOIRE);
         event.register(ModKeys.DODGE);
+        event.register(ModKeys.APPARATE);
     }
 }

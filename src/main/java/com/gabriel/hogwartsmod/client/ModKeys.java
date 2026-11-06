@@ -16,6 +16,9 @@ public final class ModKeys {
     public static final KeyMapping DODGE = new KeyMapping("key.hogwartsmod.dodge",
             KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
 
+    public static final KeyMapping APPARATE = new KeyMapping("key.hogwartsmod.apparate",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, CATEGORY);
+
     private ModKeys() {
     }
 
@@ -23,6 +26,14 @@ public final class ModKeys {
         InputConstants.Key key = SPELL_MODIFIER.getKey();
         if (key.getType() != InputConstants.Type.KEYSYM || key.getValue() == InputConstants.UNKNOWN.getValue()) {
             return SPELL_MODIFIER.isDown();
+        }
+        return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), key.getValue());
+    }
+
+    public static boolean isPhysicallyDown(KeyMapping mapping) {
+        InputConstants.Key key = mapping.getKey();
+        if (key.getType() != InputConstants.Type.KEYSYM || key.getValue() == InputConstants.UNKNOWN.getValue()) {
+            return mapping.isDown();
         }
         return InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), key.getValue());
     }

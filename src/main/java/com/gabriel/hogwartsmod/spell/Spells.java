@@ -1,6 +1,7 @@
 package com.gabriel.hogwartsmod.spell;
 
 import com.gabriel.hogwartsmod.spell.impl.AccioSpell;
+import com.gabriel.hogwartsmod.spell.impl.AparatacaoSpell;
 import com.gabriel.hogwartsmod.spell.impl.ArrestoMomentumSpell;
 import com.gabriel.hogwartsmod.spell.impl.EsquivaSpell;
 import com.gabriel.hogwartsmod.spell.impl.ExpelliarmusSpell;
@@ -26,6 +27,7 @@ public final class Spells {
     public static final IncendioSpell INCENDIO = register(new IncendioSpell());
     public static final ArrestoMomentumSpell ARRESTO_MOMENTUM = register(new ArrestoMomentumSpell());
     public static final EsquivaSpell ESQUIVA = register(new EsquivaSpell());
+    public static final AparatacaoSpell APARATACAO = register(new AparatacaoSpell());
 
     private Spells() {
     }

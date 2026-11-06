@@ -72,6 +72,7 @@ public final class MagicEvents {
         @SubscribeEvent
         public static void login(PlayerEvent.PlayerLoggedInEvent event) {
             if (event.getEntity() instanceof ServerPlayer player) {
+                com.gabriel.hogwartsmod.apparition.PublicLocations.get(player.server).sendTo(player);
                 MagicData data = MagicData.get(player);
                 if (data != null) {
                     BlockPos light = data.getLumosLight();
@@ -159,6 +160,9 @@ public final class MagicEvents {
             if (data.consumeDodgeEnd(player.level().getGameTime())) {
                 Spells.ESQUIVA.finish(player);
             }
+            if (data.isCasting()) {
+                Spells.APARATACAO.tick(player, data);
+            }
             if (data.isShielding() && !usingWand) {
                 data.stopShield();
             }
@@ -167,6 +171,16 @@ public final class MagicEvents {
             }
             if (data.isDirty() && (data.isForceSync() || player.tickCount % 10 == 0)) {
                 ModNetwork.sync(player, data);
+            }
+        }
+
+        @SubscribeEvent
+        public static void interruptApparition(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
+            if (event.getEntity() instanceof ServerPlayer player) {
+                MagicData data = MagicData.get(player);
+                if (data != null && data.isCasting()) {
+                    Spells.APARATACAO.interrupt(player, data, "message.hogwartsmod.apparate_hurt");
+                }
             }
         }
 

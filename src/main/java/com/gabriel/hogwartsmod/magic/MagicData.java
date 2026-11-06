@@ -263,6 +263,83 @@ public class MagicData {
         return now < invulnerableUntil;
     }
 
+    // -- Aparatação
+
+    private final java.util.List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> places = new java.util.ArrayList<>();
+    private boolean apparitionLicense;
+    @Nullable
+    private net.minecraft.world.phys.Vec3 castTarget;
+    private float castYaw;
+    private long castEnd;
+    @Nullable
+    private net.minecraft.world.phys.Vec3 castFrom;
+
+    public java.util.List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> getPlaces() {
+        return java.util.List.copyOf(places);
+    }
+
+    public void addPlace(com.gabriel.hogwartsmod.apparition.ApparitionPoint point) {
+        places.add(point);
+        markForSync();
+    }
+
+    public void renamePlace(int index, String name) {
+        if (index >= 0 && index < places.size()) {
+            places.set(index, places.get(index).withName(name));
+            markForSync();
+        }
+    }
+
+    public void removePlace(int index) {
+        if (index >= 0 && index < places.size()) {
+            places.remove(index);
+            markForSync();
+        }
+    }
+
+    public boolean hasApparitionLicense() {
+        return apparitionLicense;
+    }
+
+    public void setApparitionLicense(boolean value) {
+        apparitionLicense = value;
+        markForSync();
+    }
+
+    public void startCast(net.minecraft.world.phys.Vec3 from, net.minecraft.world.phys.Vec3 target, float yaw, long end) {
+        castFrom = from;
+        castTarget = target;
+        castYaw = yaw;
+        castEnd = end;
+    }
+
+    public boolean isCasting() {
+        return castTarget != null;
+    }
+
+    @Nullable
+    public net.minecraft.world.phys.Vec3 getCastTarget() {
+        return castTarget;
+    }
+
+    @Nullable
+    public net.minecraft.world.phys.Vec3 getCastFrom() {
+        return castFrom;
+    }
+
+    public float getCastYaw() {
+        return castYaw;
+    }
+
+    public long getCastEnd() {
+        return castEnd;
+    }
+
+    public void clearCast() {
+        castTarget = null;
+        castFrom = null;
+    }
+
     // -- Ensino e profissão
 
     public Profession getProfession() {
@@ -432,6 +509,10 @@ public class MagicData {
         teachReadyAt.forEach(teachTag::putLong);
         tag.put("TeachCooldowns", teachTag);
         tag.putString("Profession", profession.getId());
+        net.minecraft.nbt.ListTag placeTag = new net.minecraft.nbt.ListTag();
+        places.forEach(p -> placeTag.add(p.save()));
+        tag.put("Places", placeTag);
+        tag.putBoolean("ApparitionLicense", apparitionLicense);
         tag.putLong("LumosUntil", lumosUntil);
         if (lumosLight != null) {
             tag.put("LumosLight", NbtUtils.writeBlockPos(lumosLight));
@@ -462,6 +543,12 @@ public class MagicData {
         teachReadyAt.clear();
         CompoundTag teachTag = tag.getCompound("TeachCooldowns");
         teachTag.getAllKeys().forEach(id -> teachReadyAt.put(id, teachTag.getLong(id)));
+        places.clear();
+        net.minecraft.nbt.ListTag placeTag = tag.getList("Places", net.minecraft.nbt.Tag.TAG_COMPOUND);
+        for (int i = 0; i < placeTag.size(); i++) {
+            places.add(com.gabriel.hogwartsmod.apparition.ApparitionPoint.load(placeTag.getCompound(i)));
+        }
+        apparitionLicense = tag.getBoolean("ApparitionLicense");
         Profession loaded = Profession.byId(tag.getString("Profession"));
         profession = loaded == null ? Profession.NONE : loaded;
         lumosUntil = tag.getLong("LumosUntil");

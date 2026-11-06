@@ -110,6 +110,7 @@ public final class MagicHud implements IGuiOverlay {
     }
 
     private static String keyFor(Spell ability) {
-        return ModKeys.DODGE.getTranslatedKeyMessage().getString();
+        return (ability == com.gabriel.hogwartsmod.spell.Spells.APARATACAO ? ModKeys.APPARATE : ModKeys.DODGE)
+                .getTranslatedKeyMessage().getString();
     }
 }
