@@ -394,5 +394,7 @@
   "screen.hogwartsmod.mission_editor.search": "Search item",
   "screen.hogwartsmod.mission_editor.no_results": "No item found",
   "screen.hogwartsmod.mission_editor.remove": "Remove NPC",
-  "screen.hogwartsmod.mission_editor.remove_confirm": "Confirm removal"
+  "screen.hogwartsmod.mission_editor.remove_confirm": "Confirm removal",
+  "hud.hogwartsmod.mission_ready": "Ready! Go back to %s",
+  "hud.hogwartsmod.mission_go": "Go to %s"
 }
