@@ -30,24 +30,18 @@ import net.minecraftforge.network.PacketDistributor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProfessorNpcEntity extends PathfinderMob {
+public class ProfessorNpcEntity extends com.gabriel.hogwartsmod.npc.HogwartsNpc {
     private final List<String> spells = new ArrayList<>();
 
     public ProfessorNpcEntity(EntityType<? extends ProfessorNpcEntity> type, Level level) {
         super(type, level);
-        setPersistenceRequired();
         setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(ModItems.WAND.get()));
         setDropChance(EquipmentSlot.MAINHAND, 0f);
     }
 
-    public static AttributeSupplier.Builder createAttributes() {
-        return PathfinderMob.createMobAttributes().add(Attributes.MAX_HEALTH, 20).add(Attributes.MOVEMENT_SPEED, 0);
-    }
-
     @Override
-    protected void registerGoals() {
-        goalSelector.addGoal(1, new LookAtPlayerGoal(this, Player.class, 8f, 1f));
-        goalSelector.addGoal(2, new RandomLookAroundGoal(this));
+    protected String defaultModel() {
+        return "professor";
     }
 
     // -- Feitiços ensinados
@@ -75,10 +69,6 @@ public class ProfessorNpcEntity extends PathfinderMob {
         spells.remove(spell.getId());
     }
 
-    public String getNpcName() {
-        return getCustomName() != null ? getCustomName().getString() : getName().getString();
-    }
-
     // -- Interação
 
     @Override
@@ -91,34 +81,12 @@ public class ProfessorNpcEntity extends PathfinderMob {
                 player.displayClientMessage(Component.translatable("entity.hogwartsmod.professor_npc.disabled"), true);
             } else {
                 getLookControl().setLookAt(player);
+                talk();
                 ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
                         new OpenNpcPacket(getId(), getNpcName(), getSpells()));
             }
         }
         return InteractionResult.sidedSuccess(level().isClientSide);
-    }
-
-    @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (source.getEntity() instanceof Player player && player.isCreative() && player.isShiftKeyDown()) {
-            discard();
-            return true;
-        }
-        return source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) && super.hurt(source, amount);
-    }
-
-    @Override
-    public boolean isPushable() {
-        return false;
-    }
-
-    @Override
-    protected void doPush(net.minecraft.world.entity.Entity entity) {
-    }
-
-    @Override
-    public boolean removeWhenFarAway(double distance) {
-        return false;
     }
 
     // -- Salvamento
