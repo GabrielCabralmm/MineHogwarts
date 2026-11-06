@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "7";
+    private static final String VERSION = "8";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 

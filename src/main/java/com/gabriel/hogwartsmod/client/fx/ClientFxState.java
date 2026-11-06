@@ -77,7 +77,7 @@ public final class ClientFxState {
     public static boolean isDodging(int entityId) {
         State state = STATES.get(entityId);
         ClientLevel level = Minecraft.getInstance().level;
-        return state != null && state.dodge && level != null && level.getGameTime() - state.dodgeStart < 20;
+        return state != null && state.dodge && level != null && level.getGameTime() - state.dodgeStart < 30;
     }
 
     private ClientFxState() {

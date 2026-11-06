@@ -54,8 +54,8 @@ public final class ClientPacketHandler {
         Minecraft.getInstance().setScreen(new NpcScreen(entity, name, spells));
     }
 
-    public static void handleDodgeMove(float dx, float dz, float distance, int ticks) {
-        ClientDodge.start(dx, dz, distance, ticks);
+    public static void handleDodgeMove(float dx, float dy, float dz, float distance, int ticks) {
+        ClientDodge.start(dx, dy, dz, distance, ticks);
     }
 
     public static void handlePublicLocations(List<com.gabriel.hogwartsmod.apparition.ApparitionPoint> points) {

@@ -35,11 +35,12 @@ public final class ClientDodge {
         float forward = player.input.forwardImpulse;
         float sin = Mth.sin(player.getYRot() * Mth.DEG_TO_RAD);
         float cos = Mth.cos(player.getYRot() * Mth.DEG_TO_RAD);
-        ModNetwork.CHANNEL.sendToServer(new DodgePacket(left * cos - forward * sin, forward * cos + left * sin));
+        float vertical = -Mth.sin(player.getXRot() * Mth.DEG_TO_RAD);
+        ModNetwork.CHANNEL.sendToServer(new DodgePacket(left * cos - forward * sin, vertical, forward * cos + left * sin));
     }
 
-    public static void start(float dx, float dz, float distance, int ticks) {
-        velocity = new Vec3(dx, 0, dz).normalize().scale(distance / Math.max(1, ticks));
+    public static void start(float dx, float dy, float dz, float distance, int ticks) {
+        velocity = new Vec3(dx, dy, dz).normalize().scale(distance / Math.max(1, ticks));
         remaining = ticks;
     }
 
@@ -50,10 +51,10 @@ public final class ClientDodge {
             return;
         }
         remaining--;
-        double y = Math.max(player.getDeltaMovement().y, -0.08);
-        player.setDeltaMovement(velocity.x, y, velocity.z);
+        player.setDeltaMovement(velocity.x, velocity.y, velocity.z);
+        player.resetFallDistance();
         if (remaining == 0) {
-            player.setDeltaMovement(velocity.x * 0.25, player.getDeltaMovement().y, velocity.z * 0.25);
+            player.setDeltaMovement(velocity.x * 0.25, velocity.y * 0.15, velocity.z * 0.25);
         }
     }
 }

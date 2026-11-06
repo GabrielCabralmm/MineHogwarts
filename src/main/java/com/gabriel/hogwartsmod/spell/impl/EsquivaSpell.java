@@ -18,8 +18,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
 
 public class EsquivaSpell extends Spell {
-    public static final int DURATION = 6;
-    public static final int INVULNERABLE = 4;
+    public static final float SPEED = 0.7f;
     public static final int SMOKE = 0x2E2A36;
 
     public EsquivaSpell() {
@@ -31,15 +30,19 @@ public class EsquivaSpell extends Spell {
         return true;
     }
 
+    public int getDuration(MagicData data) {
+        return 6 + 2 * data.getMastery(this);
+    }
+
     public float getDistance(MagicData data) {
-        return 4f + data.getMastery(this) * (2f / 3f);
+        return SPEED * getDuration(data);
     }
 
     public int getCooldown(MagicData data) {
         return getCooldownTicks() - 10 * data.getMastery(this);
     }
 
-    public void tryDodge(ServerPlayer player, float dx, float dz) {
+    public void tryDodge(ServerPlayer player, float dx, float dy, float dz) {
         MagicData data = MagicData.get(player);
         if (data == null || !player.isAlive() || player.isSpectator() || player.isPassenger() || player.isSleeping()) {
             return;
@@ -59,14 +62,18 @@ public class EsquivaSpell extends Spell {
             player.displayClientMessage(Component.translatable("message.hogwartsmod.no_reserve"), true);
             return;
         }
-        Vec3 dir = new Vec3(dx, 0, dz);
-        dir = dir.lengthSqr() < 1.0e-4 ? Vec3.directionFromRotation(0, player.getYRot()).scale(-1) : dir.normalize();
+        Vec3 flat = new Vec3(dx, 0, dz);
+        flat = flat.lengthSqr() < 1.0e-4 ? Vec3.directionFromRotation(0, player.getYRot()).scale(-1) : flat.normalize();
+        float vertical = Math.max(-1f, Math.min(1f, Float.isFinite(dy) ? dy : 0f));
+        double horizontal = Math.sqrt(1 - vertical * vertical);
+        Vec3 dir = new Vec3(flat.x * horizontal, vertical, flat.z * horizontal);
+        int duration = getDuration(data);
         float distance = getDistance(data);
         data.setCooldown(this, now, getCooldown(data));
-        data.startDodge(now, DURATION, INVULNERABLE);
+        data.startDodge(now, duration, 4 + data.getMastery(this));
         data.addMastery(this, 1, getXpPerUse());
         ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
-                new DodgeMovePacket((float) dir.x, (float) dir.z, distance, DURATION));
+                new DodgeMovePacket((float) dir.x, (float) dir.y, (float) dir.z, distance, duration));
         SpellFx.sendState(player, PlayerFxPacket.Kind.DODGE, true);
         if (player.level() instanceof ServerLevel server) {
             puff(server, player.position());
@@ -75,6 +82,7 @@ public class EsquivaSpell extends Spell {
     }
 
     public void finish(ServerPlayer player) {
+        player.resetFallDistance();
         SpellFx.sendState(player, PlayerFxPacket.Kind.DODGE, false);
         if (player.level() instanceof ServerLevel server) {
             puff(server, player.position());

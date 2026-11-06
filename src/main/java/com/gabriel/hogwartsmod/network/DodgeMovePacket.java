@@ -8,21 +8,22 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record DodgeMovePacket(float dx, float dz, float distance, int ticks) {
+public record DodgeMovePacket(float dx, float dy, float dz, float distance, int ticks) {
 
     public static void encode(DodgeMovePacket packet, FriendlyByteBuf buf) {
         buf.writeFloat(packet.dx);
+        buf.writeFloat(packet.dy);
         buf.writeFloat(packet.dz);
         buf.writeFloat(packet.distance);
         buf.writeVarInt(packet.ticks);
     }
 
     public static DodgeMovePacket decode(FriendlyByteBuf buf) {
-        return new DodgeMovePacket(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readVarInt());
+        return new DodgeMovePacket(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readVarInt());
     }
 
     public static void handle(DodgeMovePacket packet, Supplier<NetworkEvent.Context> ctx) {
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleDodgeMove(packet.dx, packet.dz, packet.distance, packet.ticks));
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientPacketHandler.handleDodgeMove(packet.dx, packet.dy, packet.dz, packet.distance, packet.ticks));
         ctx.get().setPacketHandled(true);
     }
 }
