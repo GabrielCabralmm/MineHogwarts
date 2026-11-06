@@ -307,21 +307,23 @@ public class GrimoireScreen extends Screen {
             if (a.tracked()) {
                 HiRes.image(g, ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/check.png"), lx + 3, y - 1, 9, 9);
             }
-            HiRes.text(g, HiRes.ellipsize(a.mission().title().isBlank() ? "?" : a.mission().title(), HiRes.Style.BOLD, pageW - 40),
-                    HiRes.Style.BOLD, lx + 15, y, a.tracked() ? INK : MUTED);
+            float scale = HiRes.TEXT_SIZE / 7f;
+            HiRes.text(g, HiRes.ellipsize(a.mission().title().isBlank() ? "?" : a.mission().title(), HiRes.Style.BOLD, (pageW - 40) * scale),
+                    HiRes.Style.BOLD, 7f, lx + 15, y + 1, a.tracked() ? INK : MUTED);
             if (ready) {
-                HiRes.image(g, ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/check.png"), lx + pageW - 9, y, 9, 9);
+                HiRes.image(g, ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/check.png"), lx + pageW - 8, y, 8, 8);
             } else {
-                HiRes.right(g, progress + "/" + a.mission().amount(), HiRes.Style.BOLD, lx + pageW, y, GOLD);
+                String count = progress + "/" + a.mission().amount();
+                HiRes.text(g, count, HiRes.Style.BOLD, 7f, lx + pageW - HiRes.width(count, HiRes.Style.BOLD, 7f), y + 1, GOLD);
             }
-            HiRes.text(g, HiRes.ellipsize(a.npcName(), HiRes.Style.ITALIC, pageW - 18), HiRes.Style.ITALIC, 7f, lx + 15, y + 10, MUTED);
+            HiRes.text(g, HiRes.ellipsize(a.npcName(), HiRes.Style.ITALIC, (pageW - 18) * HiRes.TEXT_SIZE / 6.5f), HiRes.Style.ITALIC, 6.5f, lx + 15, y + 10, MUTED);
             int bx = lx + 3;
             int bw = pageW - 6;
             g.fill(bx, y + 19, bx + bw, y + 22, PAGE_LINE);
             g.fill(bx, y + 19, bx + Math.round(bw * Math.min(1f, progress / (float) a.mission().amount())), y + 22, ready ? GREEN : GOLD);
         }
 
-        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.track_hint"), HiRes.Style.ITALIC, 7f, lx + pageW / 2f, top + BOOK_H - 20, MUTED);
+        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.track_hint"), HiRes.Style.ITALIC, 6.5f, lx + pageW / 2f, top + BOOK_H - 20, MUTED);
 
         com.gabriel.hogwartsmod.mission.ActiveMission a = list.get(missionIndex);
         com.gabriel.hogwartsmod.mission.Mission m = a.mission();
@@ -338,7 +340,7 @@ public class GrimoireScreen extends Screen {
             HiRes.centered(g, line, HiRes.Style.ITALIC, cx, y, INK);
             y += 10;
         }
-        y = Math.max(y + 4, top + 96);
+        y += 6;
         HiRes.text(g, tr("screen.hogwartsmod.missions.objective"), HiRes.Style.BOLD, rx, y, INK);
         y += 11;
         for (String line : HiRes.wrap(m.objectiveText().getString(), HiRes.Style.REGULAR, rw)) {
@@ -347,13 +349,13 @@ public class GrimoireScreen extends Screen {
         }
         y += 3;
         HiRes.text(g, tr("screen.hogwartsmod.missions.reward"), HiRes.Style.BOLD, rx, y, INK);
-        MissionScreen.drawReward(g, rx, y + 11, m);
+        int rewardEnd = y + 11 + MissionScreen.drawReward(g, rx, y + 11, m);
         boolean ready = missionProgress(a) >= m.amount();
-        String footer = ready ? Component.translatable("screen.hogwartsmod.grimoire.mission_ready", a.npcName()).getString()
+        String footer = ready ? Component.translatable("hud.hogwartsmod.mission_ready", a.npcName()).getString()
                 : tr("screen.hogwartsmod.grimoire.mission_going");
-        List<String> footerLines = HiRes.wrap(footer, HiRes.Style.ITALIC, rw);
-        for (int i = 0; i < footerLines.size(); i++) {
-            HiRes.centered(g, footerLines.get(i), HiRes.Style.ITALIC, cx, top + BOOK_H - 34 - (footerLines.size() - 1 - i) * 10, ready ? GREEN : MUTED);
+        int footerY = top + BOOK_H - 32;
+        if (rewardEnd <= footerY - 2) {
+            HiRes.centered(g, HiRes.ellipsize(footer, HiRes.Style.ITALIC, rw * HiRes.TEXT_SIZE / 7f), HiRes.Style.ITALIC, 7f, cx, footerY, ready ? GREEN : MUTED);
         }
         boolean armed = a.key().equals(cancelArmed);
         String cancel = tr(armed ? "screen.hogwartsmod.grimoire.cancel_confirm" : "screen.hogwartsmod.grimoire.cancel");
