@@ -231,8 +231,13 @@ public class BroomEntity extends Entity {
         setYRot(getYRot() + turn);
         rollOld = roll;
         roll = Mth.lerp(0.2f, roll, Mth.clamp(-turn * 4.5f * Math.min(1f, speed / type.getMaxSpeed() + 0.2f), -30f, 30f));
-        Vec3 look = Vec3.directionFromRotation(Mth.clamp(targetPitch, -70f, 70f), getYRot());
-        Vec3 target = look.scale(speed).add(0, vertical * 0.35, 0);
+        Vec3 target;
+        if (vertical != 0) {
+            Vec3 flat = Vec3.directionFromRotation(0, getYRot());
+            target = flat.scale(speed).add(0, vertical * Math.max(0.35, speed * 0.6), 0);
+        } else {
+            target = Vec3.directionFromRotation(Mth.clamp(targetPitch, -70f, 70f), getYRot()).scale(speed);
+        }
         if (speed < 0.05f && vertical == 0) {
             target = new Vec3(0, Math.sin(tickCount * 0.12) * 0.012, 0);
         }

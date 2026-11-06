@@ -30,7 +30,7 @@ public final class ClientBroom {
             return;
         }
         float forward = Math.signum(player.input.forwardImpulse);
-        float vertical = (player.input.jumping ? 1f : 0f) - (player.input.shiftKeyDown ? 1f : 0f);
+        float vertical = (player.input.jumping ? 1f : 0f) - (Minecraft.getInstance().options.keyShift.isDown() ? 1f : 0f);
         broom.fly(forward, vertical, ModKeys.isModifierDown(), player.getYRot(), player.getXRot());
     }
 
@@ -62,9 +62,7 @@ public final class ClientBroom {
         }
         boolean riding = mc.player.getVehicle() instanceof BroomEntity;
         if (riding && !wasRiding) {
-            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.translatable("message.hogwartsmod.broom_mounted",
-                    ModKeys.BROOM_DISMOUNT.getTranslatedKeyMessage(), mc.options.keyJump.getTranslatedKeyMessage(),
-                    mc.options.keyShift.getTranslatedKeyMessage()), false);
+            mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.empty(), false);
         }
         wasRiding = riding;
         fovBoostOld = fovBoost;
