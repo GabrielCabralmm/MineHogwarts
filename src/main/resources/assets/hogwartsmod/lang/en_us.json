@@ -246,5 +246,15 @@
   "screen.hogwartsmod.zones.rule.criaturas": "Creatures",
   "screen.hogwartsmod.zones.redefine": "Reset to selection",
   "screen.hogwartsmod.zones.remove": "Remove zone",
-  "screen.hogwartsmod.zones.confirm_remove": "Click again to remove"
+  "screen.hogwartsmod.zones.confirm_remove": "Click again to remove",
+  "screen.hogwartsmod.zones.expand_title": "Expand zone",
+  "screen.hogwartsmod.zones.inside": "Selection starts in %s",
+  "screen.hogwartsmod.zones.expand": "Join to %s",
+  "screen.hogwartsmod.zones.parts": "%s parts · %s blocks",
+  "screen.hogwartsmod.zones.undo": "Undo last part",
+  "message.hogwartsmod.zone_undone": "Last part of %s undone",
+  "message.hogwartsmod.zone_not_touching": "One of the corners must be inside %s",
+  "message.hogwartsmod.zone_too_many": "A zone can have at most %s parts",
+  "message.hogwartsmod.zone_expanded": "Selection joined to %s",
+  "message.hogwartsmod.zone_inside": "inside %s"
 }

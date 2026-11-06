@@ -36,6 +36,14 @@ public final class ZoneEditing {
                 }
             }
             case CLEAR_SELECTION -> ZoneSelections.clear(player);
+            case EXPAND -> expand(player, name);
+            case UNDO_PART -> {
+                Zone zone = data.find(name);
+                if (zone != null && zone.boxes().size() > 1) {
+                    data.put(zone.withoutLast());
+                    feedback(player, Component.translatable("message.hogwartsmod.zone_undone", zone.name()));
+                }
+            }
         }
     }
 
@@ -74,6 +82,31 @@ public final class ZoneEditing {
         data.put(Zone.of(zone.name(), selection.dimension(), selection.first(), selection.second(), zone.rules()));
         ZoneSelections.clear(player);
         feedback(player, Component.translatable("message.hogwartsmod.zone_redefined", zone.name()));
+        return true;
+    }
+
+    public static boolean expand(ServerPlayer player, String name) {
+        ZoneSelections.Selection selection = ZoneSelections.get(player);
+        ZoneData data = ZoneData.get(player.server);
+        Zone zone = data.find(name);
+        if (zone == null) {
+            return false;
+        }
+        if (selection == null || !selection.complete()) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_need_selection"));
+            return false;
+        }
+        if (!zone.contains(selection.dimension(), selection.first()) && !zone.contains(selection.dimension(), selection.second())) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_not_touching", zone.name()));
+            return false;
+        }
+        if (zone.boxes().size() >= Zone.MAX_PARTS) {
+            feedback(player, Component.translatable("message.hogwartsmod.zone_too_many", Zone.MAX_PARTS));
+            return false;
+        }
+        data.put(zone.plus(selection.first(), selection.second()));
+        ZoneSelections.clear(player);
+        feedback(player, Component.translatable("message.hogwartsmod.zone_expanded", zone.name()));
         return true;
     }
 

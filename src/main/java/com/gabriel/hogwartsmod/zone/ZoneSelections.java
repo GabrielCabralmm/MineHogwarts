@@ -44,6 +44,12 @@ public final class ZoneSelections {
             message = message.copy().append(" · ").append(Component.translatable("message.hogwartsmod.zone_size",
                     Math.abs(a.getX() - b.getX()) + 1, Math.abs(a.getY() - b.getY()) + 1, Math.abs(a.getZ() - b.getZ()) + 1));
         }
+        for (Zone zone : ZoneData.get(player.server).all()) {
+            if (zone.contains(selection.dimension(), pos)) {
+                message = message.copy().append(" · ").append(Component.translatable("message.hogwartsmod.zone_inside", zone.name()));
+                break;
+            }
+        }
         player.displayClientMessage(message.copy().withStyle(ChatFormatting.GOLD), true);
     }
 

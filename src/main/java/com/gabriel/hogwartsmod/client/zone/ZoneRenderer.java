@@ -4,6 +4,7 @@ import com.gabriel.hogwartsmod.HogwartsMod;
 import com.gabriel.hogwartsmod.client.gui.ZoneScreen;
 import com.gabriel.hogwartsmod.item.ZoneWandItem;
 import com.gabriel.hogwartsmod.zone.Zone;
+import com.gabriel.hogwartsmod.zone.ZoneShape;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
@@ -34,6 +35,18 @@ public final class ZoneRenderer {
                 || mc.player.getOffhandItem().getItem() instanceof ZoneWandItem;
     }
 
+    private static void line(PoseStack.Pose pose, VertexConsumer lines, double[] e, float r, float g, float b, float a) {
+        float nx = (float) (e[3] - e[0]);
+        float ny = (float) (e[4] - e[1]);
+        float nz = (float) (e[5] - e[2]);
+        float len = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
+        nx /= len;
+        ny /= len;
+        nz /= len;
+        lines.vertex(pose.pose(), (float) e[0], (float) e[1], (float) e[2]).color(r, g, b, a).normal(pose.normal(), nx, ny, nz).endVertex();
+        lines.vertex(pose.pose(), (float) e[3], (float) e[4], (float) e[5]).color(r, g, b, a).normal(pose.normal(), nx, ny, nz).endVertex();
+    }
+
     @SubscribeEvent
     public static void render(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS || !visible()) {
@@ -50,12 +63,13 @@ public final class ZoneRenderer {
         String selected = mc.screen instanceof ZoneScreen screen ? screen.selectedName() : null;
         for (Zone zone : ClientZones.inDimension()) {
             boolean active = zone.name().equals(selected);
-            AABB box = zone.box();
-            if (active) {
-                LevelRenderer.renderLineBox(pose, lines, box, 1.0f, 0.85f, 0.4f, pulse);
-                LevelRenderer.renderLineBox(pose, lines, box.deflate(0.03), 1.0f, 0.95f, 0.7f, pulse * 0.5f);
-            } else {
-                LevelRenderer.renderLineBox(pose, lines, box, 0.45f, 0.7f, 1.0f, 0.8f);
+            float r = active ? 1.0f : 0.45f;
+            float gr = active ? 0.85f : 0.7f;
+            float b = active ? 0.4f : 1.0f;
+            float alpha = active ? pulse : 0.8f;
+            PoseStack.Pose last = pose.last();
+            for (double[] e : ZoneShape.of(zone).edges()) {
+                line(last, lines, e, r, gr, b, alpha);
             }
         }
         BlockPos a = ClientZones.first;

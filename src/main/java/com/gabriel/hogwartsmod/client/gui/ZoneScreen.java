@@ -29,6 +29,7 @@ public class ZoneScreen extends Screen {
     private static final int RULE_ROW = 17;
 
     private static final int INK = 0xFF38261A;
+    private static final int NAME = 0xFF7A2618;
     private static final int TITLE = 0xFF6E281E;
     private static final int MUTED = 0xFF82684C;
     private static final int HIGHLIGHT = 0xFFDCC696;
@@ -80,9 +81,9 @@ public class ZoneScreen extends Screen {
         nameBox = new EditBox(font, left + 21, top + 167, 122, 10, Component.empty());
         nameBox.setBordered(false);
         nameBox.setMaxLength(ZoneEditPacket.MAX_NAME);
-        nameBox.setTextColor(INK);
+        nameBox.setTextColor(NAME);
         nameBox.setHint(Component.translatable("screen.hogwartsmod.zones.name_hint").withStyle(s -> s.withColor(0xA08A6E)));
-        addRenderableWidget(nameBox);
+        addWidget(nameBox);
     }
 
     @Override
@@ -106,6 +107,20 @@ public class ZoneScreen extends Screen {
         }
         for (Zone zone : zones()) {
             if (zone.name().equals(selected)) {
+                return zone;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private Zone touching() {
+        if (!hasSelection() || minecraft == null || minecraft.level == null) {
+            return null;
+        }
+        String dim = minecraft.level.dimension().location().toString();
+        for (Zone zone : zones()) {
+            if (zone.contains(dim, ClientZones.first) || zone.contains(dim, ClientZones.second)) {
                 return zone;
             }
         }
@@ -167,13 +182,44 @@ public class ZoneScreen extends Screen {
     private void drawNew(GuiGraphics g, int mouseX, int mouseY) {
         int x = left + 18;
         int w = 128;
-        HiRes.text(g, tr("screen.hogwartsmod.zones.new"), HiRes.Style.BOLD, x, top + 148, INK);
+        Zone touching = touching();
+        nameBox.visible = touching == null;
+        if (touching != null && nameBox.isFocused()) {
+            nameBox.setFocused(false);
+        }
+        HiRes.text(g, tr(touching == null ? "screen.hogwartsmod.zones.new" : "screen.hogwartsmod.zones.expand_title"), HiRes.Style.BOLD, x, top + 148, INK);
         String status = selectionStatus();
         HiRes.right(g, status, HiRes.Style.ITALIC, x + w, top + 148, hasSelection() ? GOLD : MUTED);
+        if (touching != null) {
+            HiRes.text(g, HiRes.ellipsize(tr("screen.hogwartsmod.zones.inside", touching.name()), HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, x, top + 166, MUTED);
+            button(g, x, top + 181, w, tr("screen.hogwartsmod.zones.expand", touching.name()), true, TITLE, mouseX, mouseY);
+            return;
+        }
         g.fill(x, top + 164, x + w, top + 177, NOTE_EDGE);
         g.fill(x + 1, top + 165, x + w - 1, top + 176, nameBox.isFocused() ? NOTE_ON : NOTE);
+        drawName(g, x + 4, top + 166, w - 8);
         boolean ready = canCreate();
         button(g, x, top + 181, w, tr("screen.hogwartsmod.zones.create"), ready, TITLE, mouseX, mouseY);
+    }
+
+    private void drawName(GuiGraphics g, int x, int y, int w) {
+        String value = nameBox.getValue();
+        if (value.isEmpty() && !nameBox.isFocused()) {
+            HiRes.text(g, tr("screen.hogwartsmod.zones.name_hint"), HiRes.Style.ITALIC, x, y, MUTED);
+            return;
+        }
+        int cursor = Math.min(nameBox.getCursorPosition(), value.length());
+        String shown = value;
+        int offset = 0;
+        while (offset < cursor && HiRes.width(value.substring(offset, cursor), HiRes.Style.REGULAR) > w - 3) {
+            offset++;
+        }
+        shown = HiRes.ellipsize(value.substring(offset), HiRes.Style.REGULAR, w);
+        HiRes.text(g, shown, HiRes.Style.REGULAR, x, y, NAME);
+        if (nameBox.isFocused() && (System.currentTimeMillis() / 500) % 2 == 0) {
+            float cx = x + HiRes.width(value.substring(offset, cursor), HiRes.Style.REGULAR) + 0.5f;
+            g.fill((int) cx, y - 1, (int) cx + 1, y + 9, NAME);
+        }
     }
 
     private String selectionStatus() {
@@ -188,7 +234,7 @@ public class ZoneScreen extends Screen {
 
     private boolean canCreate() {
         String name = nameBox == null ? "" : nameBox.getValue().strip();
-        if (!hasSelection() || name.isEmpty()) {
+        if (!hasSelection() || name.isEmpty() || touching() != null) {
             return false;
         }
         for (Zone zone : zones()) {
@@ -211,11 +257,25 @@ public class ZoneScreen extends Screen {
             return;
         }
         HiRes.centered(g, HiRes.ellipsize(zone.name(), HiRes.Style.BOLD, w), HiRes.Style.BOLD, 10f, cx, top + 30, TITLE);
-        HiRes.centered(g, tr("screen.hogwartsmod.zones.size", zone.sizeX(), zone.sizeY(), zone.sizeZ()), HiRes.Style.ITALIC, cx, top + 44, MUTED);
-        BlockPos min = zone.min();
-        BlockPos max = zone.max();
-        String coords = min.getX() + " " + min.getY() + " " + min.getZ() + "  →  " + max.getX() + " " + max.getY() + " " + max.getZ();
-        HiRes.centered(g, HiRes.ellipsize(coords, HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, cx, top + 54, MUTED);
+        if (zone.boxes().size() == 1) {
+            Zone.Box box = zone.boxes().get(0);
+            BlockPos min = box.min();
+            BlockPos max = box.max();
+            HiRes.centered(g, tr("screen.hogwartsmod.zones.size", max.getX() - min.getX() + 1, max.getY() - min.getY() + 1, max.getZ() - min.getZ() + 1),
+                    HiRes.Style.ITALIC, cx, top + 44, MUTED);
+            String coords = min.getX() + " " + min.getY() + " " + min.getZ() + "  →  " + max.getX() + " " + max.getY() + " " + max.getZ();
+            HiRes.centered(g, HiRes.ellipsize(coords, HiRes.Style.ITALIC, w), HiRes.Style.ITALIC, cx, top + 54, MUTED);
+        } else {
+            HiRes.centered(g, tr("screen.hogwartsmod.zones.parts", zone.boxes().size(), String.format("%,d", zone.volume()).replace(',', '.')),
+                    HiRes.Style.ITALIC, cx, top + 44, MUTED);
+            String undo = tr("screen.hogwartsmod.zones.undo");
+            float uw = HiRes.width(undo, HiRes.Style.BOLD);
+            boolean hover = mouseX >= cx - uw / 2 - 2 && mouseX < cx + uw / 2 + 2 && mouseY >= top + 53 && mouseY < top + 64;
+            if (hover) {
+                g.fill((int) (cx - uw / 2 - 2), top + 53, (int) (cx + uw / 2 + 2), top + 64, HIGHLIGHT);
+            }
+            HiRes.centered(g, undo, HiRes.Style.BOLD, cx, top + 54, WINE);
+        }
 
         HiRes.text(g, tr("screen.hogwartsmod.zones.rules"), HiRes.Style.BOLD, x, top + 68, INK);
         ZoneRule[] rules = ZoneRule.values();
@@ -268,7 +328,14 @@ public class ZoneScreen extends Screen {
         if (button != 0) {
             return super.mouseClicked(mx, my, button);
         }
-        if (inside(mx, my, left + 18, top + 164, 128, 13)) {
+        Zone touching = touching();
+        if (touching != null && inside(mx, my, left + 18, top + 181, 128, 15)) {
+            send(ZoneEditPacket.Action.EXPAND, touching.name(), "", false);
+            selected = touching.name();
+            click();
+            return true;
+        }
+        if (touching == null && inside(mx, my, left + 18, top + 164, 128, 13)) {
             nameBox.setFocused(true);
             setFocused(nameBox);
             return super.mouseClicked(mx, my, button);
@@ -285,7 +352,7 @@ public class ZoneScreen extends Screen {
                 return true;
             }
         }
-        if (inside(mx, my, x, top + 181, 128, 15) && canCreate()) {
+        if (touching == null && inside(mx, my, x, top + 181, 128, 15) && canCreate()) {
             String name = nameBox.getValue().strip();
             send(ZoneEditPacket.Action.CREATE, name, "", false);
             selected = name;
@@ -294,6 +361,11 @@ public class ZoneScreen extends Screen {
             return true;
         }
         Zone zone = current();
+        if (zone != null && zone.boxes().size() > 1 && inside(mx, my, left + 176, top + 53, 126, 11)) {
+            send(ZoneEditPacket.Action.UNDO_PART, zone.name(), "", false);
+            click();
+            return true;
+        }
         if (zone != null) {
             int dx = left + 176;
             ZoneRule[] rules = ZoneRule.values();
