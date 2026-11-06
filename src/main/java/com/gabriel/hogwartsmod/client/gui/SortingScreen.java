@@ -17,9 +17,9 @@ import java.util.UUID;
 public class SortingScreen extends Screen {
     private static final int W = 320;
     private static final int H = 210;
-    private static final int CREST_W = 56;
-    private static final int CREST_H = 66;
-    private static final int GAP = 14;
+    private static final int CREST_W = 68;
+    private static final int CREST_H = 89;
+    private static final int GAP = 6;
 
     private static final int TITLE = 0xFF6E281E;
     private static final int MUTED = 0xFF82684C;
@@ -78,7 +78,7 @@ public class SortingScreen extends Screen {
     }
 
     private int crestY() {
-        return top + 70;
+        return top + 66;
     }
 
     @Override
@@ -97,29 +97,21 @@ public class SortingScreen extends Screen {
             House house = houses[i];
             int x = crestX(i);
             int y = crestY();
-            boolean hover = mouseX >= x - 4 && mouseX < x + CREST_W + 4 && mouseY >= y - 4 && mouseY < y + CREST_H + 22;
+            boolean hover = mouseX >= x - 3 && mouseX < x + CREST_W + 3 && mouseY >= y - 4 && mouseY < y + CREST_H + 6;
             float lift = hover ? 3f + (float) Math.sin((ticks + partialTick) * 0.25) * 0.8f : 0f;
             if (hover) {
-                g.fill(x - 5, y - 6, x + CREST_W + 5, y + CREST_H + 22, HIGHLIGHT);
+                g.fill(x - 3, y - 6, x + CREST_W + 3, y + CREST_H + 6, HIGHLIGHT);
             }
             if (house == current) {
-                g.fill(x - 5, y + CREST_H + 20, x + CREST_W + 5, y + CREST_H + 22, GOLD);
+                g.fill(x + 8, y + CREST_H + 4, x + CREST_W - 8, y + CREST_H + 6, GOLD);
             }
             g.pose().pushPose();
             g.pose().translate(0, -lift, 0);
             HiRes.image(g, tex("casa_" + house.getId()), x, y, CREST_W, CREST_H);
             g.pose().popPose();
-            HiRes.centered(g, house.getDisplayName().getString(), HiRes.Style.BOLD, x + CREST_W / 2f, y + CREST_H + 7, 0xFF000000 | darker(house.getColor()));
         }
         HiRes.centered(g, Component.translatable("screen.hogwartsmod.sorting.hint").getString(), HiRes.Style.ITALIC, left + W / 2f, top + H - 26, MUTED);
         super.render(g, mouseX, mouseY, partialTick);
-    }
-
-    private static int darker(int rgb) {
-        int r = (rgb >> 16 & 255) * 3 / 4;
-        int g = (rgb >> 8 & 255) * 3 / 4;
-        int b = (rgb & 255) * 3 / 4;
-        return r << 16 | g << 8 | b;
     }
 
     @Override
@@ -129,7 +121,7 @@ public class SortingScreen extends Screen {
             for (int i = 0; i < houses.length; i++) {
                 int x = crestX(i);
                 int y = crestY();
-                if (mx >= x - 4 && mx < x + CREST_W + 4 && my >= y - 4 && my < y + CREST_H + 22) {
+                if (mx >= x - 3 && mx < x + CREST_W + 3 && my >= y - 4 && my < y + CREST_H + 6) {
                     sent = true;
                     ModNetwork.CHANNEL.sendToServer(new SortingChoosePacket(target, houses[i].getId()));
                     if (minecraft != null) {
