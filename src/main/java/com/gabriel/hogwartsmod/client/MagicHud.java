@@ -124,6 +124,7 @@ public final class MagicHud implements IGuiOverlay {
             rows.add(new String[]{ModKeys.SPELL_MODIFIER.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_boost"});
             rows.add(new String[]{mc.options.keyShift.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_down"});
             rows.add(new String[]{mc.options.keyJump.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_up"});
+            rows.add(new String[]{mc.options.keyLeft.getTranslatedKeyMessage().getString() + "/" + mc.options.keyRight.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_turn"});
         }
         rows.add(new String[]{ModKeys.BROOM_DISMOUNT.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_dismount"});
         int y = labelY - 15;

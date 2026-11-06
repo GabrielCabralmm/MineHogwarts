@@ -29,6 +29,11 @@ public final class ClientBroom {
         if (player == null || broom.getControllingPassenger() != player) {
             return;
         }
+        float turn = Math.signum(player.input.leftImpulse) * broom.getBroomType().getHandling() * 0.65f;
+        if (turn != 0) {
+            player.setYRot(player.getYRot() - turn);
+            player.setYHeadRot(player.getYHeadRot() - turn);
+        }
         float forward = Math.signum(player.input.forwardImpulse);
         float vertical = (player.input.jumping ? 1f : 0f) - (Minecraft.getInstance().options.keyShift.isDown() ? 1f : 0f);
         broom.fly(forward, vertical, ModKeys.isModifierDown(), player.getYRot(), player.getXRot());

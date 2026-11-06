@@ -190,5 +190,6 @@
   "hud.hogwartsmod.broom_boost": "Impulso",
   "hud.hogwartsmod.broom_down": "Descer",
   "hud.hogwartsmod.broom_up": "Subir",
-  "hud.hogwartsmod.broom_dismount": "Sair da vassoura"
+  "hud.hogwartsmod.broom_dismount": "Sair da vassoura",
+  "hud.hogwartsmod.broom_turn": "Girar"
 }

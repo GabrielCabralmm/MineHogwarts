@@ -190,5 +190,6 @@
   "hud.hogwartsmod.broom_boost": "Boost",
   "hud.hogwartsmod.broom_down": "Down",
   "hud.hogwartsmod.broom_up": "Up",
-  "hud.hogwartsmod.broom_dismount": "Get off"
+  "hud.hogwartsmod.broom_dismount": "Get off",
+  "hud.hogwartsmod.broom_turn": "Turn"
 }
