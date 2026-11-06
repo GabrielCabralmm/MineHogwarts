@@ -1,6 +1,7 @@
 package com.gabriel.hogwartsmod.teach;
 
 import com.gabriel.hogwartsmod.block.PulpitBlockEntity;
+import com.gabriel.hogwartsmod.entity.ProfessorNpcEntity;
 import com.gabriel.hogwartsmod.fx.SpellFx;
 import com.gabriel.hogwartsmod.magic.MagicConfig;
 import com.gabriel.hogwartsmod.magic.MagicData;
@@ -118,6 +119,23 @@ public final class TeachingManager {
                 spell.getDisplayName().copy().withStyle(ChatFormatting.GOLD)));
         student.sendSystemMessage(Component.literal("  ").append(accept).append("  ").append(decline));
         student.playNotifySound(SoundEvents.NOTE_BLOCK_CHIME.get(), SoundSource.PLAYERS, 0.8f, 1.4f);
+    }
+
+    // -- Aula com o professor NPC
+
+    public static void startNpcLesson(ServerPlayer student, ProfessorNpcEntity npc, Spell spell) {
+        MagicData data = MagicData.get(student);
+        if (data == null || !MagicConfig.NPC_PROFESSOR_ENABLED.get() || !npc.teaches(spell)) {
+            return;
+        }
+        if (data.knows(spell) || data.getLevel() < spell.getRequiredLevel() || SESSIONS.containsKey(student.getUUID())) {
+            student.displayClientMessage(Component.translatable("teach.hogwartsmod.not_eligible", spell.getDisplayName()), true);
+            return;
+        }
+        INVITES.remove(student.getUUID());
+        SESSIONS.put(student.getUUID(), new Session(npc.getUUID(), spell.getId(), false, true));
+        ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> student),
+                new OpenTracePacket(spell.getId(), npc.getNpcName(), MagicConfig.TRACE_ATTEMPTS.get()));
     }
 
     // -- Aula no Púlpito

@@ -1,6 +1,7 @@
 package com.gabriel.hogwartsmod.registry;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.entity.ProfessorNpcEntity;
 import com.gabriel.hogwartsmod.entity.SpellProjectileEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -18,6 +19,12 @@ public final class ModEntities {
                     .clientTrackingRange(8)
                     .updateInterval(1)
                     .build("spell_projectile"));
+
+    public static final RegistryObject<EntityType<ProfessorNpcEntity>> PROFESSOR_NPC = ENTITIES.register("professor_npc",
+            () -> EntityType.Builder.<ProfessorNpcEntity>of(ProfessorNpcEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 1.8f)
+                    .clientTrackingRange(10)
+                    .build("professor_npc"));
 
     private ModEntities() {
     }

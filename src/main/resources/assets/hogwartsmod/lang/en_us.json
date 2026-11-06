@@ -123,5 +123,18 @@
   "screen.hogwartsmod.pulpit.start": "Start lesson",
   "screen.hogwartsmod.pulpit.need_professor": "Professors only",
   "teach.hogwartsmod.class_empty": "No student in the room can learn this spell",
-  "teach.hogwartsmod.class_started": "%s lesson started: %s student(s) invited"
+  "teach.hogwartsmod.class_started": "%s lesson started: %s student(s) invited",
+  "entity.hogwartsmod.professor_npc": "Professor",
+  "entity.hogwartsmod.professor_npc.disabled": "The professor NPC is disabled on this server",
+  "command.hogwartsmod.no_npc": "No professor NPC within 8 blocks",
+  "command.hogwartsmod.npc_created": "Professor NPC created: %s",
+  "command.hogwartsmod.npc_renamed": "Professor NPC renamed to %s",
+  "command.hogwartsmod.npc_spells": "%s teaches: %s",
+  "command.hogwartsmod.npc_removed": "Professor NPC removed: %s",
+  "screen.hogwartsmod.npc.subtitle": "Choose the spell you want to learn",
+  "screen.hogwartsmod.npc.empty": "This professor has no spells to teach yet.",
+  "screen.hogwartsmod.npc.detail": "Level %s · %s",
+  "screen.hogwartsmod.npc.learn": "Learn",
+  "screen.hogwartsmod.npc.level": "Level %s",
+  "screen.hogwartsmod.npc.hint": "Click a spell to start the lesson."
 }

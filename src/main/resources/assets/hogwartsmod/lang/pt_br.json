@@ -123,5 +123,18 @@
   "screen.hogwartsmod.pulpit.start": "Iniciar aula",
   "screen.hogwartsmod.pulpit.need_professor": "Só professores",
   "teach.hogwartsmod.class_empty": "Nenhum aluno na sala pode aprender esse feitiço",
-  "teach.hogwartsmod.class_started": "Aula de %s iniciada: %s aluno(s) convidado(s)"
+  "teach.hogwartsmod.class_started": "Aula de %s iniciada: %s aluno(s) convidado(s)",
+  "entity.hogwartsmod.professor_npc": "Professor",
+  "entity.hogwartsmod.professor_npc.disabled": "O professor NPC está desativado neste servidor",
+  "command.hogwartsmod.no_npc": "Nenhum professor NPC a até 8 blocos",
+  "command.hogwartsmod.npc_created": "Professor NPC criado: %s",
+  "command.hogwartsmod.npc_renamed": "Professor NPC renomeado para %s",
+  "command.hogwartsmod.npc_spells": "%s ensina: %s",
+  "command.hogwartsmod.npc_removed": "Professor NPC removido: %s",
+  "screen.hogwartsmod.npc.subtitle": "Escolha o feitiço que quer aprender",
+  "screen.hogwartsmod.npc.empty": "Este professor ainda não tem feitiços para ensinar.",
+  "screen.hogwartsmod.npc.detail": "Nível %s · %s",
+  "screen.hogwartsmod.npc.learn": "Aprender",
+  "screen.hogwartsmod.npc.level": "Nível %s",
+  "screen.hogwartsmod.npc.hint": "Clique em um feitiço para começar a aula."
 }

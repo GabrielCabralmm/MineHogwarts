@@ -8,6 +8,7 @@ import com.gabriel.hogwartsmod.particle.ModParticles;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import com.gabriel.hogwartsmod.client.render.PulpitRenderer;
+import com.gabriel.hogwartsmod.client.render.ProfessorNpcRenderer;
 import com.gabriel.hogwartsmod.registry.ModBlockEntities;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
@@ -32,6 +33,7 @@ public final class ClientSetup {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), NoopRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.PULPIT.get(), PulpitRenderer::new);
+        event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), ProfessorNpcRenderer::new);
     }
 
     @SubscribeEvent

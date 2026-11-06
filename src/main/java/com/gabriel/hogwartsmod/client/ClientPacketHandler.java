@@ -7,6 +7,7 @@ import com.gabriel.hogwartsmod.network.PlayerFxPacket;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 import com.gabriel.hogwartsmod.client.gui.TraceScreen;
+import com.gabriel.hogwartsmod.client.gui.NpcScreen;
 import com.gabriel.hogwartsmod.client.gui.PulpitScreen;
 import com.gabriel.hogwartsmod.block.PulpitBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -47,6 +48,10 @@ public final class ClientPacketHandler {
         if (mc.level != null && mc.level.getBlockEntity(pos) instanceof PulpitBlockEntity pulpit) {
             mc.setScreen(new PulpitScreen(pos, canEdit, pulpit));
         }
+    }
+
+    public static void handleOpenNpc(int entity, String name, List<String> spells) {
+        Minecraft.getInstance().setScreen(new NpcScreen(entity, name, spells));
     }
 
     public static void handleOpenTrace(String spell, String teacher, int attempts) {

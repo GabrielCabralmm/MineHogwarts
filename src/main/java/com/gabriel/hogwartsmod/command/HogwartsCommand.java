@@ -1,7 +1,14 @@
 package com.gabriel.hogwartsmod.command;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.entity.ProfessorNpcEntity;
 import com.gabriel.hogwartsmod.magic.MagicData;
+import com.gabriel.hogwartsmod.registry.ModEntities;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 import com.gabriel.hogwartsmod.magic.Profession;
 import com.gabriel.hogwartsmod.teach.TeachingManager;
 import com.gabriel.hogwartsmod.spell.Spell;
@@ -37,6 +44,8 @@ public final class HogwartsCommand {
             SharedSuggestionProvider.suggest(Stream.of(Profession.values()).map(Profession::getId), builder);
     private static final DynamicCommandExceptionType NO_DATA =
             new DynamicCommandExceptionType(name -> Component.translatable("command.hogwartsmod.no_data", name));
+    private static final SimpleCommandExceptionType NO_NPC =
+            new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.no_npc"));
     private static final SimpleCommandExceptionType UNKNOWN_PROFESSION =
             new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.unknown_profession"));
     private static final SimpleCommandExceptionType UNKNOWN_SPELL =
@@ -61,6 +70,23 @@ public final class HogwartsCommand {
                                 .executes(ctx -> TeachingManager.accept(ctx.getSource().getPlayerOrException()) ? 1 : 0))
                         .then(Commands.literal("recusar")
                                 .executes(ctx -> TeachingManager.decline(ctx.getSource().getPlayerOrException()) ? 1 : 0)))
+                .then(Commands.literal("npc").requires(STAFF)
+                        .then(Commands.literal("criar")
+                                .executes(ctx -> createNpc(ctx, null))
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> createNpc(ctx, StringArgumentType.getString(ctx, "nome")))))
+                        .then(Commands.literal("nome")
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(HogwartsCommand::renameNpc)))
+                        .then(Commands.literal("feitico")
+                                .then(Commands.literal("adicionar")
+                                        .then(Commands.argument("feitico", StringArgumentType.word()).suggests(SPELLS_OR_ALL)
+                                                .executes(ctx -> npcSpell(ctx, true))))
+                                .then(Commands.literal("remover")
+                                        .then(Commands.argument("feitico", StringArgumentType.word()).suggests(SPELLS_OR_ALL)
+                                                .executes(ctx -> npcSpell(ctx, false)))))
+                        .then(Commands.literal("remover")
+                                .executes(HogwartsCommand::removeNpc)))
                 .then(Commands.literal("profissao").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("profissao", StringArgumentType.word()).suggests(PROFESSIONS)
@@ -132,6 +158,66 @@ public final class HogwartsCommand {
         String key = learn ? "command.hogwartsmod.learned" : "command.hogwartsmod.forgot";
         ctx.getSource().sendSuccess(() -> Component.translatable(key, spells.size(), target.getDisplayName()), true);
         return spells.size();
+    }
+
+    private static ProfessorNpcEntity nearestNpc(CommandSourceStack source) throws CommandSyntaxException {
+        Vec3 pos = source.getPosition();
+        return source.getLevel().getEntitiesOfClass(ProfessorNpcEntity.class, new AABB(pos, pos).inflate(8)).stream()
+                .min(Comparator.comparingDouble(npc -> npc.distanceToSqr(pos)))
+                .orElseThrow(NO_NPC::create);
+    }
+
+    private static int createNpc(CommandContext<CommandSourceStack> ctx, @Nullable String name) throws CommandSyntaxException {
+        CommandSourceStack source = ctx.getSource();
+        ProfessorNpcEntity npc = ModEntities.PROFESSOR_NPC.get().create(source.getLevel());
+        if (npc == null) {
+            return 0;
+        }
+        Vec3 pos = source.getPosition();
+        float yaw = source.getRotation().y + 180f;
+        npc.moveTo(pos.x, pos.y, pos.z, yaw, 0f);
+        npc.setYHeadRot(yaw);
+        npc.setYBodyRot(yaw);
+        npc.setCustomName(Component.literal(name != null ? name : Component.translatable("entity.hogwartsmod.professor_npc").getString()));
+        npc.setCustomNameVisible(true);
+        source.getLevel().addFreshEntity(npc);
+        source.sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_created", npc.getNpcName()), true);
+        return 1;
+    }
+
+    private static int renameNpc(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ProfessorNpcEntity npc = nearestNpc(ctx.getSource());
+        npc.setCustomName(Component.literal(StringArgumentType.getString(ctx, "nome")));
+        npc.setCustomNameVisible(true);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_renamed", npc.getNpcName()), true);
+        return 1;
+    }
+
+    private static int npcSpell(CommandContext<CommandSourceStack> ctx, boolean add) throws CommandSyntaxException {
+        ProfessorNpcEntity npc = nearestNpc(ctx.getSource());
+        List<Spell> spells = resolve(StringArgumentType.getString(ctx, "feitico"));
+        for (Spell spell : spells) {
+            if (add) {
+                npc.addSpell(spell);
+            } else {
+                npc.removeSpell(spell);
+            }
+        }
+        String list = npc.getSpells().stream().map(id -> {
+            Spell spell = Spells.get(id);
+            return spell == null ? id : spell.getDisplayName().getString();
+        }).collect(Collectors.joining(", "));
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_spells", npc.getNpcName(),
+                list.isEmpty() ? "-" : list), true);
+        return spells.size();
+    }
+
+    private static int removeNpc(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ProfessorNpcEntity npc = nearestNpc(ctx.getSource());
+        String name = npc.getNpcName();
+        npc.discard();
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_removed", name), true);
+        return 1;
     }
 
     private static int setProfession(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
