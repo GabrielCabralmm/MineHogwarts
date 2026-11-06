@@ -194,10 +194,10 @@ public class TraceScreen extends Screen {
         if (progress > 0 || learned) {
             Path2D done = path(0, learned ? n - 1 : progress, s);
             g.setStroke(new BasicStroke(7f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(new Color(0xF0, 0xC8, 0x5A, 70));
+            g.setColor(new Color(0x3A, 0xA8, 0xFF, 80));
             g.draw(done);
             g.setStroke(new BasicStroke(3f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(new Color(0xBE, 0x8C, 0x28, 230));
+            g.setColor(new Color(0x1E, 0x7B, 0xFF, 230));
             g.draw(done);
         }
 
@@ -230,8 +230,8 @@ public class TraceScreen extends Screen {
         List<float[]> smooth = smooth(stroke);
         boolean bad = state == State.MISSED || state == State.FAILED;
         Color glow = bad ? new Color(0x8E2A2A) : spellColor;
-        Color core = bad ? new Color(0xF2C8C0) : new Color(0xFFFDF4);
-        Color deep = new Color((int) (glow.getRed() * 0.72f), (int) (glow.getGreen() * 0.72f), (int) (glow.getBlue() * 0.72f));
+        Color core = bad ? new Color(0xF2C8C0) : BLUE_CORE;
+        Color deep = bad ? glow : BLUE;
         int count = smooth.size();
         int chunks = Math.min(16, count - 1);
         for (int layer = 0; layer < 4; layer++) {
@@ -273,7 +273,9 @@ public class TraceScreen extends Screen {
         }
     }
 
-    private static final Color AURA = new Color(0xF0C85A);
+    private static final Color AURA = new Color(0x3AA8FF);
+    private static final Color BLUE = new Color(0x1E7BFF);
+    private static final Color BLUE_CORE = new Color(0x9EE6FF);
 
     private static Color withAlpha(Color color, int alpha) {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), Math.max(0, Math.min(255, alpha)));
@@ -388,9 +390,6 @@ public class TraceScreen extends Screen {
         long now = System.nanoTime();
         float dt = lastFrame == 0 ? 0 : Math.min(0.1f, (now - lastFrame) / 1_000_000_000f);
         lastFrame = now;
-        float r = ((spell.getColor() >> 16) & 0xFF) / 255f;
-        float gr = ((spell.getColor() >> 8) & 0xFF) / 255f;
-        float b = (spell.getColor() & 0xFF) / 255f;
         sparks.removeIf(p -> p[4] >= p[5]);
         for (float[] p : sparks) {
             p[4] += dt;
@@ -399,7 +398,7 @@ public class TraceScreen extends Screen {
             p[2] *= 0.92f;
             p[3] *= 0.92f;
             float life = 1f - p[4] / p[5];
-            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.6f + 0.4f * r, 0.6f + 0.4f * gr, 0.6f + 0.4f * b, life);
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, life);
             orbTinted(g, LIGHT_ORB, canvasX() + p[0], canvasY() + p[1], 2.5f + 3f * life);
         }
         com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
