@@ -89,7 +89,7 @@ public class GrimoireScreen extends Screen {
 
     @Override
     protected void init() {
-        left = (width - BOOK_W) / 2 - 8;
+        left = (width - BOOK_W) / 2;
         top = (height - BOOK_H) / 2;
         nameBox = new EditBox(font, left + 19, top + BOOK_H - 41, BOOK_W / 2 - 32, 10, Component.empty());
         nameBox.setBordered(false);
@@ -180,9 +180,16 @@ public class GrimoireScreen extends Screen {
         return Math.round(HiRes.width(tabLabel(t), HiRes.Style.BOLD, TAB_TEXT_SIZE)) + TAB_PAD + (isLocked(t) ? LOCK_SPACE : 0);
     }
 
+    private static boolean onLeft(Tab t) {
+        return t == Tab.HOUSES;
+    }
+
     private int tabTop(Tab t) {
         int y = top + 10;
         for (Tab other : Tab.values()) {
+            if (onLeft(other) != onLeft(t)) {
+                continue;
+            }
             if (other == t) {
                 return y;
             }
@@ -194,10 +201,23 @@ public class GrimoireScreen extends Screen {
     private void drawTabs(GuiGraphics g) {
         for (Tab t : Tab.values()) {
             boolean on = t == tab;
-            int x0 = left + BOOK_W - 10;
-            int x1 = left + BOOK_W + (on ? 14 : 11);
             int y0 = tabTop(t);
             int h = tabHeight(t);
+            if (onLeft(t)) {
+                int lx0 = left - (on ? 14 : 11);
+                int lx1 = left + 10;
+                g.fill(lx0, y0, lx1, y0 + h, NOTE_EDGE);
+                g.fill(lx0 + 1, y0 + 1, lx1, y0 + h - 1, on ? NOTE_ON : NOTE);
+                g.fill(lx0 + 1, y0 + h - 4, lx0 + 4, y0 + h - 1, NOTE_EDGE);
+                g.pose().pushPose();
+                g.pose().translate(lx0 + 1.5f, y0 + h - TAB_PAD / 2f, 0);
+                g.pose().mulPose(Axis.ZP.rotationDegrees(-90));
+                HiRes.text(g, tabLabel(t), HiRes.Style.BOLD, TAB_TEXT_SIZE, 0, 0, INK);
+                g.pose().popPose();
+                continue;
+            }
+            int x0 = left + BOOK_W - 10;
+            int x1 = left + BOOK_W + (on ? 14 : 11);
             g.fill(x0, y0, x1, y0 + h, NOTE_EDGE);
             g.fill(x0, y0 + 1, x1 - 1, y0 + h - 1, on ? NOTE_ON : NOTE);
             g.fill(x1 - 4, y0 + h - 4, x1 - 1, y0 + h - 1, NOTE_EDGE);
@@ -818,7 +838,8 @@ public class GrimoireScreen extends Screen {
     public boolean mouseClicked(double mx, double my, int button) {
         for (Tab t : Tab.values()) {
             int y0 = tabTop(t);
-            if (mx >= left + BOOK_W - 10 && mx < left + BOOK_W + 14 && my >= y0 && my < y0 + tabHeight(t)) {
+            boolean inX = onLeft(t) ? mx >= left - 14 && mx < left + 10 : mx >= left + BOOK_W - 10 && mx < left + BOOK_W + 14;
+            if (inX && my >= y0 && my < y0 + tabHeight(t)) {
                 if (!isLocked(t)) {
                     tab = t;
                     armed = null;
