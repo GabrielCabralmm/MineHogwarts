@@ -149,7 +149,7 @@ public class TraceScreen extends Screen {
         if (state == State.READY && (ticks / 10) % 2 == 0) {
             float sx = canvasX() + guideX(0);
             float sy = canvasY() + guideY(0);
-            g.fill((int) sx - 1, (int) sy - 9, (int) sx + 1, (int) sy - 6, GOLD);
+            g.fill((int) sx - 1, (int) sy - 9, (int) sx + 1, (int) sy - 6, 0xFF1E7BFF);
         }
         HiRes.centered(g, feedback, state == State.LEARNED ? HiRes.Style.BOLD : HiRes.Style.ITALIC, cx, top + 190, feedbackColor);
         drawAttempts(g, cx, top + 204);
@@ -218,9 +218,10 @@ public class TraceScreen extends Screen {
         }
 
         dot(g, guideX(n - 1) * s, guideY(n - 1) * s, 3.2f * s, new Color(0x82, 0x68, 0x4C, 170), false);
-        dot(g, guideX(0) * s, guideY(0) * s, 9f * s, new Color(0xF0, 0xC8, 0x5A, 70), true);
-        dot(g, guideX(0) * s, guideY(0) * s, 4.5f * s, new Color(0xBE, 0x8C, 0x28, 255), true);
-        dot(g, guideX(0) * s, guideY(0) * s, 1.8f * s, new Color(0xFF, 0xF2, 0xC8, 255), true);
+        float k = darkness();
+        dot(g, guideX(0) * s, guideY(0) * s, 9f * s, mix(new Color(0x3A, 0xA8, 0xFF, 80), new Color(0x2A, 0x14, 0x30, 90), k), true);
+        dot(g, guideX(0) * s, guideY(0) * s, 4.5f * s, mix(new Color(0x1E, 0x7B, 0xFF, 255), new Color(0x16, 0x0C, 0x1A, 255), k), true);
+        dot(g, guideX(0) * s, guideY(0) * s, 1.8f * s, mix(new Color(0xE6, 0xF8, 0xFF, 255), new Color(0x3C, 0x22, 0x44, 255), k), true);
         g.dispose();
         canvas.end(holder[0]);
     }
@@ -276,6 +277,19 @@ public class TraceScreen extends Screen {
     private static final Color AURA = new Color(0x3AA8FF);
     private static final Color BLUE = new Color(0x1E7BFF);
     private static final Color BLUE_CORE = new Color(0x9EE6FF);
+
+    private float darkness() {
+        return switch (state) {
+            case DRAWING -> Math.min(1f, elapsed() / SHADOW_DELAY);
+            case MISSED, FAILED -> 1f;
+            default -> 0f;
+        };
+    }
+
+    private static Color mix(Color a, Color b, float k) {
+        return new Color((int) (a.getRed() + (b.getRed() - a.getRed()) * k), (int) (a.getGreen() + (b.getGreen() - a.getGreen()) * k),
+                (int) (a.getBlue() + (b.getBlue() - a.getBlue()) * k), (int) (a.getAlpha() + (b.getAlpha() - a.getAlpha()) * k));
+    }
 
     private static Color withAlpha(Color color, int alpha) {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), Math.max(0, Math.min(255, alpha)));
@@ -355,7 +369,7 @@ public class TraceScreen extends Screen {
             miss(tr("screen.hogwartsmod.trace.caught"));
             return;
         }
-        if ((int) shadow != drawnShadow) {
+        if ((int) shadow != drawnShadow || elapsed() < SHADOW_DELAY + 0.1f) {
             dirty = true;
         }
     }

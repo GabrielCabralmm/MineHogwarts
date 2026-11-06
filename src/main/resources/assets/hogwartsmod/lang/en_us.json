@@ -98,7 +98,7 @@
   "screen.hogwartsmod.trace.title": "%s Lesson",
   "screen.hogwartsmod.trace.teacher": "with %s",
   "screen.hogwartsmod.trace.hint": "Follow the path before the shadow catches you.",
-  "screen.hogwartsmod.trace.start_here": "Start at the golden dot.",
+  "screen.hogwartsmod.trace.start_here": "Start at the blue dot.",
   "screen.hogwartsmod.trace.accuracy": "Accuracy: %s%%",
   "screen.hogwartsmod.trace.left_path": "You left the path.",
   "screen.hogwartsmod.trace.shaky": "The movement was too shaky.",

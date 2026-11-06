@@ -98,7 +98,7 @@
   "screen.hogwartsmod.trace.title": "Aula de %s",
   "screen.hogwartsmod.trace.teacher": "com %s",
   "screen.hogwartsmod.trace.hint": "Siga o traço antes que a sombra te alcance.",
-  "screen.hogwartsmod.trace.start_here": "Comece pelo ponto dourado.",
+  "screen.hogwartsmod.trace.start_here": "Comece pelo ponto azul.",
   "screen.hogwartsmod.trace.accuracy": "Precisão: %s%%",
   "screen.hogwartsmod.trace.left_path": "Você saiu do traço.",
   "screen.hogwartsmod.trace.shaky": "O movimento ficou impreciso.",
