@@ -309,5 +309,22 @@
   "command.hogwartsmod.points_line": "%s: %s pontos",
   "command.hogwartsmod.points_reset": "Pontos de todas as casas zerados",
   "command.hogwartsmod.points_no_winner": "Nenhuma casa está sozinha na liderança",
-  "screen.hogwartsmod.grimoire.house_points_zero": "Nenhum ponto ainda"
+  "screen.hogwartsmod.grimoire.house_points_zero": "Nenhum ponto ainda",
+  "item.hogwartsmod.galeao": "Galeão",
+  "item.hogwartsmod.sicle": "Sicle",
+  "item.hogwartsmod.nuque": "Nuque",
+  "item.hogwartsmod.bolsa_moedas": "Bolsa de Moedas",
+  "item.hogwartsmod.bolsa_moedas.empty": "Vazia",
+  "item.hogwartsmod.bolsa_moedas.tip": "Moedas apanhadas do chão vão direto para a bolsa",
+  "money.hogwartsmod.galeao": "Galeões",
+  "money.hogwartsmod.sicle": "Sicles",
+  "money.hogwartsmod.nuque": "Nuques",
+  "money.hogwartsmod.line": "%s %s",
+  "screen.hogwartsmod.pouch": "Bolsa de Moedas",
+  "screen.hogwartsmod.pouch.take": "Tirar",
+  "screen.hogwartsmod.pouch.put": "Guardar",
+  "screen.hogwartsmod.pouch.put_all": "Guardar todas do inventário",
+  "screen.hogwartsmod.pouch.empty": "A bolsa está vazia",
+  "screen.hogwartsmod.pouch.total": "Ao todo: %s Galeões, %s Sicles e %s Nuques",
+  "screen.hogwartsmod.pouch.hint": "Shift + clique: 10 de uma vez  ·  setas: trocar moedas"
 }

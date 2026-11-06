@@ -23,6 +23,10 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.BROOM_TRANSPORT.get());
                         output.accept(ModItems.ZONE_WAND.get());
                         output.accept(ModItems.SORTING_HAT.get());
+                        output.accept(ModItems.COIN_POUCH.get());
+                        output.accept(ModItems.GALEAO.get());
+                        output.accept(ModItems.SICLE.get());
+                        output.accept(ModItems.NUQUE.get());
                     })
                     .build());
 

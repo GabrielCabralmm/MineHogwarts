@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "13";
+    private static final String VERSION = "14";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -84,6 +84,8 @@ public final class ModNetwork {
                 .encoder(SortingChoosePacket::encode).decoder(SortingChoosePacket::decode).consumerMainThread(SortingChoosePacket::handle).add();
         CHANNEL.messageBuilder(HousePointsPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(HousePointsPacket::encode).decoder(HousePointsPacket::decode).consumerMainThread(HousePointsPacket::handle).add();
+        CHANNEL.messageBuilder(PouchActionPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(PouchActionPacket::encode).decoder(PouchActionPacket::decode).consumerMainThread(PouchActionPacket::handle).add();
     }
 
     public static void playAnimation(ServerPlayer player, String animation) {
