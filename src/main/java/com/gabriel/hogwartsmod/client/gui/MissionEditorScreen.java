@@ -42,6 +42,7 @@ public class MissionEditorScreen extends Screen {
     private String name;
     private String model;
     private int selected;
+    private boolean confirmRemove;
     private int left;
     private int top;
 
@@ -202,6 +203,12 @@ public class MissionEditorScreen extends Screen {
         int x = left + 18;
         int w = 134;
         HiRes.text(g, tr("screen.hogwartsmod.mission_editor.name"), HiRes.Style.BOLD, x, top + 30, INK);
+        String remove = tr(confirmRemove ? "screen.hogwartsmod.mission_editor.remove_confirm" : "screen.hogwartsmod.mission_editor.remove");
+        float rw = HiRes.width(remove, HiRes.Style.BOLD, 7.5f);
+        if (inside(mouseX, mouseY, (int) (x + w - rw - 3), top + 28, (int) rw + 6, 12) || confirmRemove) {
+            HiRes.highlight(g, (int) (x + w - rw - 3), top + 28, x + w + 3, top + 40, HiRes.Mark.HOVER);
+        }
+        HiRes.text(g, remove, HiRes.Style.BOLD, 7.5f, x + w - rw, top + 30.5f, WINE);
         field(g, nameBox, x, top + 40, w);
         HiRes.text(g, tr("screen.hogwartsmod.mission_editor.model"), HiRes.Style.BOLD, x, top + 60, INK);
         stepper(g, x, top + 72, w, model, mouseX, mouseY);
@@ -383,6 +390,19 @@ public class MissionEditorScreen extends Screen {
             box.setFocused(false);
         }
         int lx = left + 18;
+        String remove = tr(confirmRemove ? "screen.hogwartsmod.mission_editor.remove_confirm" : "screen.hogwartsmod.mission_editor.remove");
+        float removeW = HiRes.width(remove, HiRes.Style.BOLD, 7.5f);
+        if (inside(mx, my, (int) (lx + 134 - removeW - 3), top + 28, (int) removeW + 6, 12)) {
+            if (confirmRemove) {
+                ModNetwork.CHANNEL.sendToServer(new com.gabriel.hogwartsmod.network.RemoveNpcPacket(entity));
+                onClose();
+            } else {
+                confirmRemove = true;
+            }
+            click();
+            return true;
+        }
+        confirmRemove = false;
         if (inside(mx, my, lx, top + 40, 134, 13)) {
             return focus(nameBox, mx, my, button);
         }

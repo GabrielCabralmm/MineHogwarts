@@ -425,7 +425,11 @@ public final class HogwartsCommand {
     }
 
     private static int removeNpc(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ProfessorNpcEntity npc = nearestNpc(ctx.getSource());
+        Vec3 pos = ctx.getSource().getPosition();
+        com.gabriel.hogwartsmod.npc.HogwartsNpc npc = ctx.getSource().getLevel()
+                .getEntitiesOfClass(com.gabriel.hogwartsmod.npc.HogwartsNpc.class, new AABB(pos, pos).inflate(8)).stream()
+                .min(Comparator.comparingDouble(n -> n.distanceToSqr(pos)))
+                .orElseThrow(NO_NPC::create);
         String name = npc.getNpcName();
         npc.discard();
         ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_removed", name), true);

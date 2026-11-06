@@ -130,7 +130,7 @@
   "command.hogwartsmod.npc_created": "Professor NPC criado: %s",
   "command.hogwartsmod.npc_renamed": "Professor NPC renomeado para %s",
   "command.hogwartsmod.npc_spells": "%s ensina: %s",
-  "command.hogwartsmod.npc_removed": "Professor NPC removido: %s",
+  "command.hogwartsmod.npc_removed": "NPC removido: %s",
   "screen.hogwartsmod.npc.subtitle": "Escolha o feitiço que quer aprender",
   "screen.hogwartsmod.npc.empty": "Este professor ainda não tem feitiços para ensinar.",
   "screen.hogwartsmod.npc.detail": "Nível %s · %s",
@@ -392,5 +392,7 @@
   "screen.hogwartsmod.mission_editor.items": "Itens",
   "screen.hogwartsmod.mission_editor.no_items": "Nenhum item: procure abaixo",
   "screen.hogwartsmod.mission_editor.search": "Procurar item",
-  "screen.hogwartsmod.mission_editor.no_results": "Nenhum item encontrado"
+  "screen.hogwartsmod.mission_editor.no_results": "Nenhum item encontrado",
+  "screen.hogwartsmod.mission_editor.remove": "Remover NPC",
+  "screen.hogwartsmod.mission_editor.remove_confirm": "Confirmar remoção"
 }
