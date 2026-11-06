@@ -1,7 +1,6 @@
 package com.gabriel.hogwartsmod.client;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
-import com.gabriel.hogwartsmod.client.fx.ClientFxState;
 import com.gabriel.hogwartsmod.magic.MagicData;
 import com.gabriel.hogwartsmod.network.DodgePacket;
 import com.gabriel.hogwartsmod.network.ModNetwork;
@@ -11,8 +10,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -57,21 +54,6 @@ public final class ClientDodge {
         player.setDeltaMovement(velocity.x, y, velocity.z);
         if (remaining == 0) {
             player.setDeltaMovement(velocity.x * 0.25, player.getDeltaMovement().y, velocity.z * 0.25);
-        }
-    }
-
-    @SubscribeEvent
-    public static void hidePlayer(RenderPlayerEvent.Pre event) {
-        if (ClientFxState.isDodging(event.getEntity().getId())) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent
-    public static void hideHand(RenderHandEvent event) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null && (remaining > 0 || ClientFxState.isDodging(player.getId()))) {
-            event.setCanceled(true);
         }
     }
 }

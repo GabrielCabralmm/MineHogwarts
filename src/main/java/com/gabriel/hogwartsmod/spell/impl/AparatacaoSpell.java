@@ -180,6 +180,7 @@ public class AparatacaoSpell extends Spell {
         SpellFx.sendState(player, PlayerFxPacket.Kind.APPARATE, false);
         player.teleportTo(level, target.x, target.y, target.z, player.getYRot(), player.getXRot());
         player.resetFallDistance();
+        SpellFx.sendState(player, PlayerFxPacket.Kind.ARRIVE, true);
         crack(level, target);
         long now = level.getGameTime();
         data.setCooldown(this, now, Math.max(60, getCooldownTicks() - 20 * data.getMastery(this)));
@@ -192,11 +193,11 @@ public class AparatacaoSpell extends Spell {
 
     private void crack(ServerLevel level, Vec3 feet) {
         Vec3 center = feet.add(0, 1.0, 0);
-        SpellFx.burst(level, ModParticles.SMOKE.get(), 0x2E2A36, 0.8f, 26, center, 18, 0.14);
-        SpellFx.burst(level, ModParticles.SMOKE.get(), 0x4A4458, 0.6f, 22, center.add(0, 0.4, 0), 10, 0.1);
-        SpellFx.burst(level, ModParticles.BOLT.get(), 0x3C9BFF, 0.3f, 4, center, 10, 0.08);
-        SpellFx.burst(level, ModParticles.BOLT.get(), 0xA8DCFF, 0.22f, 3, center, 6, 0.06);
-        SpellFx.particle(level, ModParticles.RING.get(), 0x5AA0FF, 1.6f, 10, feet.add(0, 0.1, 0), Vec3.ZERO);
+        SpellFx.burst(level, ModParticles.SMOKE.get(), 0x241F2C, 0.45f, 16, center, 14, 0.16);
+        SpellFx.burst(level, ModParticles.BOLT.get(), 0x3C9BFF, 0.12f, 3, center, 8, 0.1);
+        SpellFx.burst(level, ModParticles.BOLT.get(), 0xA8DCFF, 0.09f, 2, center, 5, 0.08);
+        SpellFx.particle(level, ModParticles.RING.get(), 0x5AA0FF, 1.2f, 7, center, Vec3.ZERO);
+        SpellFx.particle(level, ModParticles.GLOW.get(), 0x3C7BD8, 1.4f, 5, center, Vec3.ZERO);
         level.playSound(null, BlockPos.containing(feet), SoundEvents.FIREWORK_ROCKET_BLAST, SoundSource.PLAYERS, 1.0f, 0.6f);
         level.playSound(null, BlockPos.containing(feet), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1.0f, 0.6f);
     }

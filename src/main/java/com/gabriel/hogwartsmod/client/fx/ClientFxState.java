@@ -32,6 +32,27 @@ public final class ClientFxState {
         long dodgeStart;
         boolean apparate;
         long apparateStart;
+        long arriveStart = -1000;
+    }
+
+    public static float apparateProgress(int entityId, float partialTick) {
+        State state = STATES.get(entityId);
+        ClientLevel level = Minecraft.getInstance().level;
+        if (state == null || !state.apparate || level == null) {
+            return -1f;
+        }
+        float t = (level.getGameTime() - state.apparateStart + partialTick) / 40f;
+        return t > 1.5f ? -1f : Math.min(1f, t);
+    }
+
+    public static float arrivalProgress(int entityId, float partialTick) {
+        State state = STATES.get(entityId);
+        ClientLevel level = Minecraft.getInstance().level;
+        if (state == null || level == null) {
+            return -1f;
+        }
+        float t = (level.getGameTime() - state.arriveStart + partialTick) / 10f;
+        return t < 0 || t >= 1 ? -1f : t;
     }
 
     public static boolean isApparating(int entityId) {
@@ -64,6 +85,10 @@ public final class ClientFxState {
                 if (value) {
                     state.shieldStart = now;
                 }
+            }
+            case ARRIVE -> {
+                state.apparate = false;
+                state.arriveStart = now;
             }
             case APPARATE -> {
                 state.apparate = value;
@@ -124,47 +149,49 @@ public final class ClientFxState {
             }
             if (isApparating(entry.getKey())) {
                 float t = Math.min(1f, (level.getGameTime() - state.apparateStart) / 40f);
-                Vec3 base = player.position();
-                double spinAngle = (level.getGameTime() % 360) * 0.45;
-                int count = 2 + Math.round(t * 4);
+                Vec3 core = player.position().add(0, 1.0, 0);
+                int count = 1 + Math.round(t * t * 4);
                 for (int i = 0; i < count; i++) {
-                    double a = spinAngle + i * (Math.PI * 2 / count);
-                    double radius = 1.1 - 0.6 * t + level.random.nextDouble() * 0.15;
-                    double h = level.random.nextDouble() * (0.6 + 1.4 * t);
-                    double px = base.x + Math.cos(a) * radius;
-                    double pz = base.z + Math.sin(a) * radius;
-                    int color = level.random.nextInt(3) == 0 ? 0x4A4458 : 0x2E2A36;
-                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.45f + 0.45f * t, 14 + level.random.nextInt(8)),
-                            px, base.y + h, pz, -Math.sin(a) * 0.08, 0.04 + 0.05 * t, Math.cos(a) * 0.08);
-                }
-                for (int b = 0; b < 1 + Math.round(t * 3); b++) {
                     double a = level.random.nextDouble() * Math.PI * 2;
-                    double radius = 0.3 + level.random.nextDouble() * (0.9 - 0.5 * t);
-                    int color = level.random.nextInt(3) == 0 ? 0xA8DCFF : 0x3C9BFF;
-                    level.addParticle(ModParticles.BOLT.get().with(color, 0.24f + 0.16f * t, 3 + level.random.nextInt(3)),
-                            base.x + Math.cos(a) * radius, base.y + 0.2 + level.random.nextDouble() * 1.6, base.z + Math.sin(a) * radius, 0, 0, 0);
+                    double radius = 0.9 + level.random.nextDouble() * 0.9;
+                    double h = (level.random.nextDouble() - 0.5) * 1.8 * (1 - 0.6 * t);
+                    double px = core.x + Math.cos(a) * radius;
+                    double py = core.y + h;
+                    double pz = core.z + Math.sin(a) * radius;
+                    double pull = 0.06 + 0.16 * t;
+                    double swirl = 0.08 + 0.1 * t;
+                    double vx = (core.x - px) * pull - Math.sin(a) * swirl;
+                    double vy = (core.y - py) * pull;
+                    double vz = (core.z - pz) * pull + Math.cos(a) * swirl;
+                    int color = level.random.nextInt(3) == 0 ? 0x4A4458 : 0x241F2C;
+                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.1f + 0.1f * t, 7 + level.random.nextInt(3)),
+                            px, py, pz, vx, vy, vz);
                 }
-                if (level.random.nextInt(3) == 0) {
-                    level.addParticle(ModParticles.GLOW.get().with(0x3C7BD8, 0.5f + 0.6f * t, 6), base.x, base.y + 0.1, base.z, 0, 0, 0);
+                if (t > 0.4f && level.random.nextFloat() < t) {
+                    double a = level.random.nextDouble() * Math.PI * 2;
+                    double r = 0.2 + level.random.nextDouble() * 0.5;
+                    int color = level.random.nextInt(3) == 0 ? 0xA8DCFF : 0x3C9BFF;
+                    level.addParticle(ModParticles.BOLT.get().with(color, 0.1f + 0.06f * t, 2 + level.random.nextInt(2)),
+                            core.x + Math.cos(a) * r, core.y + (level.random.nextDouble() - 0.5) * 1.2 * (1 - t), core.z + Math.sin(a) * r, 0, 0, 0);
                 }
             }
             if (isDodging(entry.getKey())) {
                 Vec3 base = player.position();
                 Vec3 motion = player.getDeltaMovement();
-                for (int i = 0; i < 4; i++) {
-                    double ox = (level.random.nextDouble() - 0.5) * 0.6;
-                    double oy = 0.2 + level.random.nextDouble() * 1.5;
-                    double oz = (level.random.nextDouble() - 0.5) * 0.6;
+                for (int i = 0; i < 14; i++) {
+                    double ox = (level.random.nextDouble() - 0.5) * 0.8;
+                    double oy = 0.1 + level.random.nextDouble() * 1.7;
+                    double oz = (level.random.nextDouble() - 0.5) * 0.8;
                     int color = level.random.nextInt(3) == 0 ? 0x4A4458 : 0x2E2A36;
-                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.4f + level.random.nextFloat() * 0.3f, 14 + level.random.nextInt(8)),
+                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.45f + level.random.nextFloat() * 0.45f, 16 + level.random.nextInt(10)),
                             base.x + ox, base.y + oy, base.z + oz, -motion.x * 0.15, 0.01, -motion.z * 0.15);
                 }
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 5; i++) {
                     double bx = base.x + (level.random.nextDouble() - 0.5) * 0.7;
                     double by = base.y + 0.2 + level.random.nextDouble() * 1.5;
                     double bz = base.z + (level.random.nextDouble() - 0.5) * 0.7;
                     int color = level.random.nextInt(3) == 0 ? 0xA8DCFF : 0x3C9BFF;
-                    level.addParticle(ModParticles.BOLT.get().with(color, 0.22f + level.random.nextFloat() * 0.16f, 3 + level.random.nextInt(3)),
+                    level.addParticle(ModParticles.BOLT.get().with(color, 0.09f + level.random.nextFloat() * 0.07f, 2 + level.random.nextInt(3)),
                             bx, by, bz, 0, 0, 0);
                 }
                 if (level.random.nextInt(2) == 0) {

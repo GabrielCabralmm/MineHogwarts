@@ -84,10 +84,10 @@ public class EsquivaSpell extends Spell {
 
     private void puff(ServerLevel server, Vec3 feet) {
         Vec3 center = feet.add(0, 0.9, 0);
-        SpellFx.burst(server, ModParticles.SMOKE.get(), SMOKE, 0.65f, 22, center, 12, 0.1);
-        SpellFx.burst(server, ModParticles.SMOKE.get(), 0x4A4458, 0.5f, 18, center.add(0, 0.5, 0), 8, 0.07);
-        SpellFx.burst(server, ModParticles.SPARK.get(), getColor(), 0.07f, 12, center, 8, 0.18);
-        SpellFx.burst(server, ModParticles.BOLT.get(), 0x3C9BFF, 0.25f, 4, center, 7, 0.06);
-        SpellFx.burst(server, ModParticles.BOLT.get(), 0xA8DCFF, 0.18f, 3, center.add(0, 0.4, 0), 4, 0.05);
+        SpellFx.burst(server, ModParticles.SMOKE.get(), SMOKE, 0.75f, 26, center, 34, 0.12);
+        SpellFx.burst(server, ModParticles.SMOKE.get(), 0x4A4458, 0.6f, 22, center.add(0, 0.5, 0), 22, 0.09);
+        SpellFx.burst(server, ModParticles.SMOKE.get(), SMOKE, 0.55f, 20, feet.add(0, 0.2, 0), 14, 0.14);
+        SpellFx.burst(server, ModParticles.BOLT.get(), 0x3C9BFF, 0.12f, 3, center, 10, 0.07);
+        SpellFx.burst(server, ModParticles.BOLT.get(), 0xA8DCFF, 0.09f, 3, center.add(0, 0.4, 0), 6, 0.06);
     }
 }
