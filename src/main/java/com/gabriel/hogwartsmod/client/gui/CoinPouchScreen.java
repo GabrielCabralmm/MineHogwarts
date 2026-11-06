@@ -101,11 +101,11 @@ public class CoinPouchScreen extends Screen {
         for (int i = 0; i < coins.length; i++) {
             Coin coin = coins[i];
             int cx = colX(i) + COL / 2;
-            int y = top + 53;
+            int y = top + 61;
             boolean chosen = coin == selected;
-            boolean hover = !chosen && inside(mouseX, mouseY, cx - 26, top + 49, 52, 80);
+            boolean hover = !chosen && inside(mouseX, mouseY, cx - 26, top + 57, 52, 80);
             if (chosen || hover) {
-                HiRes.image(g, tex(chosen ? "anel_selecao" : "anel_hover"), cx - 30, top + 45, 60, 60);
+                HiRes.image(g, tex(chosen ? "anel_selecao" : "anel_hover"), cx - 30, top + 53, 60, 60);
             }
             HiRes.image(g, tex("moeda_" + coin.getId()), cx - COIN / 2, y, COIN, COIN + 2);
             HiRes.centered(g, String.valueOf(CoinPouchItem.get(pouch, coin)), HiRes.Style.BOLD, 13f, cx, y + COIN + 13, chosen ? TITLE : INK);
@@ -114,14 +114,11 @@ public class CoinPouchScreen extends Screen {
                 drawExchange(g, coin, coins[i + 1], colX(i + 1), y + 8, pouch, mouseX, mouseY);
             }
         }
-        int by = top + 135;
+        int by = top + 143;
         button(g, left + W / 2 - 73, by, tr("screen.hogwartsmod.pouch.take"), CoinPouchItem.get(pouch, selected) > 0, mouseX, mouseY);
         button(g, left + W / 2 + 3, by, tr("screen.hogwartsmod.pouch.put"), inInventory(selected) > 0, mouseX, mouseY);
-        int ty = top + 158;
-        g.fill(left + 30, ty - 5, left + W - 30, ty - 4, GOLD_DIM);
-        HiRes.centered(g, totalLine(pouch), HiRes.Style.ITALIC, left + W / 2f, ty, MUTED);
         int anyCoins = inInventory(Coin.GALEAO) + inInventory(Coin.SICLE) + inInventory(Coin.NUQUE);
-        bigButton(g, left + W / 2 - 80, ty + 12, tr("screen.hogwartsmod.pouch.put_all"), anyCoins > 0, mouseX, mouseY);
+        bigButton(g, left + W / 2 - 80, top + 167, tr("screen.hogwartsmod.pouch.put_all"), anyCoins > 0, mouseX, mouseY);
         HiRes.centered(g, tr("screen.hogwartsmod.pouch.hint"), HiRes.Style.ITALIC, 7f, left + W / 2f, top + H - 19, MUTED);
         super.render(g, mouseX, mouseY, partialTick);
     }
@@ -164,17 +161,6 @@ public class CoinPouchScreen extends Screen {
         HiRes.text(g, label, HiRes.Style.BOLD, 8.5f, start + 22, y + 5 - lift, enabled ? 0xFF4A2C08 : 0xFF3A2E20);
     }
 
-    private String totalLine(ItemStack pouch) {
-        long total = CoinPouchItem.total(pouch);
-        if (total == 0) {
-            return tr("screen.hogwartsmod.pouch.empty");
-        }
-        long g = total / Coin.GALEAO.getValue();
-        long s = total % Coin.GALEAO.getValue() / Coin.SICLE.getValue();
-        long n = total % Coin.SICLE.getValue();
-        return tr("screen.hogwartsmod.pouch.total", g, s, n);
-    }
-
     // -- Interação
 
     private void send(PouchActions.Action action, Coin coin, int amount) {
@@ -195,8 +181,8 @@ public class CoinPouchScreen extends Screen {
         for (int i = 0; i < coins.length; i++) {
             Coin coin = coins[i];
             int cx = colX(i) + COL / 2;
-            int y = top + 53;
-            if (inside(mx, my, cx - 26, top + 49, 52, 80)) {
+            int y = top + 61;
+            if (inside(mx, my, cx - 26, top + 57, 52, 80)) {
                 if (selected != coin) {
                     selected = coin;
                     if (minecraft != null) {
@@ -218,15 +204,15 @@ public class CoinPouchScreen extends Screen {
                 }
             }
         }
-        if (inside(mx, my, left + W / 2 - 73, top + 135, 70, 15)) {
+        if (inside(mx, my, left + W / 2 - 73, top + 143, 70, 15)) {
             send(PouchActions.Action.WITHDRAW, selected, amount);
             return true;
         }
-        if (inside(mx, my, left + W / 2 + 3, top + 135, 70, 15)) {
+        if (inside(mx, my, left + W / 2 + 3, top + 143, 70, 15)) {
             send(PouchActions.Action.DEPOSIT, selected, amount);
             return true;
         }
-        if (inside(mx, my, left + W / 2 - 80, top + 170, 160, 20)) {
+        if (inside(mx, my, left + W / 2 - 80, top + 167, 160, 20)) {
             send(PouchActions.Action.DEPOSIT_ALL, Coin.NUQUE, 1);
             return true;
         }
