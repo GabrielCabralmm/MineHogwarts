@@ -69,12 +69,20 @@ public class AparatacaoSpell extends Spell {
         if (data.getCooldownRemaining(this, now) > 0) {
             return;
         }
+        if (com.gabriel.hogwartsmod.zone.Zones.blocks(player, com.gabriel.hogwartsmod.zone.ZoneRule.APARATACAO)) {
+            com.gabriel.hogwartsmod.zone.Zones.warn(player, com.gabriel.hogwartsmod.zone.ZoneRule.APARATACAO);
+            return;
+        }
         Vec3 target = switch (mode) {
             case VISUAL -> visualTarget(player, data);
             case PERSONAL -> pointTarget(player, index >= 0 && index < data.getPlaces().size() ? data.getPlaces().get(index) : null);
             case PUBLIC -> pointTarget(player, PublicLocations.get(player.server).find(name));
         };
         if (target == null) {
+            return;
+        }
+        if (com.gabriel.hogwartsmod.zone.Zones.blocks(player.level(), target, com.gabriel.hogwartsmod.zone.ZoneRule.APARATACAO)) {
+            player.displayClientMessage(Component.translatable("message.hogwartsmod.zone_blocked.aparatacao_destino").withStyle(net.minecraft.ChatFormatting.GOLD), true);
             return;
         }
         double distance = target.distanceTo(player.position());

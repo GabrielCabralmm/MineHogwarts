@@ -104,6 +104,10 @@ public class BroomEntity extends Entity {
         if (level().isClientSide) {
             return InteractionResult.SUCCESS;
         }
+        if (com.gabriel.hogwartsmod.zone.Zones.blocks(this, com.gabriel.hogwartsmod.zone.ZoneRule.VOO)) {
+            com.gabriel.hogwartsmod.zone.Zones.warn(player, com.gabriel.hogwartsmod.zone.ZoneRule.VOO);
+            return InteractionResult.CONSUME;
+        }
         if (getPassengers().isEmpty()) {
             if (!canPilot(player)) {
                 player.displayClientMessage(Component.translatable("message.hogwartsmod.broom_not_yours"), true);
@@ -266,6 +270,18 @@ public class BroomEntity extends Entity {
         super.tick();
         if (!level().isClientSide && getControllingPassenger() == null && entityData.get(BOOST)) {
             entityData.set(BOOST, false);
+        }
+        if (!level().isClientSide && tickCount % 5 == 0 && !getPassengers().isEmpty()
+                && com.gabriel.hogwartsmod.zone.Zones.blocks(this, com.gabriel.hogwartsmod.zone.ZoneRule.VOO)) {
+            for (Entity passenger : getPassengers()) {
+                if (passenger instanceof LivingEntity living) {
+                    living.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.SLOW_FALLING, 100, 0, false, false, true));
+                }
+                if (passenger instanceof Player rider) {
+                    com.gabriel.hogwartsmod.zone.Zones.warn(rider, com.gabriel.hogwartsmod.zone.ZoneRule.VOO);
+                }
+            }
+            ejectPassengers();
         }
         if (isControlledByLocalInstance()) {
             lerpSteps = 0;

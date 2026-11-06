@@ -38,6 +38,10 @@ public class WandItem extends Item {
             notify(player, level, Component.translatable("message.hogwartsmod.no_spell"));
             return InteractionResultHolder.fail(stack);
         }
+        if (isCombat(spell) && com.gabriel.hogwartsmod.zone.Zones.blocks(player, com.gabriel.hogwartsmod.zone.ZoneRule.COMBATE)) {
+            com.gabriel.hogwartsmod.zone.Zones.warn(player, com.gabriel.hogwartsmod.zone.ZoneRule.COMBATE);
+            return InteractionResultHolder.fail(stack);
+        }
         if (!data.knows(spell)) {
             notify(player, level, Component.translatable("message.hogwartsmod.not_learned", spell.getDisplayName()));
             return InteractionResultHolder.fail(stack);
@@ -129,6 +133,13 @@ public class WandItem extends Item {
     @Override
     public UseAnim getUseAnimation(ItemStack stack) {
         return UseAnim.NONE;
+    }
+
+    public static boolean isCombat(Spell spell) {
+        return switch (spell.getCategory()) {
+            case CONTROLE, FORCA, DANO, IMPERDOAVEL -> true;
+            default -> false;
+        };
     }
 
     private static void notify(Player player, Level level, Component message) {
