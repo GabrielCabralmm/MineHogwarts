@@ -18,6 +18,7 @@ import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
@@ -57,6 +58,11 @@ public class TraceScreen extends Screen {
     private final float shadowSpeed;
     private final float spacing;
     private long drawStart;
+    private long lastFrame;
+    private float penX;
+    private float penY;
+    private final List<float[]> sparks = new ArrayList<>();
+    private static final java.util.Random RANDOM = new java.util.Random();
     private int drawnShadow = -1;
     private final HiRes.Canvas canvas = new HiRes.Canvas();
     private final List<float[]> stroke = new ArrayList<>();
@@ -196,18 +202,7 @@ public class TraceScreen extends Screen {
         }
 
         if (stroke.size() > 1 && !learned) {
-            Path2D line = new Path2D.Float();
-            line.moveTo(stroke.get(0)[0] * s, stroke.get(0)[1] * s);
-            for (int i = 1; i < stroke.size(); i++) {
-                line.lineTo(stroke.get(i)[0] * s, stroke.get(i)[1] * s);
-            }
-            boolean bad = state == State.MISSED || state == State.FAILED;
-            g.setStroke(new BasicStroke(6f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(bad ? new Color(0x8E, 0x2A, 0x2A, 60) : new Color(spellColor.getRed(), spellColor.getGreen(), spellColor.getBlue(), 80));
-            g.draw(line);
-            g.setStroke(new BasicStroke(2f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.setColor(bad ? new Color(0x8E, 0x2A, 0x2A, 235) : new Color(0x38, 0x26, 0x1A, 235));
-            g.draw(line);
+            drawLight(g, s, spellColor);
         }
 
         int shadow = (int) shadowIndex();
@@ -228,6 +223,77 @@ public class TraceScreen extends Screen {
         dot(g, guideX(0) * s, guideY(0) * s, 1.8f * s, new Color(0xFF, 0xF2, 0xC8, 255), true);
         g.dispose();
         canvas.end(holder[0]);
+    }
+
+    private void drawLight(Graphics2D g, float s, Color spellColor) {
+        g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        List<float[]> smooth = smooth(stroke);
+        boolean bad = state == State.MISSED || state == State.FAILED;
+        Color glow = bad ? new Color(0x8E2A2A) : spellColor;
+        Color core = bad ? new Color(0xF2C8C0) : new Color(0xFFFDF4);
+        Color deep = new Color((int) (glow.getRed() * 0.72f), (int) (glow.getGreen() * 0.72f), (int) (glow.getBlue() * 0.72f));
+        int count = smooth.size();
+        int chunks = Math.min(16, count - 1);
+        for (int layer = 0; layer < 4; layer++) {
+            for (int c = 0; c < chunks; c++) {
+                int from = c * (count - 1) / chunks;
+                int to = (c + 1) * (count - 1) / chunks;
+                float age = 1f - (c + 1f) / chunks;
+                float fade = 0.45f + 0.55f * (1f - age) * (1f - age);
+                float taper = 0.55f + 0.45f * (1f - age);
+                Path2D part = new Path2D.Float();
+                part.moveTo(smooth.get(from)[0] * s, smooth.get(from)[1] * s);
+                for (int i = from + 1; i <= to; i++) {
+                    part.lineTo(smooth.get(i)[0] * s, smooth.get(i)[1] * s);
+                }
+                float width;
+                Color color;
+                switch (layer) {
+                    case 0 -> {
+                        width = 5.5f;
+                        color = new Color(0x2A, 0x1A, 0x10, (int) (28 * fade));
+                    }
+                    case 1 -> {
+                        width = 7.5f * taper;
+                        color = withAlpha(bad ? glow : AURA, (int) (95 * fade));
+                    }
+                    case 2 -> {
+                        width = 3.2f * taper;
+                        color = withAlpha(deep, (int) (230 * fade));
+                    }
+                    default -> {
+                        width = 1.3f * taper;
+                        color = withAlpha(core, (int) (255 * fade));
+                    }
+                }
+                g.setStroke(new BasicStroke(width * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.setColor(color);
+                g.draw(part);
+            }
+        }
+    }
+
+    private static final Color AURA = new Color(0xF0C85A);
+
+    private static Color withAlpha(Color color, int alpha) {
+        return new Color(color.getRed(), color.getGreen(), color.getBlue(), Math.max(0, Math.min(255, alpha)));
+    }
+
+    private static List<float[]> smooth(List<float[]> points) {
+        List<float[]> out = new ArrayList<>(points);
+        for (int pass = 0; pass < 2 && out.size() > 2; pass++) {
+            List<float[]> next = new ArrayList<>(out.size() * 2);
+            next.add(out.get(0));
+            for (int i = 0; i < out.size() - 1; i++) {
+                float[] a = out.get(i);
+                float[] b = out.get(i + 1);
+                next.add(new float[]{a[0] * 0.75f + b[0] * 0.25f, a[1] * 0.75f + b[1] * 0.25f});
+                next.add(new float[]{a[0] * 0.25f + b[0] * 0.75f, a[1] * 0.25f + b[1] * 0.75f});
+            }
+            next.add(out.get(out.size() - 1));
+            out = next;
+        }
+        return out;
     }
 
     private Path2D path(int from, int to, float s) {
@@ -296,7 +362,16 @@ public class TraceScreen extends Screen {
         float time = (System.nanoTime() % 4_000_000_000L) / 1_000_000_000f;
         if (state == State.DRAWING && !stroke.isEmpty()) {
             float[] pen = stroke.get(stroke.size() - 1);
-            orb(g, LIGHT_ORB, canvasX() + pen[0], canvasY() + pen[1], ORB * (1f + 0.08f * (float) Math.sin(time * 12)), 1f);
+            penX += (pen[0] - penX) * 0.6f;
+            penY += (pen[1] - penY) * 0.6f;
+            if (sparks.size() < 60 && RANDOM.nextFloat() < 0.8f) {
+                double angle = RANDOM.nextDouble() * Math.PI * 2;
+                float speed = 6f + RANDOM.nextFloat() * 14f;
+                sparks.add(new float[]{penX, penY, (float) Math.cos(angle) * speed, (float) Math.sin(angle) * speed, 0f,
+                        0.35f + RANDOM.nextFloat() * 0.3f});
+            }
+            drawSparks(g);
+            orb(g, LIGHT_ORB, canvasX() + penX, canvasY() + penY, ORB * (1f + 0.08f * (float) Math.sin(time * 12)), 1f);
             float shadow = shadowIndex();
             float appear = Math.min(1f, elapsed() / SHADOW_DELAY);
             float fi = Math.max(0, Math.min(pattern.length - 1, shadow));
@@ -307,6 +382,38 @@ public class TraceScreen extends Screen {
             float y = guideY(i) + (guideY(j) - guideY(i)) * f;
             orb(g, SHADOW_ORB, canvasX() + x, canvasY() + y, ORB * 1.15f * (0.6f + 0.4f * appear) * (1f + 0.1f * (float) Math.sin(time * 9)), appear);
         }
+    }
+
+    private void drawSparks(GuiGraphics g) {
+        long now = System.nanoTime();
+        float dt = lastFrame == 0 ? 0 : Math.min(0.1f, (now - lastFrame) / 1_000_000_000f);
+        lastFrame = now;
+        float r = ((spell.getColor() >> 16) & 0xFF) / 255f;
+        float gr = ((spell.getColor() >> 8) & 0xFF) / 255f;
+        float b = (spell.getColor() & 0xFF) / 255f;
+        sparks.removeIf(p -> p[4] >= p[5]);
+        for (float[] p : sparks) {
+            p[4] += dt;
+            p[0] += p[2] * dt;
+            p[1] += p[3] * dt;
+            p[2] *= 0.92f;
+            p[3] *= 0.92f;
+            float life = 1f - p[4] / p[5];
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(0.6f + 0.4f * r, 0.6f + 0.4f * gr, 0.6f + 0.4f * b, life);
+            orbTinted(g, LIGHT_ORB, canvasX() + p[0], canvasY() + p[1], 2.5f + 3f * life);
+        }
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    }
+
+    private void orbTinted(GuiGraphics g, ResourceLocation texture, float x, float y, float size) {
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(size / 64f, size / 64f, 1f);
+        g.blit(texture, -32, -32, 0, 0, 64, 64, 64, 64);
+        g.pose().popPose();
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
     }
 
     private void orb(GuiGraphics g, ResourceLocation texture, float x, float y, float size, float alpha) {
@@ -359,6 +466,9 @@ public class TraceScreen extends Screen {
             if (Math.hypot(x - guideX(0), y - guideY(0)) <= tolerance * 2f) {
                 state = State.DRAWING;
                 drawStart = System.nanoTime();
+                penX = x;
+                penY = y;
+                sparks.clear();
                 drawnShadow = -1;
                 stroke.clear();
                 stroke.add(new float[]{x, y});
