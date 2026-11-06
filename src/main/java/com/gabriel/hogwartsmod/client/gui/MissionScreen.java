@@ -185,10 +185,7 @@ public class MissionScreen extends Screen {
         }
         if (view.state() == MissionView.State.ACTIVE || view.state() == MissionView.State.READY) {
             int bw = w;
-            g.fill(x, y + 1, x + bw, y + 6, NOTE_EDGE);
-            g.fill(x + 1, y + 2, x + bw - 1, y + 5, NOTE_OFF);
-            int filled = Math.round((bw - 2) * Math.min(1f, view.progress() / (float) m.amount()));
-            g.fill(x + 1, y + 2, x + 1 + filled, y + 5, view.state() == MissionView.State.READY ? 0xFF6E9A3A : GOLD);
+            HiRes.bar(g, x, y + 1, bw, 4, view.progress() / (float) m.amount(), NOTE_EDGE, view.state() == MissionView.State.READY ? 0xFF6E9A3A : GOLD);
             y += 10;
         }
         y += 2;

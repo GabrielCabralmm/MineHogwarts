@@ -319,8 +319,7 @@ public class GrimoireScreen extends Screen {
             HiRes.text(g, HiRes.ellipsize(a.npcName(), HiRes.Style.ITALIC, (pageW - 18) * HiRes.TEXT_SIZE / 6.5f), HiRes.Style.ITALIC, 6.5f, lx + 15, y + 10, MUTED);
             int bx = lx + 3;
             int bw = pageW - 6;
-            g.fill(bx, y + 19, bx + bw, y + 22, PAGE_LINE);
-            g.fill(bx, y + 19, bx + Math.round(bw * Math.min(1f, progress / (float) a.mission().amount())), y + 22, ready ? GREEN : GOLD);
+            HiRes.bar(g, bx, y + 19, bw, 3, progress / (float) a.mission().amount(), PAGE_LINE, ready ? GREEN : GOLD);
         }
 
         HiRes.centered(g, tr("screen.hogwartsmod.grimoire.track_hint"), HiRes.Style.ITALIC, 6.5f, lx + pageW / 2f, top + BOOK_H - 20, MUTED);

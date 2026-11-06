@@ -145,6 +145,37 @@ public final class HiRes {
         RenderSystem.disableBlend();
     }
 
+    public static void bar(GuiGraphics g, int x, int y, int w, int h, float fraction, int track, int fill) {
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        double scale = scale();
+        int pw = Math.max(1, (int) Math.round(w * scale));
+        int ph = Math.max(1, (int) Math.round(h * scale));
+        int fw = Math.round(pw * Math.max(0f, Math.min(1f, fraction)));
+        String key = "bar|" + pw + "x" + ph + "|" + fw + "|" + track + "|" + fill;
+        Entry entry = CACHE.get(key);
+        if (entry == null) {
+            BufferedImage image = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D bg = configure(image.createGraphics());
+            java.awt.geom.RoundRectangle2D shape = new java.awt.geom.RoundRectangle2D.Float(0, 0, pw, ph, ph, ph);
+            bg.setColor(new Color(track, true));
+            bg.fill(shape);
+            if (fw > 0) {
+                bg.setClip(shape);
+                Color base = new Color(fill, true);
+                bg.setPaint(new java.awt.GradientPaint(0, 0, base.brighter(), 0, ph, base));
+                bg.fill(new java.awt.geom.RoundRectangle2D.Float(0, 0, Math.max(fw, ph), ph, ph, ph));
+            }
+            bg.dispose();
+            entry = upload(key, image, (float) (pw / scale), (float) (ph / scale), 0f);
+        }
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        g.blit(entry.id(), x, y, w, h, 0, 0, entry.pixelW(), entry.pixelH(), entry.pixelW(), entry.pixelH());
+        RenderSystem.disableBlend();
+    }
+
     // -- Imagens
 
     public static void image(GuiGraphics g, ResourceLocation source, int x, int y, int w, int h) {
