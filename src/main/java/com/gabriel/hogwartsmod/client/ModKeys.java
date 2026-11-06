@@ -13,6 +13,9 @@ public final class ModKeys {
     public static final KeyMapping OPEN_GRIMOIRE = new KeyMapping("key.hogwartsmod.open_grimoire",
             KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, CATEGORY);
 
+    public static final KeyMapping DODGE = new KeyMapping("key.hogwartsmod.dodge",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, CATEGORY);
+
     private ModKeys() {
     }
 

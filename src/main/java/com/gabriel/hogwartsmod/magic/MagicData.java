@@ -134,7 +134,7 @@ public class MagicData {
 
     public void learn(Spell spell) {
         if (learned.add(spell.getId())) {
-            for (int i = 0; i < SLOT_COUNT; i++) {
+            for (int i = 0; i < SLOT_COUNT && !spell.isAbility(); i++) {
                 if (slots[i] == null) {
                     slots[i] = spell.getId();
                     break;
@@ -194,6 +194,9 @@ public class MagicData {
     }
 
     public void setSlot(int index, @Nullable Spell spell) {
+        if (spell != null && spell.isAbility()) {
+            spell = null;
+        }
         slots[index] = spell == null ? null : spell.getId();
         markForSync();
     }
@@ -229,6 +232,35 @@ public class MagicData {
     public int getCooldownTotal(Spell spell) {
         long[] cd = cooldowns.get(spell.getId());
         return cd == null ? 0 : (int) cd[1];
+    }
+
+    // -- Esquiva
+
+    private long dodgeUntil;
+    private long invulnerableUntil;
+
+    private boolean dodgeActive;
+
+    public void startDodge(long now, int ticks, int invulnerableTicks) {
+        dodgeUntil = now + ticks;
+        invulnerableUntil = now + invulnerableTicks;
+        dodgeActive = true;
+    }
+
+    public boolean consumeDodgeEnd(long now) {
+        if (dodgeActive && now >= dodgeUntil) {
+            dodgeActive = false;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isDodging(long now) {
+        return now < dodgeUntil;
+    }
+
+    public boolean isInvulnerable(long now) {
+        return now < invulnerableUntil;
     }
 
     // -- Ensino e profissão

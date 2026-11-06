@@ -44,6 +44,11 @@ public final class ClientInputEvents {
             return;
         }
         Minecraft mc = Minecraft.getInstance();
+        while (ModKeys.DODGE.consumeClick()) {
+            if (mc.player != null && mc.screen == null) {
+                ClientDodge.request();
+            }
+        }
         while (ModKeys.OPEN_GRIMOIRE.consumeClick()) {
             if (mc.player != null && mc.screen == null) {
                 mc.setScreen(new GrimoireScreen());

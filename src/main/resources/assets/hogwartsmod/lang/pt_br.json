@@ -136,5 +136,9 @@
   "screen.hogwartsmod.npc.detail": "Nível %s · %s",
   "screen.hogwartsmod.npc.learn": "Aprender",
   "screen.hogwartsmod.npc.level": "Nível %s",
-  "screen.hogwartsmod.npc.hint": "Clique em um feitiço para começar a aula."
+  "screen.hogwartsmod.npc.hint": "Clique em um feitiço para começar a aula.",
+  "spell.hogwartsmod.esquiva": "Esquiva",
+  "spell.hogwartsmod.esquiva.desc": "Vira fumaça e desliza alguns blocos na direção em que você anda, ficando intocável por um instante. Habilidade: use a tecla própria, fora dos atalhos.",
+  "key.hogwartsmod.dodge": "Esquiva (aparatação de combate)",
+  "message.hogwartsmod.level_required": "É preciso Nível Mágico %s"
 }

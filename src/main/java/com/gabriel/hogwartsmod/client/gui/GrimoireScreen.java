@@ -617,7 +617,7 @@ public class GrimoireScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if ((pressSpell != null || pressSlot >= 0) && !dragging && Math.abs(mx - pressX) + Math.abs(my - pressY) > 3) {
+        if ((pressSpell != null && !pressSpell.isAbility() || pressSlot >= 0) && !dragging && Math.abs(mx - pressX) + Math.abs(my - pressY) > 3) {
             dragging = true;
             armed = null;
         }
@@ -642,7 +642,7 @@ public class GrimoireScreen extends Screen {
                 }
             } else if (pressSpell != null) {
                 selected = pressSpell;
-                armed = armed == pressSpell ? null : pressSpell;
+                armed = armed == pressSpell || pressSpell.isAbility() ? null : pressSpell;
             }
             pressSpell = null;
             pressSlot = -1;

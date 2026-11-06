@@ -136,5 +136,9 @@
   "screen.hogwartsmod.npc.detail": "Level %s · %s",
   "screen.hogwartsmod.npc.learn": "Learn",
   "screen.hogwartsmod.npc.level": "Level %s",
-  "screen.hogwartsmod.npc.hint": "Click a spell to start the lesson."
+  "screen.hogwartsmod.npc.hint": "Click a spell to start the lesson.",
+  "spell.hogwartsmod.esquiva": "Dodge",
+  "spell.hogwartsmod.esquiva.desc": "Turn into smoke and glide a few blocks in the direction you are moving, untouchable for an instant. Ability: use its own key, outside the shortcuts.",
+  "key.hogwartsmod.dodge": "Dodge (combat apparition)",
+  "message.hogwartsmod.level_required": "Requires Magic Level %s"
 }

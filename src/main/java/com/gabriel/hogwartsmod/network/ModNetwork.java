@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "4";
+    private static final String VERSION = "5";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -50,6 +50,10 @@ public final class ModNetwork {
                 .encoder(OpenNpcPacket::encode).decoder(OpenNpcPacket::decode).consumerMainThread(OpenNpcPacket::handle).add();
         CHANNEL.messageBuilder(NpcLearnPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(NpcLearnPacket::encode).decoder(NpcLearnPacket::decode).consumerMainThread(NpcLearnPacket::handle).add();
+        CHANNEL.messageBuilder(DodgePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(DodgePacket::encode).decoder(DodgePacket::decode).consumerMainThread(DodgePacket::handle).add();
+        CHANNEL.messageBuilder(DodgeMovePacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(DodgeMovePacket::encode).decoder(DodgeMovePacket::decode).consumerMainThread(DodgeMovePacket::handle).add();
         CHANNEL.messageBuilder(PulpitLessonPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PulpitLessonPacket::encode).decoder(PulpitLessonPacket::decode).consumerMainThread(PulpitLessonPacket::handle).add();
     }

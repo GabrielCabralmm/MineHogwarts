@@ -156,6 +156,9 @@ public final class MagicEvents {
             if (data.consumeLevelUp()) {
                 playLevelUp(player);
             }
+            if (data.consumeDodgeEnd(player.level().getGameTime())) {
+                Spells.ESQUIVA.finish(player);
+            }
             if (data.isShielding() && !usingWand) {
                 data.stopShield();
             }
@@ -170,6 +173,12 @@ public final class MagicEvents {
         @SubscribeEvent
         public static void shieldPhysicalDamage(LivingAttackEvent event) {
             if (!(event.getEntity() instanceof Player defender) || defender.level().isClientSide) {
+                return;
+            }
+            MagicData dodger = MagicData.get(defender);
+            if (dodger != null && dodger.isInvulnerable(defender.level().getGameTime())
+                    && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+                event.setCanceled(true);
                 return;
             }
             if (event.getSource().is(DamageTypeTags.BYPASSES_SHIELD)) {

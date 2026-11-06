@@ -17,6 +17,7 @@ public final class TracePatterns {
         PATTERNS.put("accio", spiral());
         PATTERNS.put("incendio", flame());
         PATTERNS.put("arresto_momentum", wave());
+        PATTERNS.put("esquiva", new Path(0.12f, 0.78f).line(0.42f, 0.62f).arc(0.56f, 0.44f, 0.14f, 135, 300).line(0.9f, 0.3f).build());
     }
 
     private TracePatterns() {

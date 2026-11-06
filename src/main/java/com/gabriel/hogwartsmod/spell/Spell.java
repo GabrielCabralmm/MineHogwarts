@@ -69,6 +69,10 @@ public abstract class Spell {
         return color;
     }
 
+    public boolean isAbility() {
+        return false;
+    }
+
     public boolean isSustained() {
         return delivery.isSustained();
     }

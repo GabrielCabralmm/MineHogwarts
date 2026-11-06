@@ -57,5 +57,6 @@ public final class ClientSetup {
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(ModKeys.SPELL_MODIFIER);
         event.register(ModKeys.OPEN_GRIMOIRE);
+        event.register(ModKeys.DODGE);
     }
 }

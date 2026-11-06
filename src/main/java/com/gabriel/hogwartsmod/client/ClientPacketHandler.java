@@ -54,6 +54,10 @@ public final class ClientPacketHandler {
         Minecraft.getInstance().setScreen(new NpcScreen(entity, name, spells));
     }
 
+    public static void handleDodgeMove(float dx, float dz, float distance, int ticks) {
+        ClientDodge.start(dx, dz, distance, ticks);
+    }
+
     public static void handleOpenTrace(String spell, String teacher, int attempts) {
         Spell resolved = Spells.get(spell);
         if (resolved != null) {

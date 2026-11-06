@@ -71,6 +71,23 @@ public final class MagicHud implements IGuiOverlay {
             }
         }
 
+        int abilityY = slotY - 13;
+        for (Spell ability : abilities(data)) {
+            int remaining = data.getCooldownRemaining(ability, now);
+            String key = keyFor(ability);
+            String label = "[" + key + "] " + ability.getDisplayName().getString();
+            int w = 12 + 3 + font.width(label) + 4;
+            g.fill(MARGIN, abilityY, MARGIN + w, abilityY + 11, remaining > 0 ? 0x90281E14 : 0xC0281E14);
+            SpellIcons.draw(g, ability, MARGIN + 1, abilityY + 1, 9);
+            int color = remaining > 0 ? 0xFF8C8070 : 0xFFECDCB6;
+            g.drawString(font, label, MARGIN + 13, abilityY + 2, color, false);
+            if (remaining > 0) {
+                String seconds = (int) Math.ceil(remaining / 20.0) + "s";
+                g.drawString(font, seconds, MARGIN + w + 3, abilityY + 2, 0xFFECDCB6, true);
+            }
+            abilityY -= 13;
+        }
+
         Spell active = data.getActiveSpell();
         if (active != null) {
             g.drawString(font, active.getDisplayName(), MARGIN, nameY, 0xFFECDCB6, true);
@@ -80,5 +97,19 @@ public final class MagicHud implements IGuiOverlay {
         float ratio = max <= 0 ? 0 : Math.max(0, Math.min(1, data.getReserve() / max));
         g.fill(MARGIN, barY, MARGIN + totalWidth, barY + 4, BAR_BACK);
         g.fill(MARGIN + 1, barY + 1, MARGIN + 1 + Math.round((totalWidth - 2) * ratio), barY + 3, RESERVE);
+    }
+
+    private static java.util.List<Spell> abilities(MagicData data) {
+        java.util.List<Spell> list = new java.util.ArrayList<>();
+        for (Spell spell : com.gabriel.hogwartsmod.spell.Spells.all()) {
+            if (spell.isAbility() && data.knows(spell)) {
+                list.add(spell);
+            }
+        }
+        return list;
+    }
+
+    private static String keyFor(Spell ability) {
+        return ModKeys.DODGE.getTranslatedKeyMessage().getString();
     }
 }

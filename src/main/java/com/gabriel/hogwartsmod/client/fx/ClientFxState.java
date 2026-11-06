@@ -28,6 +28,14 @@ public final class ClientFxState {
         long shieldStart;
         long lastHit = -100;
         boolean lastHitPerfect;
+        boolean dodge;
+        long dodgeStart;
+    }
+
+    public static boolean isDodging(int entityId) {
+        State state = STATES.get(entityId);
+        ClientLevel level = Minecraft.getInstance().level;
+        return state != null && state.dodge && level != null && level.getGameTime() - state.dodgeStart < 20;
     }
 
     private ClientFxState() {
@@ -47,6 +55,12 @@ public final class ClientFxState {
                 state.shield = value;
                 if (value) {
                     state.shieldStart = now;
+                }
+            }
+            case DODGE -> {
+                state.dodge = value;
+                if (value) {
+                    state.dodgeStart = now;
                 }
             }
             case SHIELD_HIT -> {
@@ -77,7 +91,7 @@ public final class ClientFxState {
             Entity entity = level.getEntity(entry.getKey());
             State state = entry.getValue();
             if (!(entity instanceof Player player) || !player.isAlive()) {
-                if (entity == null && !state.lumos && !state.shield) {
+                if (entity == null && !state.lumos && !state.shield && !state.dodge) {
                     it.remove();
                 }
                 continue;
@@ -92,6 +106,22 @@ public final class ClientFxState {
                     Vec3 p = player.getEyePosition(1f).add(look.scale(1.05)).add(0, -0.15, 0)
                             .add(right.scale(Math.cos(a) * 0.95)).add(up.scale(Math.sin(a) * 0.95));
                     level.addParticle(ModParticles.SPARK.get().with(0xBFDFFF, 0.08f, 10), p.x, p.y, p.z, 0, 0, 0);
+                }
+            }
+            if (isDodging(entry.getKey())) {
+                Vec3 base = player.position();
+                Vec3 motion = player.getDeltaMovement();
+                for (int i = 0; i < 4; i++) {
+                    double ox = (level.random.nextDouble() - 0.5) * 0.6;
+                    double oy = 0.2 + level.random.nextDouble() * 1.5;
+                    double oz = (level.random.nextDouble() - 0.5) * 0.6;
+                    int color = level.random.nextInt(3) == 0 ? 0x4A4458 : 0x2E2A36;
+                    level.addParticle(ModParticles.SMOKE.get().with(color, 0.4f + level.random.nextFloat() * 0.3f, 14 + level.random.nextInt(8)),
+                            base.x + ox, base.y + oy, base.z + oz, -motion.x * 0.15, 0.01, -motion.z * 0.15);
+                }
+                if (level.random.nextInt(2) == 0) {
+                    level.addParticle(ModParticles.SPARK.get().with(0x8A7FA8, 0.08f, 12), base.x, base.y + 1.0, base.z,
+                            (level.random.nextFloat() - 0.5f) * 0.1, 0.03, (level.random.nextFloat() - 0.5f) * 0.1);
                 }
             }
             if (state.lumos) {
