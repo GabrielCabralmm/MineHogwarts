@@ -186,5 +186,9 @@
   "message.hogwartsmod.broom_not_yours": "Esta vassoura não é sua",
   "message.hogwartsmod.broom_full": "Não há lugar nesta vassoura",
   "message.hogwartsmod.no_cast_flying": "Não é possível conjurar feitiços voando",
-  "message.hogwartsmod.broom_mounted": "%s para descer da vassoura · %s sobe · %s desce · Ctrl impulso"
+  "hud.hogwartsmod.broom_stamina": "Fôlego",
+  "hud.hogwartsmod.broom_boost": "Impulso",
+  "hud.hogwartsmod.broom_down": "Descer",
+  "hud.hogwartsmod.broom_up": "Subir",
+  "hud.hogwartsmod.broom_dismount": "Sair da vassoura"
 }

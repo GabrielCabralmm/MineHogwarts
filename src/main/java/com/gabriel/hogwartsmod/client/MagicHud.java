@@ -38,6 +38,10 @@ public final class MagicHud implements IGuiOverlay {
             return;
         }
         Font font = mc.font;
+        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.BroomEntity broom) {
+            renderBroom(mc, g, font, broom, width, height);
+            return;
+        }
         long now = player.level().getGameTime();
         int totalWidth = MagicData.SLOT_COUNT * (SLOT + GAP) - GAP;
         int barY = height - MARGIN - 4;
@@ -95,13 +99,46 @@ public final class MagicHud implements IGuiOverlay {
 
         float max = data.getMaxReserve();
         float ratio = max <= 0 ? 0 : Math.max(0, Math.min(1, data.getReserve() / max));
-        int barColor = RESERVE;
-        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.BroomEntity broom) {
-            ratio = Math.max(0, Math.min(1, broom.getStamina() / broom.getBroomType().getStamina()));
-            barColor = 0xFFE6B43C;
-        }
         g.fill(MARGIN, barY, MARGIN + totalWidth, barY + 4, BAR_BACK);
-        g.fill(MARGIN + 1, barY + 1, MARGIN + 1 + Math.round((totalWidth - 2) * ratio), barY + 3, barColor);
+        g.fill(MARGIN + 1, barY + 1, MARGIN + 1 + Math.round((totalWidth - 2) * ratio), barY + 3, RESERVE);
+    }
+
+    // -- Vassoura
+
+    private static void renderBroom(Minecraft mc, GuiGraphics g, Font font, com.gabriel.hogwartsmod.entity.BroomEntity broom, int width, int height) {
+        int totalWidth = MagicData.SLOT_COUNT * (SLOT + GAP) - GAP;
+        int barY = height - MARGIN - 4;
+        int labelY = barY - 11;
+        int right = width - MARGIN;
+        int left = right - totalWidth;
+        float ratio = Math.max(0, Math.min(1, broom.getStamina() / broom.getBroomType().getStamina()));
+        net.minecraft.network.chat.Component stamina = net.minecraft.network.chat.Component.translatable("hud.hogwartsmod.broom_stamina");
+        g.drawString(font, stamina, right - font.width(stamina), labelY, 0xFFECDCB6, true);
+        g.fill(left, barY, right, barY + 4, BAR_BACK);
+        int filled = Math.round((totalWidth - 2) * ratio);
+        g.fill(right - 1 - filled, barY + 1, right - 1, barY + 3, 0xFFE6B43C);
+
+        boolean pilot = broom.getControllingPassenger() == mc.player;
+        java.util.List<String[]> rows = new java.util.ArrayList<>();
+        if (pilot) {
+            rows.add(new String[]{ModKeys.SPELL_MODIFIER.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_boost"});
+            rows.add(new String[]{mc.options.keyShift.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_down"});
+            rows.add(new String[]{mc.options.keyJump.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_up"});
+        }
+        rows.add(new String[]{ModKeys.BROOM_DISMOUNT.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_dismount"});
+        int y = labelY - 15;
+        boolean boosting = broom.isBoostPose();
+        for (String[] row : rows) {
+            String label = "[" + row[0].replace(" esquerdo", " esq.").replace(" direito", " dir.") + "] " + net.minecraft.network.chat.Component.translatable(row[1]).getString();
+            int w = font.width(label) + 7;
+            boolean lit = row[1].endsWith("boost") && boosting;
+            g.fill(right - w, y, right, y + 11, 0xC0281E14);
+            if (lit) {
+                g.fill(right - 1, y, right, y + 11, 0xFFE6B43C);
+            }
+            g.drawString(font, label, right - w + 4, y + 2, lit ? 0xFFE6B43C : 0xFFECDCB6, false);
+            y -= 13;
+        }
     }
 
     private static java.util.List<Spell> abilities(MagicData data) {

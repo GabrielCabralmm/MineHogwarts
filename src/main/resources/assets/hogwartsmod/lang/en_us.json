@@ -186,5 +186,9 @@
   "message.hogwartsmod.broom_not_yours": "This broom isn't yours",
   "message.hogwartsmod.broom_full": "There's no room on this broom",
   "message.hogwartsmod.no_cast_flying": "You can't cast spells while flying",
-  "message.hogwartsmod.broom_mounted": "%s to get off · %s up · %s down · Ctrl boost"
+  "hud.hogwartsmod.broom_stamina": "Stamina",
+  "hud.hogwartsmod.broom_boost": "Boost",
+  "hud.hogwartsmod.broom_down": "Down",
+  "hud.hogwartsmod.broom_up": "Up",
+  "hud.hogwartsmod.broom_dismount": "Get off"
 }
