@@ -134,6 +134,26 @@ public class BroomEntity extends Entity {
         double back = index == 0 ? 0.0 : -0.6;
         Vec3 offset = new Vec3(0, 0, back).yRot(-getYRot() * Mth.DEG_TO_RAD);
         move.accept(passenger, getX() + offset.x, getY() + 0.1 + passenger.getMyRidingOffset(), getZ() + offset.z);
+        alignBody(passenger);
+    }
+
+    private void alignBody(Entity passenger) {
+        if (passenger instanceof LivingEntity living) {
+            living.yBodyRotO = yRotO;
+            living.setYBodyRot(getYRot());
+            float head = Mth.wrapDegrees(passenger.getYRot() - getYRot());
+            float limited = Mth.clamp(head, -100f, 100f);
+            if (head != limited) {
+                passenger.yRotO += limited - head;
+                passenger.setYRot(passenger.getYRot() + limited - head);
+            }
+            passenger.setYHeadRot(passenger.getYRot());
+        }
+    }
+
+    @Override
+    public void onPassengerTurned(Entity passenger) {
+        alignBody(passenger);
     }
 
     @Override
