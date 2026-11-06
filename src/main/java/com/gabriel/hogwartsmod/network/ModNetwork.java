@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "9";
+    private static final String VERSION = "10";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -62,6 +62,8 @@ public final class ModNetwork {
                 .encoder(PlaceEditPacket::encode).decoder(PlaceEditPacket::decode).consumerMainThread(PlaceEditPacket::handle).add();
         CHANNEL.messageBuilder(BroomDismountPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(BroomDismountPacket::encode).decoder(BroomDismountPacket::decode).consumerMainThread(BroomDismountPacket::handle).add();
+        CHANNEL.messageBuilder(BroomBoostPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(BroomBoostPacket::encode).decoder(BroomBoostPacket::decode).consumerMainThread(BroomBoostPacket::handle).add();
         CHANNEL.messageBuilder(PulpitLessonPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PulpitLessonPacket::encode).decoder(PulpitLessonPacket::decode).consumerMainThread(PulpitLessonPacket::handle).add();
     }

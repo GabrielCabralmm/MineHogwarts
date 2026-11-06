@@ -16,7 +16,8 @@ import net.minecraftforge.fml.common.Mod;
 @Mod.EventBusSubscriber(modid = HogwartsMod.MOD_ID, value = Dist.CLIENT)
 public final class ClientBroom {
     private static boolean wasRiding;
-    private static final java.util.Set<Integer> FLYING = new java.util.HashSet<>();
+    private static final java.util.Map<Integer, String> FLYING = new java.util.HashMap<>();
+    private static boolean sentBoost;
     private static float fovBoost;
     private static float fovBoostOld;
 
@@ -47,16 +48,17 @@ public final class ClientBroom {
         if (mc.level != null) {
             java.util.Set<Integer> seen = new java.util.HashSet<>();
             for (net.minecraft.client.player.AbstractClientPlayer other : mc.level.players()) {
-                if (other.getVehicle() instanceof BroomEntity) {
+                if (other.getVehicle() instanceof BroomEntity broom) {
                     seen.add(other.getId());
-                    if (FLYING.add(other.getId())) {
-                        CastAnimations.play(other, "voo_vassoura");
+                    String pose = broom.isBoostPose() && broom.getControllingPassenger() == other ? "voo_vassoura_impulso" : "voo_vassoura";
+                    if (!pose.equals(FLYING.put(other.getId(), pose))) {
+                        CastAnimations.play(other, pose);
                     }
-                } else if (FLYING.remove(other.getId())) {
+                } else if (FLYING.remove(other.getId()) != null) {
                     CastAnimations.play(other, "");
                 }
             }
-            FLYING.retainAll(seen);
+            FLYING.keySet().retainAll(seen);
         }
         boolean riding = mc.player.getVehicle() instanceof BroomEntity;
         if (riding && !wasRiding) {
@@ -67,6 +69,12 @@ public final class ClientBroom {
         wasRiding = riding;
         fovBoostOld = fovBoost;
         boolean boosting = mc.player.getVehicle() instanceof BroomEntity broom && broom.isBoosting();
+        if (boosting != sentBoost && mc.player.getVehicle() instanceof BroomEntity) {
+            sentBoost = boosting;
+            ModNetwork.CHANNEL.sendToServer(new com.gabriel.hogwartsmod.network.BroomBoostPacket(boosting));
+        } else if (!(mc.player.getVehicle() instanceof BroomEntity)) {
+            sentBoost = false;
+        }
         fovBoost = Mth.lerp(0.15f, fovBoost, boosting ? 1f : 0f);
     }
 

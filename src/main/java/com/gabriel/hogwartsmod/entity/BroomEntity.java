@@ -28,6 +28,7 @@ import java.util.UUID;
 
 public class BroomEntity extends Entity {
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> BOOST = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.OPTIONAL_UUID);
 
     public static java.util.function.Consumer<BroomEntity> clientPilot = broom -> {
@@ -62,6 +63,7 @@ public class BroomEntity extends Entity {
     protected void defineSynchedData() {
         entityData.define(TYPE, 0);
         entityData.define(OWNER, Optional.empty());
+        entityData.define(BOOST, false);
     }
 
     public BroomType getBroomType() {
@@ -195,6 +197,14 @@ public class BroomEntity extends Entity {
         return boosting;
     }
 
+    public boolean isBoostPose() {
+        return isControlledByLocalInstance() ? boosting : entityData.get(BOOST);
+    }
+
+    public void setBoostSynced(boolean value) {
+        entityData.set(BOOST, value);
+    }
+
     public float getRoll(float partialTick) {
         return Mth.lerp(partialTick, rollOld, roll);
     }
@@ -240,6 +250,9 @@ public class BroomEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
+        if (!level().isClientSide && getControllingPassenger() == null && entityData.get(BOOST)) {
+            entityData.set(BOOST, false);
+        }
         if (isControlledByLocalInstance()) {
             lerpSteps = 0;
             syncPacketPositionCodec(getX(), getY(), getZ());
