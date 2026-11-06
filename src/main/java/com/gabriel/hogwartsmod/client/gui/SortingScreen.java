@@ -24,7 +24,6 @@ public class SortingScreen extends Screen {
     private static final int TITLE = 0xFF6E281E;
     private static final int MUTED = 0xFF82684C;
     private static final int GOLD = 0xFFBE8C28;
-    private static final int HIGHLIGHT = 0xFFDCC696;
 
     private static final ResourceLocation SHEET = tex("pulpit_sheet");
 
@@ -100,7 +99,7 @@ public class SortingScreen extends Screen {
             boolean hover = mouseX >= x - 4 && mouseX < x + CREST_W + 4 && mouseY >= y - 4 && mouseY < y + CREST_H + 22;
             float lift = hover ? 3f + (float) Math.sin((ticks + partialTick) * 0.25) * 0.8f : 0f;
             if (hover) {
-                g.fill(x - 5, y - 6, x + CREST_W + 5, y + CREST_H + 22, HIGHLIGHT);
+                HiRes.highlight(g, x - 5, y - 6, x + CREST_W + 5, y + CREST_H + 22, HiRes.Mark.HOVER);
             }
             if (house == current) {
                 g.fill(x - 5, y + CREST_H + 20, x + CREST_W + 5, y + CREST_H + 22, GOLD);

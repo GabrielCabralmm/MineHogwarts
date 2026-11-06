@@ -36,7 +36,6 @@ public class PulpitScreen extends Screen {
     private static final int INK = 0xFF38261A;
     private static final int TITLE = 0xFF6E281E;
     private static final int MUTED = 0xFF82684C;
-    private static final int HIGHLIGHT = 0xFFDCC696;
     private static final int GOLD = 0xFFBE8C28;
     private static final int GREEN = 0xFF3F6B2A;
     private static final int WINE = 0xFF8E2A2A;
@@ -158,7 +157,7 @@ public class PulpitScreen extends Screen {
             int y = top + 44 + i * ROW;
             boolean hover = mouseX >= x - 2 && mouseX < x + w + 2 && mouseY >= y - 1 && mouseY < y + ROW - 1;
             if (s == spell || hover) {
-                g.fill(x - 2, y - 1, x + w + 2, y + ROW - 1, HIGHLIGHT);
+                HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 1, s == spell ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             SpellIcons.draw(g, s, x, y, 11);
             int remaining = data == null ? 0 : data.getTeachCooldownRemaining(s, now);
@@ -287,7 +286,7 @@ public class PulpitScreen extends Screen {
         boolean hover = canEdit && mouseX >= x - 1 && mouseX < x + 9 && mouseY >= y - 1 && mouseY < y + 9;
         String color = !canEdit ? "muted" : shrink ? "wine" : "ink";
         if (hover) {
-            g.fill(x - 1, y - 1, x + 9, y + 9, HIGHLIGHT);
+            HiRes.highlight(g, x - 1, y - 1, x + 9, y + 9, HiRes.Mark.HOVER);
         }
         HiRes.image(g, tex("arrow_" + dir + "_" + color), x, y, 8, 8);
     }

@@ -274,7 +274,7 @@ public class GrimoireScreen extends Screen {
             int value = points[house.ordinal()];
             boolean first = i == 0 && leader;
             if (first) {
-                g.fill(lx - 3, y - 3, lx + pageW + 3, y + 30, HIGHLIGHT);
+                HiRes.highlight(g, lx - 3, y - 3, lx + pageW + 3, y + 30, HiRes.Mark.SELECTED);
             }
             HiRes.image(g, crest(house), lx, y, 23, 27);
             String place = value > 0 ? placeOf(points, value) + "º" : "–";
@@ -355,7 +355,7 @@ public class GrimoireScreen extends Screen {
             int y = top + 30 + i * ROW_H;
             boolean hover = mouseX >= lx && mouseX < lx + pageW && mouseY >= y && mouseY < y + ROW_H;
             if (spell == selected || hover) {
-                g.fill(lx - 2, y - 1, lx + pageW + 2, y + ROW_H - 1, spell == armed ? GOLD : HIGHLIGHT);
+                HiRes.highlight(g, lx - 2, y - 1, lx + pageW + 2, y + ROW_H - 1, spell == armed ? HiRes.Mark.ARMED : spell == selected ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             SpellIcons.draw(g, spell, lx, y, 12);
             String level = "Nv " + spell.getRequiredLevel();
@@ -444,7 +444,7 @@ public class GrimoireScreen extends Screen {
             int y = top + 30 + i * ROW_H;
             boolean hover = mouseX >= lx && mouseX < lx + pageW && mouseY >= y && mouseY < y + ROW_H;
             if (spell == teachSpell || hover) {
-                g.fill(lx - 2, y - 1, lx + pageW + 2, y + ROW_H - 1, HIGHLIGHT);
+                HiRes.highlight(g, lx - 2, y - 1, lx + pageW + 2, y + ROW_H - 1, spell == teachSpell ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             SpellIcons.draw(g, spell, lx, y, 12);
             int remaining = data.getTeachCooldownRemaining(spell, now);
@@ -485,7 +485,7 @@ public class GrimoireScreen extends Screen {
             boolean hover = mouseX >= rx && mouseX < rx + rw && mouseY >= y && mouseY < y + ROW_H;
             boolean pickable = entry.status() == StudentStatus.CAN_LEARN;
             if (entry.id().equals(teachStudent) || hover && pickable) {
-                g.fill(rx - 2, y - 1, rx + rw + 2, y + ROW_H - 1, HIGHLIGHT);
+                HiRes.highlight(g, rx - 2, y - 1, rx + rw + 2, y + ROW_H - 1, entry.id().equals(teachStudent) ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             String status = tr(entry.status().key());
             float statusW = HiRes.width(status, HiRes.Style.ITALIC);
@@ -622,7 +622,7 @@ public class GrimoireScreen extends Screen {
             var point = places.get(i);
             int y = top + 30 + i * PLACE_ROW;
             if (i == renaming) {
-                g.fill(lx - 2, y - 1, lx + pageW + 2, y + PLACE_ROW - 2, HIGHLIGHT);
+                HiRes.highlight(g, lx - 2, y - 1, lx + pageW + 2, y + PLACE_ROW - 2, HiRes.Mark.SELECTED);
             }
             String rename = tr("screen.hogwartsmod.grimoire.rename");
             String forget = tr("screen.hogwartsmod.grimoire.forget");
@@ -754,7 +754,7 @@ public class GrimoireScreen extends Screen {
         for (int i = 0; i < count; i++) {
             int x = startX + i * 14;
             if (i == page) {
-                g.fill(x - 5, y - 2, x + 6, y + 9, HIGHLIGHT);
+                HiRes.highlight(g, x - 5, y - 2, x + 6, y + 9, HiRes.Mark.SELECTED);
             }
             HiRes.centered(g, String.valueOf(i + 1), i == page ? HiRes.Style.BOLD : HiRes.Style.REGULAR, x + 0.5f, y - 1, i == page ? TITLE : MUTED);
         }

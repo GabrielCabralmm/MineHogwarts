@@ -57,6 +57,94 @@ public final class HiRes {
         return Minecraft.getInstance().getWindow().getGuiScale();
     }
 
+    // -- Destaques
+
+    public enum Mark { SELECTED, HOVER, ARMED }
+
+    public static void highlight(GuiGraphics g, int x0, int y0, int x1, int y1, Mark mark) {
+        int w = x1 - x0;
+        int h = y1 - y0;
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+        double scale = scale();
+        int pad = (int) Math.ceil(2 * scale);
+        int pw = (int) Math.round(w * scale) + pad * 2;
+        int ph = (int) Math.round(h * scale) + pad * 2;
+        String key = "hl|" + mark + "|" + pw + "x" + ph;
+        Entry entry = CACHE.get(key);
+        if (entry == null) {
+            BufferedImage image = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D hg = configure(image.createGraphics());
+            float bw = pw - pad * 2f;
+            float bh = ph - pad * 2f;
+            float arc = (float) Math.min(bh * 0.9, 12 * scale);
+            float line = (float) Math.max(1, scale * 0.6);
+            java.awt.geom.RoundRectangle2D shape = new java.awt.geom.RoundRectangle2D.Float(pad, pad, bw, bh, arc, arc);
+            java.awt.geom.RoundRectangle2D shadow = new java.awt.geom.RoundRectangle2D.Float(pad, pad + line, bw, bh, arc, arc);
+            Color top;
+            Color bottom;
+            Color border;
+            switch (mark) {
+                case SELECTED -> {
+                    top = new Color(248, 236, 204);
+                    bottom = new Color(234, 214, 166);
+                    border = new Color(184, 136, 44, 210);
+                }
+                case ARMED -> {
+                    top = new Color(246, 216, 140);
+                    bottom = new Color(222, 178, 84);
+                    border = new Color(150, 104, 24, 230);
+                }
+                default -> {
+                    top = new Color(244, 232, 200, 150);
+                    bottom = new Color(232, 214, 172, 150);
+                    border = new Color(184, 136, 44, 70);
+                }
+            }
+            if (mark != Mark.HOVER) {
+                hg.setColor(new Color(90, 60, 30, 45));
+                hg.fill(shadow);
+            }
+            hg.setPaint(new java.awt.GradientPaint(0, pad, top, 0, pad + bh, bottom));
+            hg.fill(shape);
+            if (mark != Mark.HOVER) {
+                hg.setColor(new Color(255, 255, 255, 80));
+                hg.setStroke(new java.awt.BasicStroke(line));
+                hg.draw(new java.awt.geom.Line2D.Float(pad + arc / 2f, pad + line * 1.5f, pad + bw - arc / 2f, pad + line * 1.5f));
+            }
+            hg.setColor(border);
+            hg.setStroke(new java.awt.BasicStroke(line));
+            hg.draw(new java.awt.geom.RoundRectangle2D.Float(pad + line / 2f, pad + line / 2f, bw - line, bh - line, arc, arc));
+            if (mark != Mark.HOVER && bw > bh * 2.5f) {
+                float d = (float) Math.min(bh * 0.28, 3.2 * scale);
+                float cx = pad + line / 2f;
+                float cy = pad + bh / 2f;
+                java.awt.geom.Path2D diamond = new java.awt.geom.Path2D.Float();
+                diamond.moveTo(cx, cy - d);
+                diamond.lineTo(cx + d, cy);
+                diamond.lineTo(cx, cy + d);
+                diamond.lineTo(cx - d, cy);
+                diamond.closePath();
+                hg.setColor(new Color(214, 166, 60));
+                hg.fill(diamond);
+                hg.setColor(new Color(120, 80, 20, 200));
+                hg.setStroke(new java.awt.BasicStroke(Math.max(1f, line * 0.7f)));
+                hg.draw(diamond);
+            }
+            hg.dispose();
+            entry = upload(key, image, (float) (pw / scale), (float) (ph / scale), (float) (pad / scale));
+        }
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        g.pose().pushPose();
+        g.pose().translate(x0 - entry.offsetY(), y0 - entry.offsetY(), 0);
+        g.pose().scale((float) (1 / scale), (float) (1 / scale), 1f);
+        g.blit(entry.id(), 0, 0, 0, 0, entry.pixelW(), entry.pixelH(), entry.pixelW(), entry.pixelH());
+        g.pose().popPose();
+        RenderSystem.disableBlend();
+    }
+
     // -- Imagens
 
     public static void image(GuiGraphics g, ResourceLocation source, int x, int y, int w, int h) {

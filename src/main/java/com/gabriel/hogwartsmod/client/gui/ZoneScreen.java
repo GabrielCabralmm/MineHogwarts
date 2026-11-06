@@ -32,7 +32,6 @@ public class ZoneScreen extends Screen {
     private static final int NAME = 0xFF7A2618;
     private static final int TITLE = 0xFF6E281E;
     private static final int MUTED = 0xFF82684C;
-    private static final int HIGHLIGHT = 0xFFDCC696;
     private static final int GOLD = 0xFFBE8C28;
     private static final int WINE = 0xFF8E2A2A;
     private static final int LINE = 0xFFC4AA7C;
@@ -170,7 +169,7 @@ public class ZoneScreen extends Screen {
             int y = top + 44 + i * ROW;
             boolean hover = mouseX >= x - 2 && mouseX < x + w + 2 && mouseY >= y - 1 && mouseY < y + ROW - 1;
             if (zone.name().equals(selected) || hover) {
-                g.fill(x - 2, y - 1, x + w + 2, y + ROW - 1, HIGHLIGHT);
+                HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 1, zone.name().equals(selected) ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             int rules = Integer.bitCount(zone.rules());
             String count = rules == 0 ? tr("screen.hogwartsmod.zones.no_rules") : tr("screen.hogwartsmod.zones.rule_count", rules);
@@ -295,7 +294,7 @@ public class ZoneScreen extends Screen {
             float uw = HiRes.width(undo, HiRes.Style.BOLD);
             boolean hover = mouseX >= cx - uw / 2 - 2 && mouseX < cx + uw / 2 + 2 && mouseY >= top + 53 && mouseY < top + 64;
             if (hover) {
-                g.fill((int) (cx - uw / 2 - 2), top + 53, (int) (cx + uw / 2 + 2), top + 64, HIGHLIGHT);
+                HiRes.highlight(g, (int) (cx - uw / 2 - 2), top + 53, (int) (cx + uw / 2 + 2), top + 64, HiRes.Mark.HOVER);
             }
             HiRes.centered(g, undo, HiRes.Style.BOLD, cx, top + 54, WINE);
         }
@@ -307,7 +306,7 @@ public class ZoneScreen extends Screen {
             int y = top + 80 + i * RULE_ROW;
             boolean hover = mouseX >= x - 2 && mouseX < x + w + 2 && mouseY >= y - 2 && mouseY < y + RULE_ROW - 3;
             if (hover) {
-                g.fill(x - 2, y - 2, x + w + 2, y + RULE_ROW - 3, HIGHLIGHT);
+                HiRes.highlight(g, x - 2, y - 2, x + w + 2, y + RULE_ROW - 3, HiRes.Mark.HOVER);
             }
             g.fill(x, y + 2, x + 9, y + 11, NOTE_EDGE);
             g.fill(x + 1, y + 3, x + 8, y + 10, NOTE_ON);

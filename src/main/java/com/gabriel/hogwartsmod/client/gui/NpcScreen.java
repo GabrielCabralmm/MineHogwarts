@@ -26,7 +26,6 @@ public class NpcScreen extends Screen {
     private static final int INK = 0xFF38261A;
     private static final int TITLE = 0xFF6E281E;
     private static final int MUTED = 0xFF82684C;
-    private static final int HIGHLIGHT = 0xFFDCC696;
     private static final int GREEN = 0xFF3F6B2A;
     private static final int WINE = 0xFF8E2A2A;
     private static final int LINE = 0xFFC4AA7C;
@@ -101,7 +100,7 @@ public class NpcScreen extends Screen {
             int y = top + 48 + i * ROW;
             boolean hover = status == Status.LEARN && mouseX >= x - 3 && mouseX < x + w + 3 && mouseY >= y - 1 && mouseY < y + ROW - 1;
             if (hover) {
-                g.fill(x - 3, y - 1, x + w + 3, y + ROW - 1, HIGHLIGHT);
+                HiRes.highlight(g, x - 3, y - 1, x + w + 3, y + ROW - 1, HiRes.Mark.HOVER);
             }
             SpellIcons.draw(g, spell, x, y + 1, 14);
             HiRes.text(g, spell.getDisplayName().getString(), HiRes.Style.REGULAR, x + 19, y, status == Status.KNOWS ? MUTED : INK);
