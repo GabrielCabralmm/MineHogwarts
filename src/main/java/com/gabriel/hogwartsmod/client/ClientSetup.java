@@ -31,6 +31,8 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(com.gabriel.hogwartsmod.registry.ModBlockEntities.CAULDRON.get(),
+                com.gabriel.hogwartsmod.client.potion.CauldronRenderer::new);
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), NoopRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.PULPIT.get(), PulpitRenderer::new);
         event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
@@ -67,6 +69,11 @@ public final class ClientSetup {
                 player.addLayer(new com.gabriel.hogwartsmod.client.house.SortingHatLayer(player));
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void registerExtraModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
+        event.register(com.gabriel.hogwartsmod.client.potion.CauldronRenderer.SPOON);
     }
 
     @SubscribeEvent

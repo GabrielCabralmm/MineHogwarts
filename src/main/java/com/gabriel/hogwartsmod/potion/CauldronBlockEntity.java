@@ -153,7 +153,7 @@ public class CauldronBlockEntity extends BlockEntity {
         if (held.getItem() instanceof WandItem) {
             if (state == State.WATER) {
                 if (!client) {
-                    add(player, Brew.STIR);
+                    add(player, Brew.WAND);
                 }
                 return InteractionResult.sidedSuccess(client);
             }
@@ -178,7 +178,11 @@ public class CauldronBlockEntity extends BlockEntity {
         }
         if (held.isEmpty()) {
             if (!client) {
-                status(player);
+                if (state == State.WATER) {
+                    add(player, Brew.STIR);
+                } else {
+                    status(player);
+                }
             }
             return InteractionResult.sidedSuccess(client);
         }
@@ -196,11 +200,27 @@ public class CauldronBlockEntity extends BlockEntity {
         double y = worldPosition.getY() + topY();
         double z = worldPosition.getZ() + 0.5;
         if (token.equals(Brew.STIR)) {
-            server.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.4f, 1.6f);
+            level.blockEvent(worldPosition, getBlockState().getBlock(), 1, 0);
+            server.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.35f, 1.7f);
+            server.playSound(null, worldPosition, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.25f, 1.8f);
             for (int i = 0; i < 10; i++) {
                 double a = i / 10.0 * Math.PI * 2;
-                server.sendParticles(ModParticles.GLOW.get().with(getColor(), 0.3f, 12),
-                        x + Math.cos(a) * 0.25, y, z + Math.sin(a) * 0.25, 0, -Math.sin(a) * 0.04, 0.02, Math.cos(a) * 0.04, 1.0);
+                server.sendParticles(ModParticles.GLOW.get().with(getColor(), 0.25f, 12),
+                        x + Math.cos(a) * 0.22, y, z + Math.sin(a) * 0.22, 0, -Math.sin(a) * 0.04, 0.015, Math.cos(a) * 0.04, 1.0);
+            }
+        } else if (token.equals(Brew.WAND)) {
+            server.playSound(null, worldPosition, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 0.7f, 1.5f);
+            server.playSound(null, worldPosition, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.8f, 1.6f);
+            net.minecraft.world.phys.Vec3 from = player.getEyePosition().add(player.getLookAngle().scale(0.6)).add(0, -0.25, 0);
+            net.minecraft.world.phys.Vec3 to = new net.minecraft.world.phys.Vec3(x, y + 0.1, z);
+            for (int i = 0; i <= 12; i++) {
+                net.minecraft.world.phys.Vec3 p = from.lerp(to, i / 12.0);
+                server.sendParticles(ModParticles.SPARK.get().with(0xFFE6A0, 0.12f, 10), p.x, p.y, p.z, 1, 0.02, 0.02, 0.02, 0.0);
+            }
+            for (int i = 0; i < 16; i++) {
+                double a = i / 16.0 * Math.PI * 2;
+                server.sendParticles(ModParticles.STAR.get().with(getColor(), 0.35f, 16),
+                        x + Math.cos(a) * 0.3, y + 0.15, z + Math.sin(a) * 0.3, 0, Math.cos(a) * 0.02, 0.05, Math.sin(a) * 0.02, 1.0);
             }
         } else {
             server.playSound(null, worldPosition, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.5f, 1.4f);
@@ -218,9 +238,11 @@ public class CauldronBlockEntity extends BlockEntity {
             server.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1f, 0.8f);
             say(player, Component.translatable("message.hogwartsmod.cauldron_brewing", match.getDisplayName(), match.getSeconds()), ChatFormatting.GOLD);
         } else {
-            say(player, Component.translatable(token.equals(Brew.STIR) ? "message.hogwartsmod.cauldron_stirred" : "message.hogwartsmod.cauldron_added",
-                    token.equals(Brew.STIR) ? "" : BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.tryParse(token)).getDescription(),
-                    tokens.size()), ChatFormatting.GRAY);
+            Component text = token.equals(Brew.STIR) ? Component.translatable("message.hogwartsmod.cauldron_stirred", tokens.size())
+                    : token.equals(Brew.WAND) ? Component.translatable("message.hogwartsmod.cauldron_wand", tokens.size())
+                    : Component.translatable("message.hogwartsmod.cauldron_added",
+                    BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation.tryParse(token)).getDescription(), tokens.size());
+            say(player, text, ChatFormatting.GRAY);
         }
         changed();
         return true;
@@ -314,7 +336,37 @@ public class CauldronBlockEntity extends BlockEntity {
     }
 
     private double topY() {
-        return getBlockState().getValue(CauldronBlock.FIRE) ? 0.36 : 0.5;
+        return getBlockState().getValue(CauldronBlock.FIRE) ? 0.5 : 0.55;
+    }
+
+    private long stirStart = -100;
+
+    @Override
+    public boolean triggerEvent(int id, int param) {
+        if (id == 1) {
+            if (level != null && level.isClientSide) {
+                stirStart = level.getGameTime();
+            }
+            return true;
+        }
+        return super.triggerEvent(id, param);
+    }
+
+    public float spoonAngle(float partialTick) {
+        float idle = 35f;
+        if (level == null) {
+            return idle;
+        }
+        float t = (level.getGameTime() - stirStart + partialTick) / 18f;
+        if (t < 0 || t >= 1) {
+            return idle;
+        }
+        float eased = t * t * (3 - 2 * t);
+        return idle + eased * 360f;
+    }
+
+    public double liquidY() {
+        return topY();
     }
 
     // -- Tique

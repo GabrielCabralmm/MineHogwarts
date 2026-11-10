@@ -25,8 +25,8 @@ import org.jetbrains.annotations.Nullable;
 public class CauldronBlock extends Block implements EntityBlock {
     public static final BooleanProperty FILLED = BooleanProperty.create("cheio");
     public static final BooleanProperty FIRE = BooleanProperty.create("fogueira");
-    private static final VoxelShape SHAPE_FIRE = box(2, 0, 2, 14, 7, 14);
-    private static final VoxelShape SHAPE_FLOOR = box(2, 0, 2, 14, 10, 14);
+    private static final VoxelShape SHAPE_FIRE = box(1.5, 0, 1.5, 14.5, 10, 14.5);
+    private static final VoxelShape SHAPE_FLOOR = box(1.5, 0, 1.5, 14.5, 10.7, 14.5);
 
     public CauldronBlock(Properties properties) {
         super(properties);
@@ -62,6 +62,13 @@ public class CauldronBlock extends Block implements EntityBlock {
             return state.setValue(FIRE, isCampfire(neighbor));
         }
         return state;
+    }
+
+    @Override
+    public boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param) {
+        super.triggerEvent(state, level, pos, id, param);
+        BlockEntity be = level.getBlockEntity(pos);
+        return be != null && be.triggerEvent(id, param);
     }
 
     @Override

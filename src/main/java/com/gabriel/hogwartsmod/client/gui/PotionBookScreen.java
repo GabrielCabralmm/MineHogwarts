@@ -141,15 +141,22 @@ public class PotionBookScreen extends Screen {
             String text;
             ItemStack icon;
             if (step.isStir()) {
-                icon = new ItemStack(ModItems.WAND.get());
+                icon = ItemStack.EMPTY;
                 text = tr("screen.hogwartsmod.potion_book.stir", step.count());
+            } else if (step.isWand()) {
+                icon = new ItemStack(ModItems.WAND.get());
+                text = tr("screen.hogwartsmod.potion_book.wand", step.count());
             } else {
                 Item item = BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(step.item()));
                 icon = new ItemStack(item);
                 text = step.count() + "× " + item.getDescription().getString();
             }
             HiRes.text(g, n + ".", HiRes.Style.BOLD, 7f, rx, y, GOLD);
-            MissionScreen.item(g, icon, rx + 8, y - 1, 10);
+            if (icon.isEmpty()) {
+                HiRes.image(g, MissionScreen.tex("colher"), rx + 8, y - 1, 10, 10);
+            } else {
+                MissionScreen.item(g, icon, rx + 8, y - 1, 10);
+            }
             HiRes.text(g, HiRes.ellipsize(text, HiRes.Style.REGULAR, (rw - 22) * HiRes.TEXT_SIZE / 7f), HiRes.Style.REGULAR, 7f, rx + 21, y, INK);
             y += 11;
             n++;

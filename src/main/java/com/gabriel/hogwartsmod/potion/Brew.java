@@ -23,9 +23,11 @@ public enum Brew {
             Step.stir(1),
             Step.item("minecraft:glowstone_dust", 1),
             Step.item("minecraft:sugar", 2),
-            Step.stir(4)));
+            Step.stir(3),
+            Step.wand(1)));
 
     public static final String STIR = "mexer";
+    public static final String WAND = "varinha";
     public static final int MAX_DIFFICULTY = 5;
 
     public enum Action {
@@ -69,8 +71,16 @@ public enum Brew {
             return new Step(null, count);
         }
 
+        static Step wand(int count) {
+            return new Step(WAND, count);
+        }
+
         public boolean isStir() {
             return item == null;
+        }
+
+        public boolean isWand() {
+            return WAND.equals(item);
         }
     }
 
