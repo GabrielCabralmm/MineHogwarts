@@ -6,13 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "hogwartsmod:caldeirao",
-          "functions": [
-            {
-              "function": "minecraft:set_nbt",
-              "tag": "{SemFogueira:1b}"
-            }
-          ]
+          "name": "hogwartsmod:caldeirao"
         }
       ],
       "conditions": [

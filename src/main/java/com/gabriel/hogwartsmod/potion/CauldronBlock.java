@@ -25,7 +25,7 @@ import org.jetbrains.annotations.Nullable;
 public class CauldronBlock extends Block implements EntityBlock {
     public static final BooleanProperty FILLED = BooleanProperty.create("cheio");
     public static final BooleanProperty FIRE = BooleanProperty.create("fogueira");
-    private static final VoxelShape SHAPE_FIRE = Shapes.or(box(0, 0, 0, 16, 4, 16), box(2, 7, 2, 14, 16, 14), box(3, 4, 3, 13, 7, 13));
+    private static final VoxelShape SHAPE_FIRE = box(2, 0, 2, 14, 7, 14);
     private static final VoxelShape SHAPE_FLOOR = box(2, 0, 2, 14, 10, 14);
 
     public CauldronBlock(Properties properties) {
@@ -45,28 +45,23 @@ public class CauldronBlock extends Block implements EntityBlock {
 
     @Override
     public BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext context) {
-        BlockState replaced = context.getLevel().getBlockState(context.getClickedPos());
-        boolean fire = replaced.getBlock() instanceof PotionFireBlock || CauldronItem.comesWithFire(context.getItemInHand());
+        boolean fire = isCampfire(context.getLevel().getBlockState(context.getClickedPos().below()));
         net.minecraft.nbt.CompoundTag data = net.minecraft.world.item.BlockItem.getBlockEntityData(context.getItemInHand());
         boolean filled = data != null && !data.getString("Estado").isEmpty() && !data.getString("Estado").equals("EMPTY");
         return defaultBlockState().setValue(FIRE, fire).setValue(FILLED, filled);
     }
 
-    @Override
-    public void animateTick(BlockState state, Level level, BlockPos pos, net.minecraft.util.RandomSource random) {
-        if (state.getValue(FIRE) && random.nextInt(10) == 0) {
-            level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, net.minecraft.sounds.SoundEvents.CAMPFIRE_CRACKLE,
-                    net.minecraft.sounds.SoundSource.BLOCKS, 0.4f + random.nextFloat() * 0.5f, random.nextFloat() * 0.7f + 0.6f, false);
-        }
-        if (state.getValue(FIRE) && random.nextInt(4) == 0) {
-            level.addParticle(net.minecraft.core.particles.ParticleTypes.SMALL_FLAME, pos.getX() + 0.25 + random.nextDouble() * 0.5, pos.getY() + 0.3,
-                    pos.getZ() + 0.25 + random.nextDouble() * 0.5, 0, 0.005, 0);
-        }
+    public static boolean isCampfire(BlockState state) {
+        return state.is(net.minecraft.tags.BlockTags.CAMPFIRES);
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+    public BlockState updateShape(BlockState state, net.minecraft.core.Direction direction, BlockState neighbor,
+                                  net.minecraft.world.level.LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+        if (direction == net.minecraft.core.Direction.DOWN) {
+            return state.setValue(FIRE, isCampfire(neighbor));
+        }
+        return state;
     }
 
     @Override

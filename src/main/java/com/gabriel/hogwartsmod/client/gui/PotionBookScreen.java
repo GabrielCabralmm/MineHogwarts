@@ -155,7 +155,7 @@ public class PotionBookScreen extends Screen {
             n++;
         }
         HiRes.text(g, n + ".", HiRes.Style.BOLD, 7f, rx, y, GOLD);
-        MissionScreen.item(g, new ItemStack(com.gabriel.hogwartsmod.registry.ModBlocks.POTION_FIRE_ITEM.get()), rx + 8, y - 1, 10);
+        MissionScreen.item(g, new ItemStack(Items.CAMPFIRE), rx + 8, y - 1, 10);
         HiRes.text(g, tr("screen.hogwartsmod.potion_book.boil", brew.getSeconds()), HiRes.Style.REGULAR, 7f, rx + 21, y, INK);
         HiRes.centered(g, tr("screen.hogwartsmod.potion_book.doses", brew.getDoses()), HiRes.Style.ITALIC, 6.5f, cx, top + BOOK_H - 20, MUTED);
     }

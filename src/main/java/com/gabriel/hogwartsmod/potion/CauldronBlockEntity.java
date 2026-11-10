@@ -55,7 +55,11 @@ public class CauldronBlockEntity extends BlockEntity {
     }
 
     public boolean isHeated() {
-        return getBlockState().getValue(CauldronBlock.FIRE);
+        if (level == null || !getBlockState().getValue(CauldronBlock.FIRE)) {
+            return false;
+        }
+        BlockState below = level.getBlockState(worldPosition.below());
+        return CauldronBlock.isCampfire(below) && below.getValue(net.minecraft.world.level.block.CampfireBlock.LIT);
     }
 
     @Nullable
@@ -236,14 +240,11 @@ public class CauldronBlockEntity extends BlockEntity {
 
     private void pickUp(Player player) {
         ItemStack item = new ItemStack(com.gabriel.hogwartsmod.registry.ModBlocks.CAULDRON_ITEM.get());
-        item.getOrCreateTag().putBoolean(CauldronItem.NO_FIRE, true);
         if (state != State.EMPTY) {
             BlockItem.setBlockEntityData(item, getType(), saveWithoutMetadata());
         }
-        boolean fire = isHeated();
         BlockPos pos = worldPosition;
-        level.setBlock(pos, fire ? com.gabriel.hogwartsmod.registry.ModBlocks.POTION_FIRE.get().defaultBlockState()
-                : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+        level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
         level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_IRON, SoundSource.BLOCKS, 1f, 0.8f);
         if (player.getMainHandItem().isEmpty()) {
             player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, item);
@@ -313,7 +314,7 @@ public class CauldronBlockEntity extends BlockEntity {
     }
 
     private double topY() {
-        return isHeated() ? 0.88 : 0.5;
+        return getBlockState().getValue(CauldronBlock.FIRE) ? 0.36 : 0.5;
     }
 
     // -- Tique

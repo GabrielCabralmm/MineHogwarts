@@ -31,7 +31,6 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.MUCO_VERMECEGO.get());
                         output.accept(ModItems.CASCA_WIGGENTREE.get());
                         output.accept(ModItems.PO_PEDRA_DA_LUA.get());
-                        output.accept(ModBlocks.POTION_FIRE_ITEM.get());
                         ModItems.POTION_BOOKS.forEach(book -> output.accept(book.get()));
                         output.accept(ModItems.POCAO_WIGGENWELD.get());
                         output.accept(ModItems.POCAO_REVIGORANTE.get());

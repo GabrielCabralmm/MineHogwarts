@@ -30,13 +30,6 @@ public final class ModBlocks {
     public static final RegistryObject<Item> CAULDRON_ITEM = ModItems.ITEMS.register("caldeirao",
             () -> new com.gabriel.hogwartsmod.potion.CauldronItem(CAULDRON.get(), new Item.Properties().stacksTo(1)));
 
-    public static final RegistryObject<Block> POTION_FIRE = BLOCKS.register("fogueira_pocoes",
-            () -> new com.gabriel.hogwartsmod.potion.PotionFireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PODZOL)
-                    .strength(1.5f).sound(SoundType.WOOD).noOcclusion().lightLevel(state -> 13)));
-
-    public static final RegistryObject<Item> POTION_FIRE_ITEM = ModItems.ITEMS.register("fogueira_pocoes",
-            () -> new BlockItem(POTION_FIRE.get(), new Item.Properties()));
-
     private ModBlocks() {
     }
 }

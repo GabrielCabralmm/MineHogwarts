@@ -13,22 +13,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class CauldronItem extends BlockItem {
-    public static final String NO_FIRE = "SemFogueira";
-
     public CauldronItem(Block block, Properties properties) {
         super(block, properties);
     }
 
-    public static boolean comesWithFire(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null || !tag.getBoolean(NO_FIRE);
-    }
-
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        if (comesWithFire(stack)) {
-            tooltip.add(Component.translatable("item.hogwartsmod.caldeirao.with_fire").withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC));
-        }
         CompoundTag data = getBlockEntityData(stack);
         if (data != null) {
             Brew brew = Brew.byId(data.getString("Pocao"));
