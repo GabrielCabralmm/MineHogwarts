@@ -48,6 +48,12 @@ public final class ModItems {
                     () -> (Item) new com.gabriel.hogwartsmod.potion.PotionBookItem(n, new Item.Properties().stacksTo(1))))
             .toList();
 
+    public static final RegistryObject<Item> BOLSA_CRIATURAS = ITEMS.register("bolsa_criaturas",
+            () -> new com.gabriel.hogwartsmod.creature.CreatureBagItem(new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> OVO_HIPOGRIFO = ITEMS.register("ovo_hipogrifo",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(ModEntities.HIPPOGRIFF, 0x8C8E94, 0xB7895A, new Item.Properties()));
+
     public static Item potion(com.gabriel.hogwartsmod.potion.Brew brew) {
         return switch (brew) {
             case WIGGENWELD -> POCAO_WIGGENWELD.get();

@@ -18,7 +18,7 @@ public record BroomDismountPacket() {
 
     public static void handle(BroomDismountPacket packet, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null && player.getVehicle() instanceof BroomEntity) {
+        if (player != null && player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount) {
             player.setShiftKeyDown(false);
             player.stopRiding();
         }

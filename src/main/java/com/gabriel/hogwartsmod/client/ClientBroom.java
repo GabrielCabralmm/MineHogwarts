@@ -43,7 +43,7 @@ public final class ClientBroom {
             return;
         }
         while (ModKeys.BROOM_DISMOUNT.consumeClick()) {
-            if (mc.player.getVehicle() instanceof BroomEntity) {
+            if (mc.player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount) {
                 ModNetwork.CHANNEL.sendToServer(new BroomDismountPacket());
             }
         }
@@ -62,17 +62,17 @@ public final class ClientBroom {
             }
             FLYING.keySet().retainAll(seen);
         }
-        boolean riding = mc.player.getVehicle() instanceof BroomEntity;
+        boolean riding = mc.player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount;
         if (riding && !wasRiding) {
             mc.gui.setOverlayMessage(net.minecraft.network.chat.Component.empty(), false);
         }
         wasRiding = riding;
         fovBoostOld = fovBoost;
-        boolean boosting = mc.player.getVehicle() instanceof BroomEntity broom && broom.isBoosting();
-        if (boosting != sentBoost && mc.player.getVehicle() instanceof BroomEntity) {
+        boolean boosting = mc.player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount broom && broom.isBoosting();
+        if (boosting != sentBoost && mc.player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount) {
             sentBoost = boosting;
             ModNetwork.CHANNEL.sendToServer(new com.gabriel.hogwartsmod.network.BroomBoostPacket(boosting));
-        } else if (!(mc.player.getVehicle() instanceof BroomEntity)) {
+        } else if (!(mc.player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount)) {
             sentBoost = false;
         }
         fovBoost = Mth.lerp(0.15f, fovBoost, boosting ? 1f : 0f);
@@ -89,7 +89,7 @@ public final class ClientBroom {
     @SubscribeEvent
     public static void roll(ViewportEvent.ComputeCameraAngles event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && mc.player.getVehicle() instanceof BroomEntity broom && broom.getControllingPassenger() == mc.player) {
+        if (mc.player != null && mc.player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount broom && broom.getControllingPassenger() == mc.player) {
             event.setRoll(event.getRoll() + broom.getRoll((float) event.getPartialTick()) * 0.35f);
         }
     }

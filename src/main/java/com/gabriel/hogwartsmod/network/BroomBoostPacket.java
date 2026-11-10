@@ -19,7 +19,7 @@ public record BroomBoostPacket(boolean boosting) {
 
     public static void handle(BroomBoostPacket packet, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null && player.getVehicle() instanceof BroomEntity broom && broom.getControllingPassenger() == player) {
+        if (player != null && player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount broom && broom.getControllingPassenger() == player) {
             broom.setBoostSynced(packet.boosting);
         }
         ctx.get().setPacketHandled(true);

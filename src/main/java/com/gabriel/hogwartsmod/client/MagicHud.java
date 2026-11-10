@@ -38,7 +38,7 @@ public final class MagicHud implements IGuiOverlay {
             return;
         }
         Font font = mc.font;
-        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.BroomEntity broom) {
+        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount broom) {
             renderBroom(mc, g, font, broom, height);
             return;
         }
@@ -105,13 +105,13 @@ public final class MagicHud implements IGuiOverlay {
 
     // -- Vassoura
 
-    private static void renderBroom(Minecraft mc, GuiGraphics g, Font font, com.gabriel.hogwartsmod.entity.BroomEntity broom, int height) {
+    private static void renderBroom(Minecraft mc, GuiGraphics g, Font font, com.gabriel.hogwartsmod.entity.FlyingMount broom, int height) {
         int totalWidth = MagicData.SLOT_COUNT * (SLOT + GAP) - GAP;
         int barY = height - MARGIN - 4;
         int labelY = barY - 11;
         int left = MARGIN;
         int right = left + totalWidth;
-        float ratio = Math.max(0, Math.min(1, broom.getStamina() / broom.getBroomType().getStamina()));
+        float ratio = Math.max(0, Math.min(1, broom.getStamina() / broom.getMaxStamina()));
         net.minecraft.network.chat.Component stamina = net.minecraft.network.chat.Component.translatable("hud.hogwartsmod.broom_stamina");
         g.drawString(font, stamina, left, labelY, 0xFFECDCB6, true);
         g.fill(left, barY, right, barY + 4, BAR_BACK);
@@ -123,8 +123,10 @@ public final class MagicHud implements IGuiOverlay {
         if (pilot) {
             rows.add(new String[]{ModKeys.SPELL_MODIFIER.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_boost"});
             rows.add(new String[]{mc.options.keyShift.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_down"});
-            rows.add(new String[]{mc.options.keyJump.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_up"});
-            rows.add(new String[]{mc.options.keyLeft.getTranslatedKeyMessage().getString() + "/" + mc.options.keyRight.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_turn"});
+            rows.add(new String[]{mc.options.keyJump.getTranslatedKeyMessage().getString(), broom.upKey()});
+            if (broom.showsTurnKeys()) {
+                rows.add(new String[]{mc.options.keyLeft.getTranslatedKeyMessage().getString() + "/" + mc.options.keyRight.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_turn"});
+            }
         }
         rows.add(new String[]{ModKeys.BROOM_DISMOUNT.getTranslatedKeyMessage().getString(), "hud.hogwartsmod.broom_dismount"});
         int y = labelY - 15;

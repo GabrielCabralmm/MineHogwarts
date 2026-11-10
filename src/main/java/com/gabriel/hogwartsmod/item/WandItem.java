@@ -28,7 +28,7 @@ public class WandItem extends Item {
         if (data == null) {
             return InteractionResultHolder.pass(stack);
         }
-        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.BroomEntity) {
+        if (player.getVehicle() instanceof com.gabriel.hogwartsmod.entity.FlyingMount) {
             notify(player, level, Component.translatable("message.hogwartsmod.no_cast_flying"));
             return InteractionResultHolder.fail(stack);
         }

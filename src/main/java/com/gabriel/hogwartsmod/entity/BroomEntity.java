@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.UUID;
 
-public class BroomEntity extends Entity {
+public class BroomEntity extends Entity implements FlyingMount {
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BOOST = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.OPTIONAL_UUID);
@@ -196,6 +196,11 @@ public class BroomEntity extends Entity {
 
     public float getSpeed() {
         return speed;
+    }
+
+    @Override
+    public float getMaxStamina() {
+        return getBroomType().getStamina();
     }
 
     public float getStamina() {

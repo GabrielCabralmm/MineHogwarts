@@ -21,6 +21,12 @@ public final class ModEntities {
                     .updateInterval(1)
                     .build("spell_projectile"));
 
+    public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.creature.HippogriffEntity>> HIPPOGRIFF = ENTITIES.register("hipogrifo",
+            () -> EntityType.Builder.<com.gabriel.hogwartsmod.creature.HippogriffEntity>of(com.gabriel.hogwartsmod.creature.HippogriffEntity::new, MobCategory.CREATURE)
+                    .sized(1.4f, 1.7f)
+                    .clientTrackingRange(10)
+                    .build("hipogrifo"));
+
     public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.mission.MissionNpcEntity>> MISSION_NPC = ENTITIES.register("npc_missoes",
             () -> EntityType.Builder.<com.gabriel.hogwartsmod.mission.MissionNpcEntity>of(com.gabriel.hogwartsmod.mission.MissionNpcEntity::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f)

@@ -27,6 +27,7 @@ public final class ClientSetup {
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(CastAnimations::registerLayer);
         com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
+        com.gabriel.hogwartsmod.creature.HippogriffEntity.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
     }
 
     @SubscribeEvent
@@ -38,6 +39,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
+        event.registerEntityRenderer(ModEntities.HIPPOGRIFF.get(), com.gabriel.hogwartsmod.client.creature.HippogriffRenderer::new);
         event.registerEntityRenderer(ModEntities.BROOM.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
     }
 
@@ -46,6 +48,7 @@ public final class ClientSetup {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "magic_hud", MagicHud.INSTANCE);
         event.registerAboveAll("zone_banner", com.gabriel.hogwartsmod.client.zone.ZoneBanner.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "mission_tracker", com.gabriel.hogwartsmod.client.mission.MissionTracker.INSTANCE);
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "creature_health", com.gabriel.hogwartsmod.client.creature.ClientCreatures.INSTANCE);
     }
 
     @SubscribeEvent

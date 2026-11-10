@@ -14,7 +14,7 @@ public final class BroomEvents {
 
     @SubscribeEvent
     public static void keepRiding(EntityMountEvent event) {
-        if (event.isDismounting() && event.getEntityBeingMounted() instanceof BroomEntity broom && broom.isAlive()
+        if (event.isDismounting() && event.getEntityBeingMounted() instanceof com.gabriel.hogwartsmod.entity.FlyingMount && event.getEntityBeingMounted().isAlive()
                 && event.getEntityMounting() instanceof Player player && player.isAlive() && player.isShiftKeyDown()) {
             event.setCanceled(true);
         }
