@@ -23,6 +23,15 @@ public final class ClientCreatures implements IGuiOverlay {
     private ClientCreatures() {
     }
 
+    public static void hideMountBars(net.minecraftforge.client.event.RenderGuiOverlayEvent.Pre event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.player.getVehicle() instanceof HippogriffEntity
+                && (event.getOverlay().id().equals(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.MOUNT_HEALTH.id())
+                || event.getOverlay().id().equals(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.JUMP_BAR.id()))) {
+            event.setCanceled(true);
+        }
+    }
+
     public static void pilot(HippogriffEntity hippogriff) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || hippogriff.getControllingPassenger() != player) {

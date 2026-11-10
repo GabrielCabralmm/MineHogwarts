@@ -28,6 +28,7 @@ public final class ClientSetup {
         event.enqueueWork(CastAnimations::registerLayer);
         com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
         com.gabriel.hogwartsmod.creature.HippogriffEntity.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(com.gabriel.hogwartsmod.client.creature.ClientCreatures::hideMountBars);
     }
 
     @SubscribeEvent

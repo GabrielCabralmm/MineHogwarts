@@ -38,6 +38,12 @@ public class HippogriffModel extends GeoModel<HippogriffEntity> {
             head.setRotX(head.getRotX() + data.headPitch() * Mth.DEG_TO_RAD * 0.6f);
             head.setRotY(head.getRotY() + Mth.clamp(data.netHeadYaw(), -50f, 50f) * Mth.DEG_TO_RAD * 0.6f);
         }
+        CoreGeoBone neck = getAnimationProcessor().getBone("pescoco");
+        if (neck != null) {
+            net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+            boolean firstPersonRider = mc.player != null && mc.player.getVehicle() == entity && mc.options.getCameraType().isFirstPerson();
+            neck.setHidden(firstPersonRider);
+        }
         CoreGeoBone body = getAnimationProcessor().getBone("raiz");
         if (body != null && entity.isVehicle()) {
             body.setRotZ(body.getRotZ() + entity.getRoll(state.getPartialTick()) * Mth.DEG_TO_RAD * 0.6f);

@@ -91,12 +91,12 @@ public class HippogriffEntity extends TamableAnimal implements GeoEntity, Flying
 
     public HippogriffEntity(EntityType<? extends HippogriffEntity> type, Level level) {
         super(type, level);
-        setMaxUpStep(1.1f);
+        setMaxUpStep(1.6f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return TamableAnimal.createMobAttributes()
-                .add(Attributes.MAX_HEALTH, 40.0)
+                .add(Attributes.MAX_HEALTH, 50.0)
                 .add(Attributes.MOVEMENT_SPEED, 0.25)
                 .add(Attributes.ATTACK_DAMAGE, 6.0)
                 .add(Attributes.FOLLOW_RANGE, 24.0);
@@ -147,7 +147,7 @@ public class HippogriffEntity extends TamableAnimal implements GeoEntity, Flying
             accepted = null;
         }
         if (!isTame() && getTarget() == null && tickCount % 2 == 0) {
-            for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(6))) {
+            for (Player player : level().getEntitiesOfClass(Player.class, getBoundingBox().inflate(8))) {
                 if (player.isCrouching() && isLookingAtMe(player)) {
                     int ticks = bowing.merge(player.getUUID(), 2, Integer::sum);
                     getLookControl().setLookAt(player);
@@ -288,10 +288,10 @@ public class HippogriffEntity extends TamableAnimal implements GeoEntity, Flying
         if (index < 0) {
             return;
         }
-        double back = index == 0 ? 0.05 : -0.6;
+        double back = index == 0 ? 0.15 : -0.75;
         Vec3 offset = new Vec3(0, 0, back).yRot(-yBodyRot * Mth.DEG_TO_RAD);
-        double lower = isInSittingPose() ? -0.35 : 0;
-        move.accept(passenger, getX() + offset.x, getY() + 1.3 + lower + passenger.getMyRidingOffset(), getZ() + offset.z);
+        double lower = isInSittingPose() ? -0.6 : 0;
+        move.accept(passenger, getX() + offset.x, getY() + 2.05 + lower + passenger.getMyRidingOffset(), getZ() + offset.z);
         if (passenger instanceof LivingEntity living) {
             living.setYBodyRot(yBodyRot);
         }
@@ -299,7 +299,7 @@ public class HippogriffEntity extends TamableAnimal implements GeoEntity, Flying
 
     @Override
     public double getPassengersRidingOffset() {
-        return 1.25;
+        return 2.05;
     }
 
     @Override
@@ -458,6 +458,11 @@ public class HippogriffEntity extends TamableAnimal implements GeoEntity, Flying
     @Override
     public boolean showsTurnKeys() {
         return false;
+    }
+
+    @Override
+    public String dismountKey() {
+        return "hud.hogwartsmod.hippogriff_dismount";
     }
 
     @Override

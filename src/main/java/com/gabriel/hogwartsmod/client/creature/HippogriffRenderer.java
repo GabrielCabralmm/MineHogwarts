@@ -8,6 +8,7 @@ public class HippogriffRenderer extends GeoEntityRenderer<HippogriffEntity> {
 
     public HippogriffRenderer(EntityRendererProvider.Context context) {
         super(context, new HippogriffModel());
-        shadowRadius = 0.8f;
+        shadowRadius = 1.2f;
+        withScale(1.6f);
     }
 }

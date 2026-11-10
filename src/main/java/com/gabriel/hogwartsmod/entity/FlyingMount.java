@@ -23,6 +23,10 @@ public interface FlyingMount {
         return true;
     }
 
+    default String dismountKey() {
+        return "hud.hogwartsmod.broom_dismount";
+    }
+
     default String upKey() {
         return "hud.hogwartsmod.broom_up";
     }

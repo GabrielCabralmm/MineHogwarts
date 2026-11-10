@@ -182,7 +182,7 @@
   "item.hogwartsmod.vassoura_esportiva": "Vassoura Esportiva (teste)",
   "item.hogwartsmod.vassoura_transporte": "Vassoura de Transporte (teste)",
   "entity.hogwartsmod.vassoura": "Vassoura",
-  "key.hogwartsmod.broom_dismount": "Desmontar da vassoura",
+  "key.hogwartsmod.broom_dismount": "Desmontar (vassoura ou criatura)",
   "message.hogwartsmod.broom_not_yours": "Esta vassoura não é sua",
   "message.hogwartsmod.broom_full": "Não há lugar nesta vassoura",
   "message.hogwartsmod.no_cast_flying": "Não é possível conjurar feitiços voando",
@@ -496,5 +496,6 @@
   "screen.hogwartsmod.creature_wheel.summoned": "Invocada",
   "screen.hogwartsmod.creature_wheel.release": "Solte para invocar",
   "screen.hogwartsmod.creature_wheel.cancel": "Solte no centro para cancelar",
-  "hud.hogwartsmod.hippogriff_up": "Voar / Subir"
+  "hud.hogwartsmod.hippogriff_up": "Voar / Subir",
+  "hud.hogwartsmod.hippogriff_dismount": "Sair do hipogrifo"
 }

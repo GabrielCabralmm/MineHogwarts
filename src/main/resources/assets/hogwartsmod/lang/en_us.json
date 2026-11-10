@@ -182,7 +182,7 @@
   "item.hogwartsmod.vassoura_esportiva": "Sport Broom (test)",
   "item.hogwartsmod.vassoura_transporte": "Transport Broom (test)",
   "entity.hogwartsmod.vassoura": "Broom",
-  "key.hogwartsmod.broom_dismount": "Dismount broom",
+  "key.hogwartsmod.broom_dismount": "Dismount (broom or creature)",
   "message.hogwartsmod.broom_not_yours": "This broom isn't yours",
   "message.hogwartsmod.broom_full": "There's no room on this broom",
   "message.hogwartsmod.no_cast_flying": "You can't cast spells while flying",
@@ -496,5 +496,6 @@
   "screen.hogwartsmod.creature_wheel.summoned": "Summoned",
   "screen.hogwartsmod.creature_wheel.release": "Release to summon",
   "screen.hogwartsmod.creature_wheel.cancel": "Release in the center to cancel",
-  "hud.hogwartsmod.hippogriff_up": "Fly / Rise"
+  "hud.hogwartsmod.hippogriff_up": "Fly / Rise",
+  "hud.hogwartsmod.hippogriff_dismount": "Dismount the hippogriff"
 }

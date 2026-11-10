@@ -23,7 +23,7 @@ public final class ModEntities {
 
     public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.creature.HippogriffEntity>> HIPPOGRIFF = ENTITIES.register("hipogrifo",
             () -> EntityType.Builder.<com.gabriel.hogwartsmod.creature.HippogriffEntity>of(com.gabriel.hogwartsmod.creature.HippogriffEntity::new, MobCategory.CREATURE)
-                    .sized(1.4f, 1.7f)
+                    .sized(2.0f, 2.6f)
                     .clientTrackingRange(10)
                     .build("hipogrifo"));
 
