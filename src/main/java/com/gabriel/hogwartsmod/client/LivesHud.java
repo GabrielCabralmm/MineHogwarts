@@ -1,6 +1,5 @@
 package com.gabriel.hogwartsmod.client;
 
-import com.gabriel.hogwartsmod.client.gui.HiRes;
 import com.gabriel.hogwartsmod.magic.MagicData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -25,13 +24,14 @@ public final class LivesHud implements IGuiOverlay {
         if (data == null) {
             return;
         }
-        String text = "x" + data.getLives();
-        float tw = HiRes.width(text, HiRes.Style.BOLD, 8f);
-        int x = Math.round(width - 8 - tw - 11);
-        int y = height - 15;
+        String text = String.valueOf(data.getLives());
+        int w = 12 + 2 + mc.font.width(text) + 4;
+        int x = width - 4 - w;
+        int y = height - 4 - 11;
+        g.fill(x, y, x + w, y + 11, 0xC0281E14);
         int v = data.getLives() <= 1 ? 45 : 0;
-        g.blit(ICONS, x, y, 16, v, 9, 9);
-        g.blit(ICONS, x, y, 52, v, 9, 9);
-        HiRes.text(g, text, HiRes.Style.BOLD, 8f, x + 11, y + 1, 0xFFF3E4C4);
+        g.blit(ICONS, x + 2, y + 1, 16, v, 9, 9);
+        g.blit(ICONS, x + 2, y + 1, 52, v, 9, 9);
+        g.drawString(mc.font, text, x + 14, y + 2, 0xFFECDCB6, false);
     }
 }
