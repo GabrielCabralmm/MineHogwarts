@@ -1,0 +1,10 @@
+{
+  "parent": "minecraft:block/cauldron",
+  "textures": {
+    "bottom": "hogwartsmod:block/caldeirao_bottom",
+    "inside": "hogwartsmod:block/caldeirao_inner",
+    "particle": "hogwartsmod:block/caldeirao_side",
+    "side": "hogwartsmod:block/caldeirao_side",
+    "top": "hogwartsmod:block/caldeirao_top"
+  }
+}

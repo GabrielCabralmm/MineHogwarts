@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "hogwartsmod:item/po_pedra_da_lua"
+  }
+}

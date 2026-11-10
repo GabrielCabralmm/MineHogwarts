@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/template_cauldron_full",
+  "textures": {
+    "bottom": "hogwartsmod:block/caldeirao_bottom",
+    "inside": "hogwartsmod:block/caldeirao_inner",
+    "particle": "hogwartsmod:block/caldeirao_side",
+    "side": "hogwartsmod:block/caldeirao_side",
+    "top": "hogwartsmod:block/caldeirao_top",
+    "content": "minecraft:block/water_still"
+  }
+}

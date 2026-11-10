@@ -22,6 +22,13 @@ public final class ModBlocks {
     public static final RegistryObject<Item> PULPIT_ITEM = ModItems.ITEMS.register("pulpito_professor",
             () -> new BlockItem(PULPIT.get(), new Item.Properties()));
 
+    public static final RegistryObject<Block> CAULDRON = BLOCKS.register("caldeirao",
+            () -> new com.gabriel.hogwartsmod.potion.CauldronBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+                    .requiresCorrectToolForDrops().strength(2.0f).sound(SoundType.METAL).noOcclusion()));
+
+    public static final RegistryObject<Item> CAULDRON_ITEM = ModItems.ITEMS.register("caldeirao",
+            () -> new BlockItem(CAULDRON.get(), new Item.Properties()));
+
     private ModBlocks() {
     }
 }

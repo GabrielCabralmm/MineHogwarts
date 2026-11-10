@@ -70,6 +70,16 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
+    public static void registerBlockColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Block event) {
+        event.register((state, level, pos, tint) -> {
+            if (level != null && pos != null && level.getBlockEntity(pos) instanceof com.gabriel.hogwartsmod.potion.CauldronBlockEntity cauldron) {
+                return cauldron.getColor();
+            }
+            return com.gabriel.hogwartsmod.potion.CauldronBlockEntity.WATER_COLOR;
+        }, com.gabriel.hogwartsmod.registry.ModBlocks.CAULDRON.get());
+    }
+
+    @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         event.register(ModKeys.SPELL_MODIFIER);
         event.register(ModKeys.OPEN_GRIMOIRE);

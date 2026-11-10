@@ -44,6 +44,10 @@ import java.util.stream.Stream;
 public final class HogwartsCommand {
     private static final String ALL = "todos";
     private static final Predicate<CommandSourceStack> STAFF = source -> source.hasPermission(2);
+    private static final SuggestionProvider<CommandSourceStack> BREWS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.concat(Stream.of("todas"),
+                    Stream.of(com.gabriel.hogwartsmod.potion.Brew.values()).map(com.gabriel.hogwartsmod.potion.Brew::getId)), builder);
+
     private static final SuggestionProvider<CommandSourceStack> PROFESSIONS = (ctx, builder) ->
             SharedSuggestionProvider.suggest(Stream.of(Profession.values()).map(Profession::getId), builder);
     private static final DynamicCommandExceptionType NO_DATA =
@@ -187,6 +191,15 @@ public final class HogwartsCommand {
                                         .executes(ctx -> setHouse(ctx, false))
                                         .then(Commands.literal("anunciar")
                                                 .executes(ctx -> setHouse(ctx, true))))))
+                .then(Commands.literal("pocao").requires(HogwartsCommand::canGivePoints)
+                        .then(Commands.literal("ensinar")
+                                .then(Commands.argument("alvo", EntityArgument.player())
+                                        .then(Commands.argument("pocao", StringArgumentType.word()).suggests(BREWS)
+                                                .executes(ctx -> setRecipe(ctx, true)))))
+                        .then(Commands.literal("esquecer")
+                                .then(Commands.argument("alvo", EntityArgument.player())
+                                        .then(Commands.argument("pocao", StringArgumentType.word()).suggests(BREWS)
+                                                .executes(ctx -> setRecipe(ctx, false))))))
                 .then(Commands.literal("profissao").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("profissao", StringArgumentType.word()).suggests(PROFESSIONS)
@@ -456,6 +469,33 @@ public final class HogwartsCommand {
         npc.discard();
         ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_removed", name), true);
         return 1;
+    }
+
+    private static int setRecipe(CommandContext<CommandSourceStack> ctx, boolean learn) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        String id = StringArgumentType.getString(ctx, "pocao");
+        java.util.List<com.gabriel.hogwartsmod.potion.Brew> brews = id.equals("todas")
+                ? java.util.List.of(com.gabriel.hogwartsmod.potion.Brew.values())
+                : java.util.Optional.ofNullable(com.gabriel.hogwartsmod.potion.Brew.byId(id)).map(java.util.List::of).orElse(java.util.List.of());
+        MagicData data = MagicData.get(target);
+        if (brews.isEmpty() || data == null) {
+            ctx.getSource().sendFailure(Component.translatable("command.hogwartsmod.potion_unknown", id));
+            return 0;
+        }
+        int changed = 0;
+        for (com.gabriel.hogwartsmod.potion.Brew brew : brews) {
+            if (learn ? data.learnRecipe(brew) : data.forgetRecipe(brew)) {
+                changed++;
+            }
+        }
+        Component what = brews.size() == 1 ? brews.get(0).getDisplayName() : Component.translatable("command.hogwartsmod.potion_all");
+        ctx.getSource().sendSuccess(() -> Component.translatable(learn ? "command.hogwartsmod.potion_taught" : "command.hogwartsmod.potion_forgot",
+                what, target.getDisplayName()), true);
+        if (learn && changed > 0) {
+            target.displayClientMessage(Component.translatable("message.hogwartsmod.recipe_learned", what)
+                    .withStyle(net.minecraft.ChatFormatting.GOLD), true);
+        }
+        return changed;
     }
 
     private static int setProfession(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

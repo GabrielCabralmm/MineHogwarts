@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "cheio=false": {
+      "model": "hogwartsmod:block/caldeirao"
+    },
+    "cheio=true": {
+      "model": "hogwartsmod:block/caldeirao_cheio"
+    }
+  }
+}

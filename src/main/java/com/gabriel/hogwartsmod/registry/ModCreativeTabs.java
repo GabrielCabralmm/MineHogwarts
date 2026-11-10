@@ -27,6 +27,14 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.GALEAO.get());
                         output.accept(ModItems.SICLE.get());
                         output.accept(ModItems.NUQUE.get());
+                        output.accept(ModBlocks.CAULDRON_ITEM.get());
+                        output.accept(ModItems.MUCO_VERMECEGO.get());
+                        output.accept(ModItems.CASCA_WIGGENTREE.get());
+                        output.accept(ModItems.PO_PEDRA_DA_LUA.get());
+                        output.accept(ModItems.RECEITA_WIGGENWELD.get());
+                        output.accept(ModItems.RECEITA_REVIGORANTE.get());
+                        output.accept(ModItems.POCAO_WIGGENWELD.get());
+                        output.accept(ModItems.POCAO_REVIGORANTE.get());
                     })
                     .build());
 

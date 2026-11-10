@@ -15,6 +15,10 @@ public final class ModBlockEntities {
     public static final RegistryObject<BlockEntityType<PulpitBlockEntity>> PULPIT = BLOCK_ENTITIES.register("pulpito_professor",
             () -> BlockEntityType.Builder.of(PulpitBlockEntity::new, ModBlocks.PULPIT.get()).build(null));
 
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<com.gabriel.hogwartsmod.potion.CauldronBlockEntity>> CAULDRON = BLOCK_ENTITIES.register("caldeirao",
+            () -> BlockEntityType.Builder.of(com.gabriel.hogwartsmod.potion.CauldronBlockEntity::new, ModBlocks.CAULDRON.get()).build(null));
+
     private ModBlockEntities() {
     }
 }

@@ -34,6 +34,34 @@ public final class ModItems {
     public static final RegistryObject<Item> COIN_POUCH = ITEMS.register("bolsa_moedas",
             () -> new com.gabriel.hogwartsmod.money.CoinPouchItem(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> MUCO_VERMECEGO = ITEMS.register("muco_vermecego", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> CASCA_WIGGENTREE = ITEMS.register("casca_wiggentree", () -> new Item(new Item.Properties()));
+    public static final RegistryObject<Item> PO_PEDRA_DA_LUA = ITEMS.register("po_pedra_da_lua", () -> new Item(new Item.Properties()));
+
+    public static final RegistryObject<Item> POCAO_WIGGENWELD = ITEMS.register("pocao_wiggenweld",
+            () -> new com.gabriel.hogwartsmod.potion.BrewItem(com.gabriel.hogwartsmod.potion.Brew.WIGGENWELD, new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> POCAO_REVIGORANTE = ITEMS.register("pocao_revigorante",
+            () -> new com.gabriel.hogwartsmod.potion.BrewItem(com.gabriel.hogwartsmod.potion.Brew.REVIGORANTE, new Item.Properties().stacksTo(16)));
+
+    public static final RegistryObject<Item> RECEITA_WIGGENWELD = ITEMS.register("receita_wiggenweld",
+            () -> new com.gabriel.hogwartsmod.potion.RecipeScrollItem(com.gabriel.hogwartsmod.potion.Brew.WIGGENWELD, new Item.Properties().stacksTo(16)));
+    public static final RegistryObject<Item> RECEITA_REVIGORANTE = ITEMS.register("receita_revigorante",
+            () -> new com.gabriel.hogwartsmod.potion.RecipeScrollItem(com.gabriel.hogwartsmod.potion.Brew.REVIGORANTE, new Item.Properties().stacksTo(16)));
+
+    public static Item potion(com.gabriel.hogwartsmod.potion.Brew brew) {
+        return switch (brew) {
+            case WIGGENWELD -> POCAO_WIGGENWELD.get();
+            case REVIGORANTE -> POCAO_REVIGORANTE.get();
+        };
+    }
+
+    public static Item recipe(com.gabriel.hogwartsmod.potion.Brew brew) {
+        return switch (brew) {
+            case WIGGENWELD -> RECEITA_WIGGENWELD.get();
+            case REVIGORANTE -> RECEITA_REVIGORANTE.get();
+        };
+    }
+
     private ModItems() {
     }
 }
