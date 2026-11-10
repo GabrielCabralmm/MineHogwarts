@@ -57,7 +57,7 @@ public class GrimoireScreen extends Screen {
     private static final ResourceLocation BOOK =
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/gui/grimoire.png");
 
-    private enum Tab { SPELLS, TEACH, APPARITION, HOUSES, MISSIONS, POTIONS }
+    private enum Tab { SPELLS, TEACH, APPARITION, HOUSES, MISSIONS }
 
     private int left;
     private int top;
@@ -148,7 +148,6 @@ public class GrimoireScreen extends Screen {
             case APPARITION -> drawApparitionTab(g, mouseX, mouseY);
             case HOUSES -> drawHousesTab(g);
             case MISSIONS -> drawMissionsTab(g, mouseX, mouseY);
-            case POTIONS -> drawPotionsTab(g, mouseX, mouseY);
         }
         super.render(g, mouseX, mouseY, partialTick);
         if (dragging) {
@@ -186,7 +185,7 @@ public class GrimoireScreen extends Screen {
     }
 
     private static boolean onLeft(Tab t) {
-        return t == Tab.HOUSES || t == Tab.MISSIONS || t == Tab.POTIONS;
+        return t == Tab.HOUSES || t == Tab.MISSIONS;
     }
 
     private int tabTop(Tab t) {
@@ -280,118 +279,6 @@ public class GrimoireScreen extends Screen {
             return Math.min(m.amount(), n);
         }
         return Math.min(m.amount(), active.progress());
-    }
-
-    // -- Poções
-
-    private int potionIndex;
-
-    private boolean knowsRecipe(com.gabriel.hogwartsmod.potion.Brew brew) {
-        MagicData data = data();
-        return data != null && data.knowsRecipe(brew);
-    }
-
-    private void drawPotionsTab(GuiGraphics g, int mouseX, int mouseY) {
-        int lx = left + 16;
-        int pageW = BOOK_W / 2 - 26;
-        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.potions"), HiRes.Style.BOLD, lx + pageW / 2f, top + 17, TITLE);
-        com.gabriel.hogwartsmod.potion.Brew[] brews = com.gabriel.hogwartsmod.potion.Brew.values();
-        potionIndex = Math.min(potionIndex, brews.length - 1);
-        int known = 0;
-        for (int i = 0; i < brews.length; i++) {
-            com.gabriel.hogwartsmod.potion.Brew brew = brews[i];
-            boolean knows = knowsRecipe(brew);
-            known += knows ? 1 : 0;
-            int y = top + 31 + i * 20;
-            boolean hover = mouseX >= lx - 2 && mouseX < lx + pageW + 2 && mouseY >= y - 2 && mouseY < y + 17;
-            if (i == potionIndex || hover) {
-                HiRes.highlight(g, lx - 2, y - 2, lx + pageW + 2, y + 17, i == potionIndex ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
-            }
-            net.minecraft.world.item.ItemStack icon = new net.minecraft.world.item.ItemStack(com.gabriel.hogwartsmod.registry.ModItems.potion(brew));
-            if (knows) {
-                MissionScreen.item(g, icon, lx + 2, y + 1, 12);
-            } else {
-                MissionScreen.item(g, icon, lx + 2, y + 1, 12);
-                g.pose().pushPose();
-                g.pose().translate(0, 0, 200);
-                g.fill(lx + 2, y + 1, lx + 14, y + 13, 0xB8E6D5B0);
-                g.pose().popPose();
-            }
-            HiRes.text(g, brew.getDisplayName().getString(), HiRes.Style.BOLD, 7.5f, lx + 18, y + 1, knows ? INK : MUTED);
-            HiRes.text(g, tr(knows ? "screen.hogwartsmod.grimoire.potion_known" : "screen.hogwartsmod.grimoire.potion_unknown"),
-                    HiRes.Style.ITALIC, 6.5f, lx + 18, y + 9.5f, knows ? GREEN : MUTED);
-        }
-        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.potion_count", known, brews.length), HiRes.Style.ITALIC, 6.5f,
-                lx + pageW / 2f, top + BOOK_H - 20, MUTED);
-
-        com.gabriel.hogwartsmod.potion.Brew brew = brews[potionIndex];
-        int rx = left + BOOK_W / 2 + 10;
-        int rw = BOOK_W / 2 - 26;
-        float cx = rx + rw / 2f;
-        HiRes.centered(g, brew.getDisplayName().getString(), HiRes.Style.BOLD, 10f, cx, top + 17, TITLE);
-        if (!knowsRecipe(brew)) {
-            MissionScreen.item(g, new net.minecraft.world.item.ItemStack(com.gabriel.hogwartsmod.registry.ModItems.potion(brew)), Math.round(cx) - 12, top + 40, 24);
-            g.pose().pushPose();
-            g.pose().translate(0, 0, 200);
-            g.fill(Math.round(cx) - 12, top + 40, Math.round(cx) + 12, top + 64, 0xB8E6D5B0);
-            g.pose().popPose();
-            int y = top + 74;
-            for (String line : HiRes.wrap(tr("screen.hogwartsmod.grimoire.potion_locked"), HiRes.Style.ITALIC, rw)) {
-                HiRes.centered(g, line, HiRes.Style.ITALIC, cx, y, MUTED);
-                y += 10;
-            }
-            return;
-        }
-        int y = top + 30;
-        for (String line : HiRes.wrap(brew.getEffectText().getString(), HiRes.Style.ITALIC, rw * HiRes.TEXT_SIZE / 7f)) {
-            HiRes.centered(g, line, HiRes.Style.ITALIC, 7f, cx, y, MUTED);
-            y += 8;
-        }
-        y += 4;
-        HiRes.text(g, tr("screen.hogwartsmod.grimoire.potion_prepare"), HiRes.Style.BOLD, 8f, rx, y, INK);
-        y += 11;
-        HiRes.text(g, HiRes.ellipsize(tr("screen.hogwartsmod.grimoire.potion_base"), HiRes.Style.REGULAR, (rw - 14) * HiRes.TEXT_SIZE / 7f),
-                HiRes.Style.REGULAR, 7f, rx + 13, y, INK);
-        MissionScreen.item(g, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.WATER_BUCKET), rx, y - 1, 10);
-        y += 11;
-        int n = 1;
-        for (com.gabriel.hogwartsmod.potion.Brew.Step step : brew.getSteps()) {
-            String text;
-            net.minecraft.world.item.ItemStack icon;
-            if (step.isStir()) {
-                icon = new net.minecraft.world.item.ItemStack(com.gabriel.hogwartsmod.registry.ModItems.WAND.get());
-                text = tr(step.count() == 1 ? "screen.hogwartsmod.grimoire.potion_stir_once" : "screen.hogwartsmod.grimoire.potion_stir", step.count());
-            } else {
-                net.minecraft.world.item.Item item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(step.item()));
-                icon = new net.minecraft.world.item.ItemStack(item);
-                text = step.count() + "× " + item.getDescription().getString();
-            }
-            HiRes.text(g, n + ".", HiRes.Style.BOLD, 7f, rx, y, GOLD);
-            MissionScreen.item(g, icon, rx + 8, y - 1, 10);
-            HiRes.text(g, HiRes.ellipsize(text, HiRes.Style.REGULAR, (rw - 22) * HiRes.TEXT_SIZE / 7f), HiRes.Style.REGULAR, 7f, rx + 21, y, INK);
-            y += 11;
-            n++;
-        }
-        HiRes.text(g, n + ".", HiRes.Style.BOLD, 7f, rx, y, GOLD);
-        MissionScreen.item(g, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.CAMPFIRE), rx + 8, y - 1, 10);
-        HiRes.text(g, tr("screen.hogwartsmod.grimoire.potion_boil", brew.getSeconds()), HiRes.Style.REGULAR, 7f, rx + 21, y, INK);
-        HiRes.centered(g, tr("screen.hogwartsmod.grimoire.potion_doses", com.gabriel.hogwartsmod.potion.Brew.DOSES), HiRes.Style.ITALIC, 6.5f,
-                cx, top + BOOK_H - 20, MUTED);
-    }
-
-    private boolean potionsClicked(double mx, double my) {
-        int lx = left + 16;
-        int pageW = BOOK_W / 2 - 26;
-        com.gabriel.hogwartsmod.potion.Brew[] brews = com.gabriel.hogwartsmod.potion.Brew.values();
-        for (int i = 0; i < brews.length; i++) {
-            int y = top + 31 + i * 20;
-            if (mx >= lx - 2 && mx < lx + pageW + 2 && my >= y - 2 && my < y + 17) {
-                potionIndex = i;
-                click();
-                return true;
-            }
-        }
-        return false;
     }
 
     private void drawMissionsTab(GuiGraphics g, int mouseX, int mouseY) {
@@ -1142,9 +1029,6 @@ public class GrimoireScreen extends Screen {
             return true;
         }
         if (tab == Tab.MISSIONS && button == 0 && missionsClicked(mx, my)) {
-            return true;
-        }
-        if (tab == Tab.POTIONS && button == 0 && potionsClicked(mx, my)) {
             return true;
         }
         if (tab != Tab.SPELLS) {

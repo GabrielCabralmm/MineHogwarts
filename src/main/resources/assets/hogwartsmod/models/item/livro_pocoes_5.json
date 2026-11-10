@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "hogwartsmod:item/livro_pocoes_5"
+  }
+}

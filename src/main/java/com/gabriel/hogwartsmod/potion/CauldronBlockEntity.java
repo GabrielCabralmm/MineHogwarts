@@ -1,7 +1,6 @@
 package com.gabriel.hogwartsmod.potion;
 
 import com.gabriel.hogwartsmod.item.WandItem;
-import com.gabriel.hogwartsmod.magic.MagicData;
 import com.gabriel.hogwartsmod.particle.ModParticles;
 import com.gabriel.hogwartsmod.registry.ModBlockEntities;
 import net.minecraft.ChatFormatting;
@@ -19,17 +18,14 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -59,15 +55,7 @@ public class CauldronBlockEntity extends BlockEntity {
     }
 
     public boolean isHeated() {
-        if (level == null) {
-            return false;
-        }
-        BlockState below = level.getBlockState(worldPosition.below());
-        if (below.is(BlockTags.CAMPFIRES)) {
-            return below.getValue(CampfireBlock.LIT);
-        }
-        return below.is(BlockTags.FIRE) || below.is(Blocks.MAGMA_BLOCK) || below.getFluidState().is(Fluids.LAVA)
-                || below.getFluidState().is(Fluids.FLOWING_LAVA);
+        return getBlockState().getValue(CauldronBlock.FIRE);
     }
 
     @Nullable
@@ -128,11 +116,27 @@ public class CauldronBlockEntity extends BlockEntity {
             }
             return InteractionResult.sidedSuccess(client);
         }
-        if (held.isEmpty() && player.isShiftKeyDown()) {
-            if (state != State.EMPTY && !client) {
+        if (held.is(Items.BUCKET) && state != State.EMPTY) {
+            if (!client) {
+                boolean lost = state != State.WATER || !tokens.isEmpty();
+                held.shrink(1);
+                ItemStack water = new ItemStack(Items.WATER_BUCKET);
+                if (held.isEmpty()) {
+                    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, water);
+                } else if (!player.getInventory().add(water)) {
+                    player.drop(water, false);
+                }
                 reset(State.EMPTY);
-                level.playSound(null, worldPosition, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.8f, 0.7f);
-                say(player, Component.translatable("message.hogwartsmod.cauldron_emptied"), ChatFormatting.GRAY);
+                level.playSound(null, worldPosition, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1f, 1f);
+                if (lost) {
+                    say(player, Component.translatable("message.hogwartsmod.cauldron_lost"), ChatFormatting.GRAY);
+                }
+            }
+            return InteractionResult.sidedSuccess(client);
+        }
+        if (held.isEmpty() && player.isShiftKeyDown()) {
+            if (!client) {
+                pickUp(player);
             }
             return InteractionResult.sidedSuccess(client);
         }
@@ -179,20 +183,20 @@ public class CauldronBlockEntity extends BlockEntity {
 
     private boolean add(Player player, String token) {
         if (!isHeated()) {
-            say(player, Component.translatable("message.hogwartsmod.cauldron_cold"), ChatFormatting.GRAY);
+            say(player, Component.translatable("message.hogwartsmod.cauldron_no_fire"), ChatFormatting.GRAY);
             return false;
         }
         tokens.add(token);
         ServerLevel server = (ServerLevel) level;
         double x = worldPosition.getX() + 0.5;
-        double y = worldPosition.getY() + 0.95;
+        double y = worldPosition.getY() + topY();
         double z = worldPosition.getZ() + 0.5;
         if (token.equals(Brew.STIR)) {
             server.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.4f, 1.6f);
             for (int i = 0; i < 10; i++) {
                 double a = i / 10.0 * Math.PI * 2;
                 server.sendParticles(ModParticles.GLOW.get().with(getColor(), 0.3f, 12),
-                        x + Math.cos(a) * 0.32, y, z + Math.sin(a) * 0.32, 0, -Math.sin(a) * 0.04, 0.02, Math.cos(a) * 0.04, 1.0);
+                        x + Math.cos(a) * 0.25, y, z + Math.sin(a) * 0.25, 0, -Math.sin(a) * 0.04, 0.02, Math.cos(a) * 0.04, 1.0);
             }
         } else {
             server.playSound(null, worldPosition, SoundEvents.GENERIC_SPLASH, SoundSource.BLOCKS, 0.5f, 1.4f);
@@ -200,15 +204,10 @@ public class CauldronBlockEntity extends BlockEntity {
         }
         Brew match = bestMatch();
         if (match == null) {
-            ruin(player, Component.translatable("message.hogwartsmod.cauldron_ruined"));
+            explode(player);
             return true;
         }
         if (match.getTokens().size() == tokens.size()) {
-            MagicData data = MagicData.get(player);
-            if (data == null || !data.knowsRecipe(match)) {
-                ruin(player, Component.translatable("message.hogwartsmod.cauldron_unknown"));
-                return true;
-            }
             brew = match;
             state = State.BREWING;
             timer = match.getSeconds() * 20;
@@ -223,15 +222,34 @@ public class CauldronBlockEntity extends BlockEntity {
         return true;
     }
 
-    private void ruin(Player player, Component message) {
-        state = State.RUINED;
-        brew = null;
+    private void explode(Player player) {
         ServerLevel server = (ServerLevel) level;
-        server.playSound(null, worldPosition, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.7f, 0.8f);
-        server.sendParticles(ParticleTypes.LARGE_SMOKE, worldPosition.getX() + 0.5, worldPosition.getY() + 1, worldPosition.getZ() + 0.5,
-                12, 0.2, 0.1, 0.2, 0.02);
-        say(player, message, ChatFormatting.RED);
-        changed();
+        double x = worldPosition.getX() + 0.5;
+        double y = worldPosition.getY() + 0.9;
+        double z = worldPosition.getZ() + 0.5;
+        reset(State.EMPTY);
+        server.explode(null, x, y, z, 1.4f, net.minecraft.world.level.Level.ExplosionInteraction.NONE);
+        server.sendParticles(ParticleTypes.LARGE_SMOKE, x, y, z, 24, 0.3, 0.2, 0.3, 0.04);
+        server.sendParticles(ModParticles.SMOKE.get().with(RUINED_COLOR, 0.8f, 30), x, y, z, 16, 0.3, 0.3, 0.3, 0.05);
+        say(player, Component.translatable("message.hogwartsmod.cauldron_exploded"), ChatFormatting.RED);
+    }
+
+    private void pickUp(Player player) {
+        ItemStack item = new ItemStack(com.gabriel.hogwartsmod.registry.ModBlocks.CAULDRON_ITEM.get());
+        item.getOrCreateTag().putBoolean(CauldronItem.NO_FIRE, true);
+        if (state != State.EMPTY) {
+            BlockItem.setBlockEntityData(item, getType(), saveWithoutMetadata());
+        }
+        boolean fire = isHeated();
+        BlockPos pos = worldPosition;
+        level.setBlock(pos, fire ? com.gabriel.hogwartsmod.registry.ModBlocks.POTION_FIRE.get().defaultBlockState()
+                : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
+        level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_IRON, SoundSource.BLOCKS, 1f, 0.8f);
+        if (player.getMainHandItem().isEmpty()) {
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, item);
+        } else if (!player.getInventory().add(item)) {
+            player.drop(item, false);
+        }
     }
 
     private void collect(Player player, ItemStack bottle) {
@@ -259,7 +277,7 @@ public class CauldronBlockEntity extends BlockEntity {
         Component text = switch (state) {
             case EMPTY -> Component.translatable("message.hogwartsmod.cauldron_status_empty");
             case WATER -> tokens.isEmpty()
-                    ? Component.translatable(isHeated() ? "message.hogwartsmod.cauldron_status_water" : "message.hogwartsmod.cauldron_cold")
+                    ? Component.translatable(isHeated() ? "message.hogwartsmod.cauldron_status_water" : "message.hogwartsmod.cauldron_no_fire")
                     : Component.translatable("message.hogwartsmod.cauldron_status_steps", tokens.size());
             case BREWING -> Component.translatable("message.hogwartsmod.cauldron_status_brewing", brew == null ? "" : brew.getDisplayName(),
                     Math.max(1, timer / 20));
@@ -294,6 +312,10 @@ public class CauldronBlockEntity extends BlockEntity {
         }
     }
 
+    private double topY() {
+        return isHeated() ? 0.88 : 0.5;
+    }
+
     // -- Tique
 
     public void serverTick() {
@@ -306,11 +328,17 @@ public class CauldronBlockEntity extends BlockEntity {
         }
         if (timer <= 0) {
             state = State.READY;
-            doses = Brew.DOSES;
+            doses = brew.getDoses();
             ServerLevel server = (ServerLevel) level;
             server.playSound(null, worldPosition, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1.2f, 1.2f);
-            server.sendParticles(ModParticles.STAR.get().with(brew.getColor(), 0.9f, 20),
-                    worldPosition.getX() + 0.5, worldPosition.getY() + 1.0, worldPosition.getZ() + 0.5, 12, 0.25, 0.15, 0.25, 0.02);
+            double x = worldPosition.getX() + 0.5;
+            double z = worldPosition.getZ() + 0.5;
+            double top = worldPosition.getY() + topY();
+            for (int i = 0; i < 14; i++) {
+                server.sendParticles(ModParticles.GLOW.get().with(brew.getColor(), 0.35f, 22), x, top + i * 0.12, z, 1, 0.05, 0.02, 0.05, 0.0);
+            }
+            server.sendParticles(ModParticles.STAR.get().with(brew.getColor(), 0.6f, 20), x, top + 0.2, z, 10, 0.25, 0.15, 0.25, 0.02);
+            server.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, top + 0.3, z, 2, 0.1, 0.05, 0.1, 0.005);
             changed();
         }
     }
@@ -327,9 +355,9 @@ public class CauldronBlockEntity extends BlockEntity {
         if (level.random.nextInt(rate) != 0) {
             return;
         }
-        double x = worldPosition.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.6;
-        double y = worldPosition.getY() + 0.94;
-        double z = worldPosition.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.6;
+        double x = worldPosition.getX() + 0.5 + (level.random.nextDouble() - 0.5) * 0.5;
+        double y = worldPosition.getY() + topY();
+        double z = worldPosition.getZ() + 0.5 + (level.random.nextDouble() - 0.5) * 0.5;
         if (state == State.RUINED) {
             level.addParticle(ParticleTypes.SMOKE, x, y, z, 0, 0.02, 0);
             return;

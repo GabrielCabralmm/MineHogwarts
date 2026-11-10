@@ -27,6 +27,7 @@ public class HogwartsMod {
         ModEntities.ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
         ModParticles.PARTICLES.register(modBus);
+        com.gabriel.hogwartsmod.registry.ModLootModifiers.SERIALIZERS.register(modBus);
         context.registerConfig(ModConfig.Type.COMMON, MagicConfig.SPEC);
         modBus.addListener(this::commonSetup);
     }

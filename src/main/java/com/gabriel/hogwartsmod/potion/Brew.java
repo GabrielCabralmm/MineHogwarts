@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Brew {
-    WIGGENWELD("wiggenweld", 0x5FCFA2, 15, List.of(
+    WIGGENWELD("wiggenweld", 1, Action.CURA, 0x5FCFA2, 15, List.of(
             Step.item("hogwartsmod:muco_vermecego", 2),
             Step.stir(2),
             Step.item("hogwartsmod:casca_wiggentree", 1),
             Step.item("minecraft:honey_bottle", 1),
             Step.stir(3))),
-    REVIGORANTE("revigorante", 0x4F9BFF, 20, List.of(
+    REVIGORANTE("revigorante", 2, Action.MAGIA, 0x4F9BFF, 20, List.of(
             Step.item("hogwartsmod:po_pedra_da_lua", 2),
             Step.stir(1),
             Step.item("minecraft:glowstone_dust", 1),
@@ -26,16 +26,28 @@ public enum Brew {
             Step.stir(4)));
 
     public static final String STIR = "mexer";
-    public static final int DOSES = 3;
+    public static final int MAX_DIFFICULTY = 5;
+
+    public enum Action {
+        CURA, MAGIA, PROTECAO, MELHORIA, MENTE, TRANSFORMACAO;
+
+        public Component getDisplayName() {
+            return Component.translatable("potion.hogwartsmod.action." + name().toLowerCase());
+        }
+    }
 
     private final String id;
+    private final int difficulty;
+    private final Action action;
     private final int color;
     private final int seconds;
     private final List<Step> steps;
     private final List<String> tokens;
 
-    Brew(String id, int color, int seconds, List<Step> steps) {
+    Brew(String id, int difficulty, Action action, int color, int seconds, List<Step> steps) {
         this.id = id;
+        this.difficulty = difficulty;
+        this.action = action;
         this.color = color;
         this.seconds = seconds;
         this.steps = steps;
@@ -64,6 +76,30 @@ public enum Brew {
 
     public String getId() {
         return id;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public int getDoses() {
+        return difficulty <= 2 ? 3 : difficulty <= 4 ? 2 : 1;
+    }
+
+    public static List<Brew> ofDifficulty(int level) {
+        List<Brew> list = new ArrayList<>();
+        for (Action action : Action.values()) {
+            for (Brew brew : values()) {
+                if (brew.difficulty == level && brew.action == action) {
+                    list.add(brew);
+                }
+            }
+        }
+        return list;
     }
 
     public int getColor() {

@@ -25,7 +25,6 @@ public class MagicData {
     public static final int SLOT_COUNT = 6;
 
     private float reserve = -1f;
-    private final java.util.Set<String> recipes = new java.util.LinkedHashSet<>();
     private int level = 1;
     private int xp;
     private final Set<String> learned = new LinkedHashSet<>();
@@ -124,28 +123,6 @@ public class MagicData {
         boolean value = pendingLevelUp;
         pendingLevelUp = false;
         return value;
-    }
-
-    // -- Receitas de poções
-
-    public boolean knowsRecipe(com.gabriel.hogwartsmod.potion.Brew brew) {
-        return recipes.contains(brew.getId());
-    }
-
-    public boolean learnRecipe(com.gabriel.hogwartsmod.potion.Brew brew) {
-        if (recipes.add(brew.getId())) {
-            markForSync();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean forgetRecipe(com.gabriel.hogwartsmod.potion.Brew brew) {
-        if (recipes.remove(brew.getId())) {
-            markForSync();
-            return true;
-        }
-        return false;
     }
 
     // -- Feitiços aprendidos e maestria
@@ -550,9 +527,6 @@ public class MagicData {
         tag.put("TeachCooldowns", teachTag);
         tag.putString("Profession", profession.getId());
         tag.put("Missoes", missions.save());
-        ListTag recipeTag = new ListTag();
-        recipes.forEach(id -> recipeTag.add(StringTag.valueOf(id)));
-        tag.put("Receitas", recipeTag);
         if (house != null) {
             tag.putString("House", house.getId());
         }
@@ -599,8 +573,6 @@ public class MagicData {
         Profession loaded = Profession.byId(tag.getString("Profession"));
         profession = loaded == null ? Profession.NONE : loaded;
         missions.load(tag.getCompound("Missoes"));
-        recipes.clear();
-        tag.getList("Receitas", Tag.TAG_STRING).forEach(t -> recipes.add(t.getAsString()));
         house = com.gabriel.hogwartsmod.house.House.byId(tag.getString("House"));
         lumosUntil = tag.getLong("LumosUntil");
         lumosLight = tag.contains("LumosLight") ? NbtUtils.readBlockPos(tag.getCompound("LumosLight")) : null;

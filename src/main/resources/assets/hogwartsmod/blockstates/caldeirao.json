@@ -1,10 +1,16 @@
 {
   "variants": {
-    "cheio=false": {
+    "cheio=false,fogueira=false": {
       "model": "hogwartsmod:block/caldeirao"
     },
-    "cheio=true": {
+    "cheio=false,fogueira=true": {
+      "model": "hogwartsmod:block/caldeirao_fogueira"
+    },
+    "cheio=true,fogueira=false": {
       "model": "hogwartsmod:block/caldeirao_cheio"
+    },
+    "cheio=true,fogueira=true": {
+      "model": "hogwartsmod:block/caldeirao_fogueira_cheio"
     }
   }
 }

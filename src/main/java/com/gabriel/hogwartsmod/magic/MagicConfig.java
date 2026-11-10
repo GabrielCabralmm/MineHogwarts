@@ -18,6 +18,7 @@ public final class MagicConfig {
     public static final ForgeConfigSpec.BooleanValue NPC_PROFESSOR_ENABLED;
     public static final ForgeConfigSpec.IntValue BROOM_MAX_HEIGHT;
     public static final ForgeConfigSpec.BooleanValue BROOM_THEFT;
+    public static final ForgeConfigSpec.BooleanValue POTION_BOOKS_IN_CHESTS;
     public static final ForgeConfigSpec.IntValue LEARN_XP_BASE;
     public static final ForgeConfigSpec.IntValue LEARN_XP_PER_LEVEL;
     public static final ForgeConfigSpec.IntValue TEACHER_XP_BASE;
@@ -50,6 +51,9 @@ public final class MagicConfig {
         builder.push("vassouras");
         BROOM_MAX_HEIGHT = builder.comment("Altura máxima (Y) que uma vassoura alcança").defineInRange("alturaMaxima", 320, -64, 2000);
         BROOM_THEFT = builder.comment("Permite que qualquer jogador pilote vassouras de outros").define("permitirRoubo", false);
+        builder.pop();
+        builder.push("pocoes");
+        POTION_BOOKS_IN_CHESTS = builder.comment("Livros de poções podem aparecer nos baús das estruturas").define("livrosNosBaus", true);
         builder.pop();
         SPEC = builder.build();
     }
