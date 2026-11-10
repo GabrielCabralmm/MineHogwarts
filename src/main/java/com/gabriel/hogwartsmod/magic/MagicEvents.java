@@ -51,7 +51,6 @@ public final class MagicEvents {
             if (event.getObject() instanceof Player) {
                 MagicDataProvider provider = new MagicDataProvider();
                 event.addCapability(KEY, provider);
-                event.addListener(provider::invalidate);
             }
         }
 
