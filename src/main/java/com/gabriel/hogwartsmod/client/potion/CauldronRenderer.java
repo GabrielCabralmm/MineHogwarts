@@ -23,10 +23,10 @@ public class CauldronRenderer implements BlockEntityRenderer<CauldronBlockEntity
     public void render(CauldronBlockEntity cauldron, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
         BakedModel model = Minecraft.getInstance().getModelManager().getModel(SPOON);
         pose.pushPose();
-        pose.translate(0.5, cauldron.liquidY() - 0.2, 0.5);
+        pose.translate(0.5, cauldron.liquidY() - 0.16, 0.5);
         pose.mulPose(Axis.YP.rotationDegrees(-cauldron.spoonAngle(partialTick)));
         pose.translate(0.2, 0, 0);
-        pose.mulPose(Axis.ZP.rotationDegrees(-24f));
+        pose.mulPose(Axis.ZP.rotationDegrees(-22f));
         pose.translate(-0.5, 0, -0.5);
         Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(pose.last(), buffers.getBuffer(RenderType.cutout()),
                 cauldron.getBlockState(), model, 1f, 1f, 1f, light, overlay, ModelData.EMPTY, RenderType.cutout());
