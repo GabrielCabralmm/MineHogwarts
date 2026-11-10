@@ -6,7 +6,6 @@ import com.gabriel.hogwartsmod.network.ModNetwork;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.MultilineTextField;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -23,22 +22,19 @@ public class LetterScreen extends Screen {
     private static final int H = 236;
     private static final int BODY_W = 160;
     private static final int LINE_H = 10;
-    private static final int MAX_LINES = 15;
+    private static final int MAX_LINES = 16;
     private static final int SELECTION = 0x5A8E6A3A;
     private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
     private static final ResourceLocation SEAL = MissionScreen.tex("lacre");
-    private static final int BTN_W = 80;
-    private static final int BTN_H = 18;
+    private static final int BTN_W = 54;
+    private static final int BTN_H = 12;
     private static final long HOLD_MS = 1500;
 
     private final InteractionHand hand;
     private boolean sealed;
     private String author;
-    private final String initialTo;
     private final String initialText;
-    private EditBox toBox;
     private Body body;
-    private boolean bodyFocused = true;
     private long holdStart = -1;
     private boolean sent;
     private int left;
@@ -49,7 +45,6 @@ public class LetterScreen extends Screen {
         this.hand = hand;
         this.sealed = LetterItem.isSealed(stack);
         this.author = LetterItem.author(stack);
-        this.initialTo = LetterItem.to(stack);
         this.initialText = LetterItem.text(stack);
     }
 
@@ -61,21 +56,10 @@ public class LetterScreen extends Screen {
     protected void init() {
         left = (width - W) / 2;
         top = (height - H) / 2;
-        String to = toBox == null ? initialTo : toBox.getValue();
         String text = body == null ? initialText : body.value();
-        toBox = new EditBox(font, left + 52, top + 26, 128, 10, Component.empty());
-        toBox.setBordered(false);
-        toBox.setMaxLength(LetterItem.MAX_TO);
-        toBox.setValue(to);
         body = new Body(font, BODY_W);
         body.setCharacterLimit(LetterItem.MAX_TEXT);
         body.setValue(text);
-        if (!sealed) {
-            addWidget(toBox);
-            if (to.isEmpty()) {
-                focusTo();
-            }
-        }
     }
 
     @Override
@@ -88,19 +72,7 @@ public class LetterScreen extends Screen {
     }
 
     private int bodyY() {
-        return top + 48;
-    }
-
-    private void focusTo() {
-        bodyFocused = false;
-        setFocused(toBox);
-        toBox.setFocused(true);
-    }
-
-    private void focusBody() {
-        bodyFocused = true;
-        toBox.setFocused(false);
-        setFocused(null);
+        return top + 24;
     }
 
     // -- Desenho
@@ -110,13 +82,6 @@ public class LetterScreen extends Screen {
         renderBackground(g);
         HiRes.image(g, PAPER, left, top, W, H);
         int x = bodyX();
-        HiRes.text(g, tr("screen.hogwartsmod.letter.to"), HiRes.Style.BOLD, 9f, x, top + 25, TITLE);
-        g.fill(left + 50, top + 37, left + W - 20, top + 38, LINE);
-        if (sealed) {
-            HiRes.text(g, HiRes.ellipsize(toBox.getValue(), HiRes.Style.ITALIC, 128 * HiRes.TEXT_SIZE / 9f), HiRes.Style.ITALIC, 9f, left + 52, top + 25, INK);
-        } else {
-            drawToField(g);
-        }
         for (int i = 1; i <= MAX_LINES; i++) {
             g.fill(x, bodyY() + i * LINE_H - 1, x + BODY_W, bodyY() + i * LINE_H, 0x40B49A6C);
         }
@@ -129,21 +94,6 @@ public class LetterScreen extends Screen {
         super.render(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawToField(GuiGraphics g) {
-        String value = toBox.getValue();
-        int x = left + 52;
-        int y = top + 25;
-        if (value.isEmpty() && !toBox.isFocused()) {
-            HiRes.text(g, tr("screen.hogwartsmod.letter.to_hint"), HiRes.Style.ITALIC, 8f, x, y + 1, MUTED);
-        }
-        HiRes.text(g, value, HiRes.Style.ITALIC, 9f, x, y, INK);
-        if (toBox.isFocused() && blink()) {
-            int cursor = Math.min(toBox.getCursorPosition(), value.length());
-            float cx = x + HiRes.width(value.substring(0, cursor), HiRes.Style.ITALIC, 9f) + 0.5f;
-            g.fill((int) cx, y, (int) cx + 1, y + 10, INK);
-        }
-    }
-
     private boolean blink() {
         return (System.currentTimeMillis() / 500) % 2 == 0;
     }
@@ -152,7 +102,7 @@ public class LetterScreen extends Screen {
         int x = bodyX();
         int y = bodyY();
         String value = body.value();
-        boolean selection = !sealed && bodyFocused && body.hasSelection();
+        boolean selection = !sealed && body.hasSelection();
         int[] selected = body.selected();
         int line = 0;
         for (int[] view : body.lines()) {
@@ -170,7 +120,7 @@ public class LetterScreen extends Screen {
             g.drawString(font, text, x, ly, INK, false);
             line++;
         }
-        if (!sealed && bodyFocused && blink()) {
+        if (!sealed && blink()) {
             int at = body.getLineAtCursor();
             int[] view = body.line(at);
             int cursor = Math.max(view[0], Math.min(body.cursor(), view[1]));
@@ -178,8 +128,8 @@ public class LetterScreen extends Screen {
             int ly = y + at * LINE_H + 1;
             g.fill(cx, ly - 1, cx + 1, ly + 9, INK);
         }
-        if (!sealed && value.isEmpty() && !bodyFocused) {
-            HiRes.text(g, tr("screen.hogwartsmod.letter.body_hint"), HiRes.Style.ITALIC, 8f, x, y + 1, MUTED);
+        if (!sealed && value.isEmpty()) {
+            HiRes.text(g, tr("screen.hogwartsmod.letter.body_hint"), HiRes.Style.ITALIC, 8f, x + 3, y + 1, MUTED);
         }
     }
 
@@ -207,9 +157,9 @@ public class LetterScreen extends Screen {
             g.disableScissor();
         }
         String label = tr(progress > 0f ? "screen.hogwartsmod.letter.signing" : "screen.hogwartsmod.letter.sign");
-        HiRes.centered(g, label, HiRes.Style.BOLD, 8f, bx + BTN_W / 2f, by + 4, can ? 0xFFF6E6C8 : 0xFFB8A88C);
+        HiRes.centered(g, label, HiRes.Style.BOLD, 6.5f, bx + BTN_W / 2f, by + 2, can ? 0xFFF6E6C8 : 0xFFB8A88C);
         if (can) {
-            HiRes.centered(g, tr("screen.hogwartsmod.letter.hold_hint"), HiRes.Style.ITALIC, 6.5f, bx + BTN_W / 2f, by - 9, MUTED);
+            HiRes.centered(g, tr("screen.hogwartsmod.letter.hold_hint"), HiRes.Style.ITALIC, 6f, bx + BTN_W / 2f, by - 8, MUTED);
         }
         if (progress >= 1f) {
             sign();
@@ -221,9 +171,6 @@ public class LetterScreen extends Screen {
         send(true);
         sealed = true;
         author = minecraft.player == null ? "" : minecraft.player.getGameProfile().getName();
-        toBox.setFocused(false);
-        bodyFocused = false;
-        removeWidget(toBox);
     }
 
     private int signX() {
@@ -231,11 +178,11 @@ public class LetterScreen extends Screen {
     }
 
     private int signY() {
-        return top + H - 34;
+        return top + H - 31;
     }
 
     private boolean overSign(double mx, double my) {
-        return mx >= signX() && mx < signX() + BTN_W && my >= signY() && my < signY() + BTN_H - 3;
+        return mx >= signX() && mx < signX() + BTN_W && my >= signY() && my < signY() + BTN_H - 2;
     }
 
     private void drawSignature(GuiGraphics g) {
@@ -246,7 +193,7 @@ public class LetterScreen extends Screen {
     }
 
     private boolean canSeal() {
-        return !toBox.getValue().isBlank() && !body.value().isBlank();
+        return !body.value().isBlank();
     }
 
     // -- Interação
@@ -269,13 +216,7 @@ public class LetterScreen extends Screen {
             }
             return true;
         }
-        if (mx >= left + 48 && mx < left + W - 18 && my >= top + 22 && my < top + 40) {
-            focusTo();
-            toBox.mouseClicked(mx, my, button);
-            return true;
-        }
         if (mx >= bodyX() - 2 && mx < bodyX() + BODY_W + 2 && my >= bodyY() && my < bodyY() + MAX_LINES * LINE_H) {
-            focusBody();
             body.setSelecting(hasShiftDown());
             body.seekCursorToPoint(mx - bodyX(), (my - bodyY()) * 9.0 / LINE_H);
             return true;
@@ -291,7 +232,7 @@ public class LetterScreen extends Screen {
 
     @Override
     public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (!sealed && bodyFocused && button == 0 && mx >= bodyX() - 2 && mx < bodyX() + BODY_W + 2) {
+        if (!sealed && button == 0 && mx >= bodyX() - 2 && mx < bodyX() + BODY_W + 2) {
             body.setSelecting(true);
             body.seekCursorToPoint(mx - bodyX(), (my - bodyY()) * 9.0 / LINE_H);
             body.setSelecting(hasShiftDown());
@@ -309,13 +250,6 @@ public class LetterScreen extends Screen {
         if (sealed) {
             return super.keyPressed(key, scan, modifiers);
         }
-        if (!bodyFocused) {
-            if (key == 257 || key == 335 || key == 258) {
-                focusBody();
-                return true;
-            }
-            return toBox.keyPressed(key, scan, modifiers);
-        }
         String before = body.value();
         boolean handled = body.keyPressed(key);
         limitLines(before);
@@ -326,9 +260,6 @@ public class LetterScreen extends Screen {
     public boolean charTyped(char c, int modifiers) {
         if (sealed) {
             return false;
-        }
-        if (!bodyFocused) {
-            return toBox.charTyped(c, modifiers);
         }
         if (!SharedConstants.isAllowedChatCharacter(c)) {
             return false;
@@ -350,12 +281,12 @@ public class LetterScreen extends Screen {
             return;
         }
         sent = true;
-        ModNetwork.CHANNEL.sendToServer(new EditLetterPacket(hand, toBox.getValue(), body.value(), seal));
+        ModNetwork.CHANNEL.sendToServer(new EditLetterPacket(hand, body.value(), seal));
     }
 
     @Override
     public void removed() {
-        if (!sealed && (!toBox.getValue().equals(initialTo) || !body.value().equals(initialText))) {
+        if (!sealed && !body.value().equals(initialText)) {
             send(false);
         }
         super.removed();

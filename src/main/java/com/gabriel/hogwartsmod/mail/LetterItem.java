@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class LetterItem extends Item {
-    public static final int MAX_TO = 32;
     public static final int MAX_TEXT = 640;
 
     public LetterItem(Properties properties) {
@@ -30,10 +29,6 @@ public class LetterItem extends Item {
         return stack.getTag() != null && stack.getTag().getBoolean("Selada");
     }
 
-    public static String to(ItemStack stack) {
-        return stack.getTag() == null ? "" : stack.getTag().getString("Para");
-    }
-
     public static String text(ItemStack stack) {
         return stack.getTag() == null ? "" : stack.getTag().getString("Texto");
     }
@@ -42,11 +37,10 @@ public class LetterItem extends Item {
         return stack.getTag() == null ? "" : stack.getTag().getString("Autor");
     }
 
-    public static void write(ItemStack stack, String to, String text) {
+    public static void write(ItemStack stack, String text) {
         CompoundTag tag = stack.getOrCreateTag();
-        tag.putString("Para", to);
         tag.putString("Texto", text);
-        if (to.isEmpty() && text.isEmpty()) {
+        if (text.isEmpty()) {
             stack.setTag(null);
         }
     }
@@ -70,9 +64,8 @@ public class LetterItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        String to = to(stack);
-        if (!to.isEmpty()) {
-            return Component.translatable("item.hogwartsmod.envelope.to", to);
+        if (isSealed(stack)) {
+            return Component.translatable("item.hogwartsmod.envelope.from", author(stack));
         }
         return super.getName(stack);
     }
@@ -80,7 +73,7 @@ public class LetterItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         if (isSealed(stack)) {
-            tooltip.add(Component.translatable("item.hogwartsmod.envelope.sealed_by", author(stack)).withStyle(ChatFormatting.GOLD));
+            tooltip.add(Component.translatable("item.hogwartsmod.envelope.sealed_hint").withStyle(ChatFormatting.GRAY));
         } else if (stack.hasTag()) {
             tooltip.add(Component.translatable("item.hogwartsmod.envelope.draft").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         } else {

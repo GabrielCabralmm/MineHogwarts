@@ -12,17 +12,16 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record EditLetterPacket(InteractionHand hand, String to, String text, boolean seal) {
+public record EditLetterPacket(InteractionHand hand, String text, boolean seal) {
 
     public static void encode(EditLetterPacket packet, FriendlyByteBuf buf) {
         buf.writeEnum(packet.hand);
-        buf.writeUtf(packet.to, LetterItem.MAX_TO);
         buf.writeUtf(packet.text, LetterItem.MAX_TEXT * 4);
         buf.writeBoolean(packet.seal);
     }
 
     public static EditLetterPacket decode(FriendlyByteBuf buf) {
-        return new EditLetterPacket(buf.readEnum(InteractionHand.class), buf.readUtf(LetterItem.MAX_TO), buf.readUtf(LetterItem.MAX_TEXT * 4), buf.readBoolean());
+        return new EditLetterPacket(buf.readEnum(InteractionHand.class), buf.readUtf(LetterItem.MAX_TEXT * 4), buf.readBoolean());
     }
 
     public static void handle(EditLetterPacket packet, Supplier<NetworkEvent.Context> ctx) {
@@ -38,13 +37,12 @@ public record EditLetterPacket(InteractionHand hand, String to, String text, boo
         if (!(held.getItem() instanceof LetterItem) || LetterItem.isSealed(held)) {
             return;
         }
-        String to = packet.to.strip();
         String text = packet.text.length() > LetterItem.MAX_TEXT ? packet.text.substring(0, LetterItem.MAX_TEXT) : packet.text;
-        if (!packet.seal && to.equals(LetterItem.to(held)) && text.equals(LetterItem.text(held))) {
+        if (!packet.seal && text.equals(LetterItem.text(held))) {
             return;
         }
         ItemStack letter = held.getCount() > 1 ? held.split(1) : held;
-        LetterItem.write(letter, to, text);
+        LetterItem.write(letter, text);
         if (packet.seal) {
             LetterItem.seal(letter, player.getGameProfile().getName());
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.HONEYCOMB_WAX_ON, SoundSource.PLAYERS, 1f, 0.9f);
