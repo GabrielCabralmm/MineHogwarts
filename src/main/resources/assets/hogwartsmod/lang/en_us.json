@@ -477,6 +477,5 @@
   "screen.hogwartsmod.potion_book.doses": "Makes %s doses · use glass bottles",
   "message.hogwartsmod.cauldron_wand": "You waved your wand over the cauldron (step %s)",
   "screen.hogwartsmod.potion_book.wand": "Wave the wand %s×",
-  "message.hogwartsmod.cauldron_carry": "You are carrying the cauldron · right-click a block to set it down",
   "message.hogwartsmod.cauldron_carry_drop": "Set the cauldron down on a block instead of dropping it"
 }

@@ -270,7 +270,6 @@ public class CauldronBlockEntity extends BlockEntity {
         level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
         level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_IRON, SoundSource.BLOCKS, 1f, 0.8f);
         player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, item);
-        say(player, Component.translatable("message.hogwartsmod.cauldron_carry"), ChatFormatting.GOLD);
     }
 
     private void collect(Player player, ItemStack bottle) {
