@@ -476,5 +476,7 @@
   "screen.hogwartsmod.potion_book.boil": "Ferver por %s segundos",
   "screen.hogwartsmod.potion_book.doses": "Rende %s doses · use frascos de vidro",
   "message.hogwartsmod.cauldron_wand": "Você agitou a varinha sobre o caldeirão (passo %s)",
-  "screen.hogwartsmod.potion_book.wand": "Agitar a varinha %s×"
+  "screen.hogwartsmod.potion_book.wand": "Agitar a varinha %s×",
+  "message.hogwartsmod.cauldron_carry": "Você está carregando o caldeirão · clique direito num bloco para colocar",
+  "message.hogwartsmod.cauldron_carry_drop": "Coloque o caldeirão num bloco em vez de soltá-lo"
 }

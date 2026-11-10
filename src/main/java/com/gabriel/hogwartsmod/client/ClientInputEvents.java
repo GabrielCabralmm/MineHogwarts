@@ -21,6 +21,10 @@ public final class ClientInputEvents {
     @SubscribeEvent
     public static void onScroll(InputEvent.MouseScrollingEvent event) {
         Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && mc.screen == null && com.gabriel.hogwartsmod.potion.CauldronCarry.isCarrying(mc.player)) {
+            event.setCanceled(true);
+            return;
+        }
         if (mc.player == null || mc.screen != null || !ModKeys.isModifierDown()) {
             return;
         }

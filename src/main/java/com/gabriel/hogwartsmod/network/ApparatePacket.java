@@ -22,7 +22,7 @@ public record ApparatePacket(AparatacaoSpell.Mode mode, int index, String name) 
 
     public static void handle(ApparatePacket packet, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null) {
+        if (player != null && !com.gabriel.hogwartsmod.potion.CauldronCarry.isCarrying(player)) {
             Spells.APARATACAO.request(player, packet.mode, packet.index, packet.name);
         }
         ctx.get().setPacketHandled(true);

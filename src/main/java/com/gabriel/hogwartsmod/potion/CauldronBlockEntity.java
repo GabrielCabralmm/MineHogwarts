@@ -262,17 +262,15 @@ public class CauldronBlockEntity extends BlockEntity {
 
     private void pickUp(Player player) {
         ItemStack item = new ItemStack(com.gabriel.hogwartsmod.registry.ModBlocks.CAULDRON_ITEM.get());
+        item.getOrCreateTag().putBoolean(CauldronCarry.CARRIED, true);
         if (state != State.EMPTY) {
             BlockItem.setBlockEntityData(item, getType(), saveWithoutMetadata());
         }
         BlockPos pos = worldPosition;
         level.setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 3);
         level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_IRON, SoundSource.BLOCKS, 1f, 0.8f);
-        if (player.getMainHandItem().isEmpty()) {
-            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, item);
-        } else if (!player.getInventory().add(item)) {
-            player.drop(item, false);
-        }
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, item);
+        say(player, Component.translatable("message.hogwartsmod.cauldron_carry"), ChatFormatting.GOLD);
     }
 
     private void collect(Player player, ItemStack bottle) {

@@ -21,7 +21,7 @@ public record DodgePacket(float dx, float dy, float dz) {
 
     public static void handle(DodgePacket packet, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
-        if (player != null && Float.isFinite(packet.dx) && Float.isFinite(packet.dz)) {
+        if (player != null && !com.gabriel.hogwartsmod.potion.CauldronCarry.isCarrying(player) && Float.isFinite(packet.dx) && Float.isFinite(packet.dz)) {
             Spells.ESQUIVA.tryDodge(player, packet.dx, packet.dy, packet.dz);
         }
         ctx.get().setPacketHandled(true);

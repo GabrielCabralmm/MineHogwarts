@@ -18,6 +18,11 @@ public class CauldronItem extends BlockItem {
     }
 
     @Override
+    public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
+        consumer.accept(com.gabriel.hogwartsmod.client.potion.CauldronItemClient.INSTANCE);
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         CompoundTag data = getBlockEntityData(stack);
         if (data != null) {
