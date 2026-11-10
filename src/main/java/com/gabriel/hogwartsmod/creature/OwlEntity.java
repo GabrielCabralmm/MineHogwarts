@@ -177,7 +177,7 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
                 }
                 return InteractionResult.sidedSuccess(level().isClientSide);
             }
-            if (held.isEmpty() && player.isShiftKeyDown()) {
+            if (held.isEmpty()) {
                 if (!level().isClientSide) {
                     setOrderedToSit(!isOrderedToSit());
                     navigation.stop();
