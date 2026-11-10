@@ -336,7 +336,7 @@ public class CauldronBlockEntity extends BlockEntity {
     }
 
     private double topY() {
-        return getBlockState().getValue(CauldronBlock.FIRE) ? 0.5 : 0.55;
+        return getBlockState().getValue(CauldronBlock.FIRE) ? 0.58 : 0.63;
     }
 
     private long stirStart = -100;
