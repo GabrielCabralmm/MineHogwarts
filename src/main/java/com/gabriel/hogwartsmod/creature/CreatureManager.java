@@ -45,6 +45,10 @@ public final class CreatureManager {
         if (species == null || data == null || !creature.isOwnedBy(player)) {
             return false;
         }
+        if (creature instanceof OwlEntity owl && owl.isBusy()) {
+            say(player, Component.translatable("message.hogwartsmod.owl_busy"), ChatFormatting.GRAY);
+            return false;
+        }
         CreatureStore store = data.getCreatures();
         CreatureStore.Entry current = store.get(species);
         if (current != null && !creature.getUUID().equals(current.summoned())) {

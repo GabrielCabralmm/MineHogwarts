@@ -15,6 +15,7 @@ public final class ModEntityAttributes {
         event.put(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.npc.HogwartsNpc.createAttributes().build());
         event.put(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.npc.HogwartsNpc.createAttributes().build());
         event.put(ModEntities.HIPPOGRIFF.get(), com.gabriel.hogwartsmod.creature.HippogriffEntity.createAttributes().build());
+        event.put(ModEntities.OWL.get(), com.gabriel.hogwartsmod.creature.OwlEntity.createAttributes().build());
         event.put(ModEntities.THESTRAL.get(), com.gabriel.hogwartsmod.creature.ThestralEntity.createAttributes().build());
     }
 
@@ -24,6 +25,10 @@ public final class ModEntityAttributes {
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 (type, level, reason, pos, random) -> level.getBlockState(pos.below()).isSolidRender(level, pos.below())
                         && level.getRawBrightness(pos, 0) > 8,
+                net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE);
+        event.register(ModEntities.OWL.get(), net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,
+                net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> level.getBlockState(pos.below()).isSolidRender(level, pos.below()),
                 net.minecraftforge.event.entity.SpawnPlacementRegisterEvent.Operation.REPLACE);
         event.register(ModEntities.THESTRAL.get(), net.minecraft.world.entity.SpawnPlacements.Type.ON_GROUND,
                 net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,

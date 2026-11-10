@@ -10,7 +10,8 @@ import java.util.function.Supplier;
 
 public enum Species {
     HIPOGRIFO("hipogrifo", () -> ModEntities.HIPPOGRIFF.get()),
-    TESTRALIO("testralio", () -> ModEntities.THESTRAL.get());
+    TESTRALIO("testralio", () -> ModEntities.THESTRAL.get()),
+    CORUJA("coruja", () -> ModEntities.OWL.get());
 
     private final String id;
     private final Supplier<EntityType<? extends Entity>> type;

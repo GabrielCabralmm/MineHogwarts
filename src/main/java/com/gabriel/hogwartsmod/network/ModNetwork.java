@@ -58,6 +58,8 @@ public final class ModNetwork {
                 .encoder(PublicLocationsPacket::encode).decoder(PublicLocationsPacket::decode).consumerMainThread(PublicLocationsPacket::handle).add();
         CHANNEL.messageBuilder(EditLetterPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(EditLetterPacket::encode).decoder(EditLetterPacket::decode).consumerMainThread(EditLetterPacket::handle).add();
+        CHANNEL.messageBuilder(SendOwlPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(SendOwlPacket::encode).decoder(SendOwlPacket::decode).consumerMainThread(SendOwlPacket::handle).add();
         CHANNEL.messageBuilder(ApparatePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ApparatePacket::encode).decoder(ApparatePacket::decode).consumerMainThread(ApparatePacket::handle).add();
         CHANNEL.messageBuilder(PlaceEditPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)

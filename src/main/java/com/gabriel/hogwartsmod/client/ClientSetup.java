@@ -45,6 +45,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.HIPPOGRIFF.get(), c -> new com.gabriel.hogwartsmod.client.creature.MountRenderer<>(c, "hipogrifo", 1.6f, 1.2f));
+        event.registerEntityRenderer(ModEntities.OWL.get(), com.gabriel.hogwartsmod.client.creature.OwlRenderer::new);
         event.registerEntityRenderer(ModEntities.THESTRAL.get(), c -> new com.gabriel.hogwartsmod.client.creature.MountRenderer<>(c, "testralio", 1.55f, 1.0f));
         event.registerEntityRenderer(ModEntities.BROOM.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
     }

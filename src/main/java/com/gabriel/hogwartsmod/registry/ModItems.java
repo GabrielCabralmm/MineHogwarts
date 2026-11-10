@@ -57,6 +57,9 @@ public final class ModItems {
     public static final RegistryObject<Item> ENVELOPE = ITEMS.register("envelope",
             () -> new com.gabriel.hogwartsmod.mail.LetterItem(new Item.Properties().stacksTo(16)));
 
+    public static final RegistryObject<Item> OVO_CORUJA = ITEMS.register("ovo_coruja",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(ModEntities.OWL, 0xECECE6, 0x4A4642, new Item.Properties()));
+
     public static final RegistryObject<Item> OVO_TESTRALIO = ITEMS.register("ovo_testralio",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(ModEntities.THESTRAL, 0x1E1C22, 0x6E6A78, new Item.Properties()));
 

@@ -1,0 +1,336 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.coruja",
+    "texture_width": 64,
+    "texture_height": 64,
+    "visible_bounds_width": 2,
+    "visible_bounds_height": 2,
+    "visible_bounds_offset": [
+     0,
+     0.5,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "raiz",
+     "pivot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "corpo",
+     "pivot": [
+      0,
+      3,
+      0
+     ],
+     "parent": "raiz",
+     "cubes": [
+      {
+       "origin": [
+        -3,
+        3,
+        -3
+       ],
+       "size": [
+        6,
+        7,
+        6
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "cabeca",
+     "pivot": [
+      0,
+      10,
+      0
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        -3.5,
+        10,
+        -3.5
+       ],
+       "size": [
+        7,
+        6,
+        6
+       ],
+       "uv": [
+        25,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "bico",
+     "pivot": [
+      0,
+      12,
+      -3.5
+     ],
+     "parent": "cabeca",
+     "cubes": [
+      {
+       "origin": [
+        -0.5,
+        11.5,
+        -4.5
+       ],
+       "size": [
+        1,
+        1.5,
+        1
+       ],
+       "uv": [
+        52,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "tufo_esq",
+     "pivot": [
+      2.5,
+      16,
+      0
+     ],
+     "parent": "cabeca",
+     "cubes": [
+      {
+       "origin": [
+        2,
+        16,
+        -1
+       ],
+       "size": [
+        1,
+        1,
+        2
+       ],
+       "uv": [
+        57,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "tufo_dir",
+     "pivot": [
+      -2.5,
+      16,
+      0
+     ],
+     "parent": "cabeca",
+     "cubes": [
+      {
+       "origin": [
+        -3,
+        16,
+        -1
+       ],
+       "size": [
+        1,
+        1,
+        2
+       ],
+       "uv": [
+        0,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "asa_esq",
+     "pivot": [
+      3,
+      9.5,
+      0
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        3,
+        4,
+        -2.5
+       ],
+       "size": [
+        1,
+        6,
+        5.5
+       ],
+       "uv": [
+        7,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "asa_dir",
+     "pivot": [
+      -3,
+      9.5,
+      0
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        -4,
+        4,
+        -2.5
+       ],
+       "size": [
+        1,
+        6,
+        5.5
+       ],
+       "uv": [
+        22,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "cauda",
+     "pivot": [
+      0,
+      4,
+      3
+     ],
+     "parent": "corpo",
+     "rotation": [
+      -30,
+      0,
+      0
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -1.5,
+        1.5,
+        2.5
+       ],
+       "size": [
+        3,
+        3,
+        1
+       ],
+       "uv": [
+        37,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "pe_esq",
+     "pivot": [
+      1.5,
+      3,
+      0
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        0.5,
+        0,
+        -1.5
+       ],
+       "size": [
+        2,
+        3,
+        2
+       ],
+       "uv": [
+        46,
+        14
+       ]
+      },
+      {
+       "origin": [
+        0.5,
+        0,
+        -2.5
+       ],
+       "size": [
+        2,
+        0.5,
+        1
+       ],
+       "uv": [
+        55,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "pe_dir",
+     "pivot": [
+      -1.5,
+      3,
+      0
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        -2.5,
+        0,
+        -1.5
+       ],
+       "size": [
+        2,
+        3,
+        2
+       ],
+       "uv": [
+        0,
+        27
+       ]
+      },
+      {
+       "origin": [
+        -2.5,
+        0,
+        -2.5
+       ],
+       "size": [
+        2,
+        0.5,
+        1
+       ],
+       "uv": [
+        9,
+        27
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

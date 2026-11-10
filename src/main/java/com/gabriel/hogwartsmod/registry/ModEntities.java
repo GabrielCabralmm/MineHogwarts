@@ -27,6 +27,12 @@ public final class ModEntities {
                     .clientTrackingRange(10)
                     .build("hipogrifo"));
 
+    public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.creature.OwlEntity>> OWL = ENTITIES.register("coruja",
+            () -> EntityType.Builder.<com.gabriel.hogwartsmod.creature.OwlEntity>of(com.gabriel.hogwartsmod.creature.OwlEntity::new, MobCategory.CREATURE)
+                    .sized(0.5f, 0.8f)
+                    .clientTrackingRange(10)
+                    .build("coruja"));
+
     public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.creature.ThestralEntity>> THESTRAL = ENTITIES.register("testralio",
             () -> EntityType.Builder.<com.gabriel.hogwartsmod.creature.ThestralEntity>of(com.gabriel.hogwartsmod.creature.ThestralEntity::new, MobCategory.CREATURE)
                     .sized(1.7f, 2.6f)
