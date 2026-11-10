@@ -26,6 +26,9 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(CastAnimations::registerLayer);
+        event.enqueueWork(() -> net.minecraft.client.renderer.item.ItemProperties.register(com.gabriel.hogwartsmod.registry.ModItems.ENVELOPE.get(),
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "selada"),
+                (stack, level, entity, seed) -> com.gabriel.hogwartsmod.mail.LetterItem.isSealed(stack) ? 1f : 0f));
         com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
         com.gabriel.hogwartsmod.creature.MountCreature.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
         com.gabriel.hogwartsmod.creature.MountCreature.clientSeesAll = com.gabriel.hogwartsmod.client.creature.ClientCreatures::seesThestrals;

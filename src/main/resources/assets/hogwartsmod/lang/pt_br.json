@@ -511,5 +511,17 @@
   "message.hogwartsmod.lives_final_kick": "Você perdeu sua última vida. Sua jornada em Hogwarts terminou.",
   "command.hogwartsmod.lives": "%s tem %s vida(s)",
   "command.hogwartsmod.thestral_sight_on": "%s agora enxerga testrálios",
-  "command.hogwartsmod.thestral_sight_off": "%s não enxerga mais testrálios"
+  "command.hogwartsmod.thestral_sight_off": "%s não enxerga mais testrálios",
+  "item.hogwartsmod.envelope": "Envelope",
+  "item.hogwartsmod.envelope.to": "Carta para %s",
+  "item.hogwartsmod.envelope.sealed_by": "Selada por %s",
+  "item.hogwartsmod.envelope.draft": "Rascunho — ainda não selada",
+  "item.hogwartsmod.envelope.hint": "Clique direito para escrever uma carta",
+  "screen.hogwartsmod.letter.to": "Para:",
+  "screen.hogwartsmod.letter.to_hint": "nome do destinatário",
+  "screen.hogwartsmod.letter.body_hint": "Escreva sua carta aqui...",
+  "screen.hogwartsmod.letter.draft_hint": "Esc guarda o rascunho",
+  "screen.hogwartsmod.letter.seal": "Selar",
+  "screen.hogwartsmod.letter.seal_confirm": "Confirmar?",
+  "screen.hogwartsmod.letter.sealed_by": "Selada por"
 }

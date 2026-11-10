@@ -511,5 +511,17 @@
   "message.hogwartsmod.lives_final_kick": "You lost your last life. Your journey at Hogwarts is over.",
   "command.hogwartsmod.lives": "%s has %s life/lives",
   "command.hogwartsmod.thestral_sight_on": "%s can now see thestrals",
-  "command.hogwartsmod.thestral_sight_off": "%s can no longer see thestrals"
+  "command.hogwartsmod.thestral_sight_off": "%s can no longer see thestrals",
+  "item.hogwartsmod.envelope": "Envelope",
+  "item.hogwartsmod.envelope.to": "Letter to %s",
+  "item.hogwartsmod.envelope.sealed_by": "Sealed by %s",
+  "item.hogwartsmod.envelope.draft": "Draft — not sealed yet",
+  "item.hogwartsmod.envelope.hint": "Right-click to write a letter",
+  "screen.hogwartsmod.letter.to": "To:",
+  "screen.hogwartsmod.letter.to_hint": "recipient's name",
+  "screen.hogwartsmod.letter.body_hint": "Write your letter here...",
+  "screen.hogwartsmod.letter.draft_hint": "Esc keeps the draft",
+  "screen.hogwartsmod.letter.seal": "Seal",
+  "screen.hogwartsmod.letter.seal_confirm": "Confirm?",
+  "screen.hogwartsmod.letter.sealed_by": "Sealed by"
 }
