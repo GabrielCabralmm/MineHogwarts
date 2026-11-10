@@ -1,7 +1,7 @@
 package com.gabriel.hogwartsmod.client.creature;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
-import com.gabriel.hogwartsmod.creature.HippogriffEntity;
+import com.gabriel.hogwartsmod.creature.MountCreature;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import software.bernie.geckolib.constant.DataTickets;
@@ -10,28 +10,34 @@ import software.bernie.geckolib.core.animation.AnimationState;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.model.data.EntityModelData;
 
-public class HippogriffModel extends GeoModel<HippogriffEntity> {
-    private static final ResourceLocation MODEL = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "geo/criatura/hipogrifo.geo.json");
-    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/entity/criatura/hipogrifo.png");
-    private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "animations/criatura/hipogrifo.animation.json");
+public class MountModel<T extends MountCreature> extends GeoModel<T> {
+    private final ResourceLocation model;
+    private final ResourceLocation texture;
+    private final ResourceLocation animation;
 
-    @Override
-    public ResourceLocation getModelResource(HippogriffEntity entity) {
-        return MODEL;
+    public MountModel(String name) {
+        model = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "geo/criatura/" + name + ".geo.json");
+        texture = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/entity/criatura/" + name + ".png");
+        animation = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "animations/criatura/" + name + ".animation.json");
     }
 
     @Override
-    public ResourceLocation getTextureResource(HippogriffEntity entity) {
-        return TEXTURE;
+    public ResourceLocation getModelResource(T entity) {
+        return model;
     }
 
     @Override
-    public ResourceLocation getAnimationResource(HippogriffEntity entity) {
-        return ANIMATION;
+    public ResourceLocation getTextureResource(T entity) {
+        return texture;
     }
 
     @Override
-    public void setCustomAnimations(HippogriffEntity entity, long instanceId, AnimationState<HippogriffEntity> state) {
+    public ResourceLocation getAnimationResource(T entity) {
+        return animation;
+    }
+
+    @Override
+    public void setCustomAnimations(T entity, long instanceId, AnimationState<T> state) {
         CoreGeoBone head = getAnimationProcessor().getBone("cabeca");
         EntityModelData data = state.getData(DataTickets.ENTITY_MODEL_DATA);
         if (head != null && data != null && !entity.isVehicle()) {

@@ -1,0 +1,609 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.testralio",
+    "texture_width": 128,
+    "texture_height": 128,
+    "visible_bounds_width": 5,
+    "visible_bounds_height": 4,
+    "visible_bounds_offset": [
+     0,
+     1.5,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "raiz",
+     "pivot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "corpo",
+     "pivot": [
+      0,
+      15,
+      0
+     ],
+     "parent": "raiz",
+     "cubes": [
+      {
+       "origin": [
+        -5,
+        15,
+        -10
+       ],
+       "size": [
+        10,
+        9,
+        20
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "pescoco",
+     "pivot": [
+      0,
+      22,
+      -9
+     ],
+     "parent": "corpo",
+     "rotation": [
+      30,
+      0,
+      0
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -2,
+        20,
+        -13
+       ],
+       "size": [
+        4,
+        11,
+        5
+       ],
+       "uv": [
+        61,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "cabeca",
+     "pivot": [
+      0,
+      30,
+      -11
+     ],
+     "parent": "pescoco",
+     "rotation": [
+      15,
+      0,
+      0
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -2.5,
+        28,
+        -16
+       ],
+       "size": [
+        5,
+        5,
+        7
+       ],
+       "uv": [
+        80,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "focinho",
+     "pivot": [
+      0,
+      29,
+      -16
+     ],
+     "parent": "cabeca",
+     "cubes": [
+      {
+       "origin": [
+        -1.75,
+        28,
+        -22
+       ],
+       "size": [
+        3.5,
+        3.5,
+        6
+       ],
+       "uv": [
+        105,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "orelhas",
+     "pivot": [
+      0,
+      33,
+      -11
+     ],
+     "parent": "cabeca",
+     "cubes": [
+      {
+       "origin": [
+        -2.5,
+        33,
+        -11
+       ],
+       "size": [
+        1,
+        2.5,
+        1
+       ],
+       "uv": [
+        0,
+        30
+       ]
+      },
+      {
+       "origin": [
+        1.5,
+        33,
+        -11
+       ],
+       "size": [
+        1,
+        2.5,
+        1
+       ],
+       "uv": [
+        5,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "crina",
+     "pivot": [
+      0,
+      30,
+      -10
+     ],
+     "parent": "pescoco",
+     "cubes": [
+      {
+       "origin": [
+        -0.5,
+        22,
+        -9
+       ],
+       "size": [
+        1,
+        9,
+        3
+       ],
+       "uv": [
+        10,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "perna_frente_esq",
+     "pivot": [
+      3.25,
+      15,
+      -7
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        2,
+        1,
+        -8
+       ],
+       "size": [
+        2.5,
+        14,
+        2.5
+       ],
+       "uv": [
+        19,
+        30
+       ]
+      },
+      {
+       "origin": [
+        1.75,
+        0,
+        -8.25
+       ],
+       "size": [
+        3,
+        1.5,
+        3
+       ],
+       "uv": [
+        28,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "perna_tras_esq",
+     "pivot": [
+      3.25,
+      16,
+      7
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        2,
+        1,
+        6
+       ],
+       "size": [
+        2.5,
+        15,
+        2.5
+       ],
+       "uv": [
+        41,
+        30
+       ]
+      },
+      {
+       "origin": [
+        1.75,
+        0,
+        5.75
+       ],
+       "size": [
+        3,
+        1.5,
+        3
+       ],
+       "uv": [
+        50,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "asa_esq",
+     "pivot": [
+      5,
+      24,
+      -6
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        5,
+        15,
+        -7
+       ],
+       "size": [
+        0.5,
+        9,
+        14
+       ],
+       "uv": [
+        63,
+        30
+       ]
+      },
+      {
+       "origin": [
+        4.75,
+        23,
+        -7
+       ],
+       "size": [
+        1,
+        1,
+        14
+       ],
+       "uv": [
+        94,
+        30
+       ]
+      }
+     ]
+    },
+    {
+     "name": "asa_ponta_esq",
+     "pivot": [
+      5,
+      24,
+      7
+     ],
+     "parent": "asa_esq",
+     "cubes": [
+      {
+       "origin": [
+        5,
+        14,
+        7
+       ],
+       "size": [
+        0.5,
+        10,
+        13
+       ],
+       "uv": [
+        0,
+        54
+       ]
+      },
+      {
+       "origin": [
+        4.75,
+        23,
+        7
+       ],
+       "size": [
+        1,
+        1,
+        13
+       ],
+       "uv": [
+        29,
+        54
+       ]
+      }
+     ]
+    },
+    {
+     "name": "perna_frente_dir",
+     "pivot": [
+      -3.25,
+      15,
+      -7
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        1,
+        -8
+       ],
+       "size": [
+        2.5,
+        14,
+        2.5
+       ],
+       "uv": [
+        58,
+        54
+       ]
+      },
+      {
+       "origin": [
+        -4.75,
+        0,
+        -8.25
+       ],
+       "size": [
+        3,
+        1.5,
+        3
+       ],
+       "uv": [
+        67,
+        54
+       ]
+      }
+     ]
+    },
+    {
+     "name": "perna_tras_dir",
+     "pivot": [
+      -3.25,
+      16,
+      7
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        1,
+        6
+       ],
+       "size": [
+        2.5,
+        15,
+        2.5
+       ],
+       "uv": [
+        80,
+        54
+       ]
+      },
+      {
+       "origin": [
+        -4.75,
+        0,
+        5.75
+       ],
+       "size": [
+        3,
+        1.5,
+        3
+       ],
+       "uv": [
+        89,
+        54
+       ]
+      }
+     ]
+    },
+    {
+     "name": "asa_dir",
+     "pivot": [
+      -5,
+      24,
+      -6
+     ],
+     "parent": "corpo",
+     "cubes": [
+      {
+       "origin": [
+        -5.5,
+        15,
+        -7
+       ],
+       "size": [
+        0.5,
+        9,
+        14
+       ],
+       "uv": [
+        0,
+        78
+       ]
+      },
+      {
+       "origin": [
+        -5.25,
+        23,
+        -7
+       ],
+       "size": [
+        1,
+        1,
+        14
+       ],
+       "uv": [
+        31,
+        78
+       ]
+      }
+     ]
+    },
+    {
+     "name": "asa_ponta_dir",
+     "pivot": [
+      -5,
+      24,
+      7
+     ],
+     "parent": "asa_dir",
+     "cubes": [
+      {
+       "origin": [
+        -5.5,
+        14,
+        7
+       ],
+       "size": [
+        0.5,
+        10,
+        13
+       ],
+       "uv": [
+        62,
+        78
+       ]
+      },
+      {
+       "origin": [
+        -5.25,
+        23,
+        7
+       ],
+       "size": [
+        1,
+        1,
+        13
+       ],
+       "uv": [
+        91,
+        78
+       ]
+      }
+     ]
+    },
+    {
+     "name": "cauda",
+     "pivot": [
+      0,
+      23,
+      10
+     ],
+     "parent": "corpo",
+     "rotation": [
+      30,
+      0,
+      0
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -0.75,
+        11,
+        9.5
+       ],
+       "size": [
+        1.5,
+        12,
+        1.5
+       ],
+       "uv": [
+        120,
+        78
+       ]
+      },
+      {
+       "origin": [
+        -1.25,
+        7,
+        9
+       ],
+       "size": [
+        2.5,
+        5,
+        2.5
+       ],
+       "uv": [
+        0,
+        102
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

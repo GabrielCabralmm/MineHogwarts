@@ -497,5 +497,19 @@
   "screen.hogwartsmod.creature_wheel.release": "Solte para invocar",
   "screen.hogwartsmod.creature_wheel.cancel": "Solte no centro para cancelar",
   "hud.hogwartsmod.hippogriff_up": "Voar / Subir",
-  "hud.hogwartsmod.hippogriff_dismount": "Sair do hipogrifo"
+  "hud.hogwartsmod.hippogriff_dismount": "Sair do hipogrifo",
+  "entity.hogwartsmod.testralio": "Testrálio",
+  "creature.hogwartsmod.testralio": "Testrálio",
+  "item.hogwartsmod.ovo_testralio": "Ovo Gerador de Testrálio",
+  "message.hogwartsmod.thestral_bowed": "O testrálio abaixou a cabeça. Ofereça carne a ele",
+  "message.hogwartsmod.thestral_tamed": "O testrálio aceitou você",
+  "message.hogwartsmod.thestral_offended": "O testrálio recuou, desconfiado! Faça uma reverência antes",
+  "hud.hogwartsmod.thestral_dismount": "Sair do testrálio",
+  "message.hogwartsmod.thestral_sight": "Você presenciou uma morte. Algo que antes era invisível agora se revela a você...",
+  "message.hogwartsmod.lives_left": "Você perdeu uma vida. Restam %s",
+  "message.hogwartsmod.lives_final": "%s perdeu sua última vida e partiu para sempre",
+  "message.hogwartsmod.lives_final_kick": "Você perdeu sua última vida. Sua jornada em Hogwarts terminou.",
+  "command.hogwartsmod.lives": "%s tem %s vida(s)",
+  "command.hogwartsmod.thestral_sight_on": "%s agora enxerga testrálios",
+  "command.hogwartsmod.thestral_sight_off": "%s não enxerga mais testrálios"
 }

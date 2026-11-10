@@ -19,6 +19,9 @@ public final class MagicConfig {
     public static final ForgeConfigSpec.IntValue BROOM_MAX_HEIGHT;
     public static final ForgeConfigSpec.BooleanValue BROOM_THEFT;
     public static final ForgeConfigSpec.BooleanValue POTION_BOOKS_IN_CHESTS;
+    public static final ForgeConfigSpec.BooleanValue LIVES_ENABLED;
+    public static final ForgeConfigSpec.IntValue LIVES_START;
+    public static final ForgeConfigSpec.IntValue LIVES_WITNESS_RANGE;
     public static final ForgeConfigSpec.IntValue LEARN_XP_BASE;
     public static final ForgeConfigSpec.IntValue LEARN_XP_PER_LEVEL;
     public static final ForgeConfigSpec.IntValue TEACHER_XP_BASE;
@@ -54,6 +57,11 @@ public final class MagicConfig {
         builder.pop();
         builder.push("pocoes");
         POTION_BOOKS_IN_CHESTS = builder.comment("Livros de poções podem aparecer nos baús das estruturas").define("livrosNosBaus", true);
+        builder.pop();
+        builder.push("vidas");
+        LIVES_ENABLED = builder.comment("Ativa o sistema de vidas (apenas em servidores). Ao chegar a zero, a morte é definitiva e o jogador é banido").define("ativo", false);
+        LIVES_START = builder.comment("Vidas com que cada jogador começa").defineInRange("vidasIniciais", 5, 1, 1000);
+        LIVES_WITNESS_RANGE = builder.comment("Distância, em blocos, para presenciar uma morte definitiva e passar a ver testrálios").defineInRange("distanciaTestemunha", 24, 1, 256);
         builder.pop();
         SPEC = builder.build();
     }

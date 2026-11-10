@@ -54,6 +54,9 @@ public final class ModItems {
     public static final RegistryObject<Item> OVO_HIPOGRIFO = ITEMS.register("ovo_hipogrifo",
             () -> new net.minecraftforge.common.ForgeSpawnEggItem(ModEntities.HIPPOGRIFF, 0x8C8E94, 0xB7895A, new Item.Properties()));
 
+    public static final RegistryObject<Item> OVO_TESTRALIO = ITEMS.register("ovo_testralio",
+            () -> new net.minecraftforge.common.ForgeSpawnEggItem(ModEntities.THESTRAL, 0x1E1C22, 0x6E6A78, new Item.Properties()));
+
     public static Item potion(com.gabriel.hogwartsmod.potion.Brew brew) {
         return switch (brew) {
             case WIGGENWELD -> POCAO_WIGGENWELD.get();

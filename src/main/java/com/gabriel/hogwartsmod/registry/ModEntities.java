@@ -27,6 +27,12 @@ public final class ModEntities {
                     .clientTrackingRange(10)
                     .build("hipogrifo"));
 
+    public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.creature.ThestralEntity>> THESTRAL = ENTITIES.register("testralio",
+            () -> EntityType.Builder.<com.gabriel.hogwartsmod.creature.ThestralEntity>of(com.gabriel.hogwartsmod.creature.ThestralEntity::new, MobCategory.CREATURE)
+                    .sized(1.7f, 2.6f)
+                    .clientTrackingRange(10)
+                    .build("testralio"));
+
     public static final RegistryObject<EntityType<com.gabriel.hogwartsmod.mission.MissionNpcEntity>> MISSION_NPC = ENTITIES.register("npc_missoes",
             () -> EntityType.Builder.<com.gabriel.hogwartsmod.mission.MissionNpcEntity>of(com.gabriel.hogwartsmod.mission.MissionNpcEntity::new, MobCategory.MISC)
                     .sized(0.6f, 1.8f)

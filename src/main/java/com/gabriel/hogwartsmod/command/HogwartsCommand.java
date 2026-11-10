@@ -220,6 +220,19 @@ public final class HogwartsCommand {
                 .then(Commands.literal("reserva").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .executes(HogwartsCommand::fillReserve)))
+                .then(Commands.literal("vidas").requires(STAFF)
+                        .then(Commands.argument("alvo", EntityArgument.player())
+                                .executes(ctx -> lives(ctx, 0, 0))
+                                .then(Commands.literal("adicionar").then(Commands.argument("quantidade", IntegerArgumentType.integer(1))
+                                        .executes(ctx -> lives(ctx, 1, IntegerArgumentType.getInteger(ctx, "quantidade")))))
+                                .then(Commands.literal("remover").then(Commands.argument("quantidade", IntegerArgumentType.integer(1))
+                                        .executes(ctx -> lives(ctx, -1, IntegerArgumentType.getInteger(ctx, "quantidade")))))
+                                .then(Commands.literal("definir").then(Commands.argument("quantidade", IntegerArgumentType.integer(0))
+                                        .executes(ctx -> lives(ctx, 2, IntegerArgumentType.getInteger(ctx, "quantidade")))))))
+                .then(Commands.literal("testralio").requires(STAFF)
+                        .then(Commands.argument("alvo", EntityArgument.player())
+                                .then(Commands.literal("ver").executes(ctx -> thestralSight(ctx, true)))
+                                .then(Commands.literal("esconder").executes(ctx -> thestralSight(ctx, false)))))
                 .then(Commands.literal("info").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .executes(HogwartsCommand::info))));
@@ -497,6 +510,24 @@ public final class HogwartsCommand {
         }
         data.setSlot(slot - 1, spell);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.slot_set", slot, spell.getDisplayName()), false);
+        return 1;
+    }
+
+    private static int lives(CommandContext<CommandSourceStack> ctx, int mode, int amount) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        MagicData data = data(target);
+        if (mode != 0) {
+            data.setLives(mode == 2 ? amount : data.getLives() + mode * amount);
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.lives", target.getDisplayName(), data.getLives()), mode != 0);
+        return data.getLives();
+    }
+
+    private static int thestralSight(CommandContext<CommandSourceStack> ctx, boolean value) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        data(target).setSeenDeath(value);
+        ctx.getSource().sendSuccess(() -> Component.translatable(value ? "command.hogwartsmod.thestral_sight_on" : "command.hogwartsmod.thestral_sight_off",
+                target.getDisplayName()), true);
         return 1;
     }
 

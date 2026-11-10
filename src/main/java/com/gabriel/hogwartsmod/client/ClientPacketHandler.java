@@ -35,6 +35,7 @@ public final class ClientPacketHandler {
         if (tag.contains("TeachMinLevel")) {
             ClientTeachState.limits = new TeachRules.Limits(tag.getInt("TeachMinLevel"), tag.getInt("TeachMaxSpellLevel"));
             ClientTeachState.range = tag.getInt("TeachRange");
+            LivesHud.enabled = tag.getBoolean("VidasAtivas");
         }
     }
 

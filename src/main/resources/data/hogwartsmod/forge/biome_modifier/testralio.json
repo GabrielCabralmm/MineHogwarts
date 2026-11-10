@@ -1,0 +1,12 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": [
+    "minecraft:dark_forest"
+  ],
+  "spawners": {
+    "type": "hogwartsmod:testralio",
+    "weight": 6,
+    "minCount": 2,
+    "maxCount": 4
+  }
+}

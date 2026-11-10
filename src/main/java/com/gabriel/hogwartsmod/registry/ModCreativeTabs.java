@@ -29,6 +29,7 @@ public final class ModCreativeTabs {
                         output.accept(ModItems.NUQUE.get());
                         output.accept(ModItems.BOLSA_CRIATURAS.get());
                         output.accept(ModItems.OVO_HIPOGRIFO.get());
+                        output.accept(ModItems.OVO_TESTRALIO.get());
                         output.accept(ModBlocks.CAULDRON_ITEM.get());
                         output.accept(ModItems.MUCO_VERMECEGO.get());
                         output.accept(ModItems.CASCA_WIGGENTREE.get());

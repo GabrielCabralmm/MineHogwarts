@@ -497,5 +497,19 @@
   "screen.hogwartsmod.creature_wheel.release": "Release to summon",
   "screen.hogwartsmod.creature_wheel.cancel": "Release in the center to cancel",
   "hud.hogwartsmod.hippogriff_up": "Fly / Rise",
-  "hud.hogwartsmod.hippogriff_dismount": "Dismount the hippogriff"
+  "hud.hogwartsmod.hippogriff_dismount": "Dismount the hippogriff",
+  "entity.hogwartsmod.testralio": "Thestral",
+  "creature.hogwartsmod.testralio": "Thestral",
+  "item.hogwartsmod.ovo_testralio": "Thestral Spawn Egg",
+  "message.hogwartsmod.thestral_bowed": "The thestral lowered its head. Offer it meat",
+  "message.hogwartsmod.thestral_tamed": "The thestral accepted you",
+  "message.hogwartsmod.thestral_offended": "The thestral backs away, wary! Bow first",
+  "hud.hogwartsmod.thestral_dismount": "Dismount the thestral",
+  "message.hogwartsmod.thestral_sight": "You witnessed a death. Something once invisible now reveals itself to you...",
+  "message.hogwartsmod.lives_left": "You lost a life. %s left",
+  "message.hogwartsmod.lives_final": "%s lost their last life and is gone forever",
+  "message.hogwartsmod.lives_final_kick": "You lost your last life. Your journey at Hogwarts is over.",
+  "command.hogwartsmod.lives": "%s has %s life/lives",
+  "command.hogwartsmod.thestral_sight_on": "%s can now see thestrals",
+  "command.hogwartsmod.thestral_sight_off": "%s can no longer see thestrals"
 }

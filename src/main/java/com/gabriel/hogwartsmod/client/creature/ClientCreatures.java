@@ -2,7 +2,7 @@ package com.gabriel.hogwartsmod.client.creature;
 
 import com.gabriel.hogwartsmod.client.ModKeys;
 import com.gabriel.hogwartsmod.client.gui.HiRes;
-import com.gabriel.hogwartsmod.creature.HippogriffEntity;
+import com.gabriel.hogwartsmod.creature.MountCreature;
 import com.gabriel.hogwartsmod.creature.Species;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
@@ -25,14 +25,14 @@ public final class ClientCreatures implements IGuiOverlay {
 
     public static void hideMountBars(net.minecraftforge.client.event.RenderGuiOverlayEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && mc.player.getVehicle() instanceof HippogriffEntity
+        if (mc.player != null && mc.player.getVehicle() instanceof MountCreature
                 && (event.getOverlay().id().equals(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.MOUNT_HEALTH.id())
                 || event.getOverlay().id().equals(net.minecraftforge.client.gui.overlay.VanillaGuiOverlay.JUMP_BAR.id()))) {
             event.setCanceled(true);
         }
     }
 
-    public static void pilot(HippogriffEntity hippogriff) {
+    public static void pilot(MountCreature hippogriff) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null || hippogriff.getControllingPassenger() != player) {
             return;
@@ -40,6 +40,12 @@ public final class ClientCreatures implements IGuiOverlay {
         float forward = Math.signum(player.input.forwardImpulse);
         float vertical = (player.input.jumping ? 1f : 0f) - (Minecraft.getInstance().options.keyShift.isDown() ? 1f : 0f);
         hippogriff.setInput(forward, vertical, ModKeys.isModifierDown(), player.getYRot(), player.getXRot());
+    }
+
+    public static boolean seesThestrals() {
+        Minecraft mc = Minecraft.getInstance();
+        com.gabriel.hogwartsmod.magic.MagicData data = mc.player == null ? null : com.gabriel.hogwartsmod.magic.MagicData.get(mc.player);
+        return data != null && data.hasSeenDeath();
     }
 
     // -- Aviso de vida baixa
@@ -52,7 +58,8 @@ public final class ClientCreatures implements IGuiOverlay {
         }
         List<TamableAnimal> low = new ArrayList<>();
         for (Entity entity : mc.level.entitiesForRendering()) {
-            if (entity instanceof TamableAnimal creature && creature.isAlive() && Species.of(creature) != null
+            if (entity instanceof TamableAnimal creature && creature.isAlive()
+                    && !(creature instanceof com.gabriel.hogwartsmod.creature.MountCreature mount && !mount.isVisibleToClient()) && Species.of(creature) != null
                     && creature.isOwnedBy(mc.player) && creature.getHealth() / creature.getMaxHealth() < LOW) {
                 low.add(creature);
             }

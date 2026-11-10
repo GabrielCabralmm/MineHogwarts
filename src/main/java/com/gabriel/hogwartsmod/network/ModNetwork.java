@@ -124,6 +124,7 @@ public final class ModNetwork {
         tag.putInt("TeachMinLevel", limits.minLevel());
         tag.putInt("TeachMaxSpellLevel", limits.maxSpellLevel());
         tag.putInt("TeachRange", MagicConfig.INVITE_RANGE.get());
+        tag.putBoolean("VidasAtivas", com.gabriel.hogwartsmod.lives.LivesManager.isActive(player.server));
         CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new SyncMagicPacket(tag));
         data.clearSync();
     }

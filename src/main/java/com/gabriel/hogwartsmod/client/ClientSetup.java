@@ -27,7 +27,8 @@ public final class ClientSetup {
     public static void clientSetup(FMLClientSetupEvent event) {
         event.enqueueWork(CastAnimations::registerLayer);
         com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
-        com.gabriel.hogwartsmod.creature.HippogriffEntity.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
+        com.gabriel.hogwartsmod.creature.MountCreature.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
+        com.gabriel.hogwartsmod.creature.MountCreature.clientSeesAll = com.gabriel.hogwartsmod.client.creature.ClientCreatures::seesThestrals;
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(com.gabriel.hogwartsmod.client.creature.ClientCreatures::hideMountBars);
     }
 
@@ -40,7 +41,8 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
-        event.registerEntityRenderer(ModEntities.HIPPOGRIFF.get(), com.gabriel.hogwartsmod.client.creature.HippogriffRenderer::new);
+        event.registerEntityRenderer(ModEntities.HIPPOGRIFF.get(), c -> new com.gabriel.hogwartsmod.client.creature.MountRenderer<>(c, "hipogrifo", 1.6f, 1.2f));
+        event.registerEntityRenderer(ModEntities.THESTRAL.get(), c -> new com.gabriel.hogwartsmod.client.creature.MountRenderer<>(c, "testralio", 1.55f, 1.0f));
         event.registerEntityRenderer(ModEntities.BROOM.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
     }
 
@@ -50,6 +52,7 @@ public final class ClientSetup {
         event.registerAboveAll("zone_banner", com.gabriel.hogwartsmod.client.zone.ZoneBanner.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "mission_tracker", com.gabriel.hogwartsmod.client.mission.MissionTracker.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "creature_health", com.gabriel.hogwartsmod.client.creature.ClientCreatures.INSTANCE);
+        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "lives", LivesHud.INSTANCE);
     }
 
     @SubscribeEvent

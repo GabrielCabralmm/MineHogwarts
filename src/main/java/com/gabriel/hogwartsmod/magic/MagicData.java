@@ -51,6 +51,8 @@ public class MagicData {
     private String pendingSpell;
     private long pendingAt;
     private boolean pendingLevelUp;
+    private int lives = -1;
+    private boolean seenDeath;
     private boolean dirty = true;
     private boolean forceSync = true;
 
@@ -478,6 +480,29 @@ public class MagicData {
         lastIncendioMastery = value;
     }
 
+    // -- Vidas e testrálios
+
+    public int getLives() {
+        if (lives < 0) {
+            lives = MagicConfig.LIVES_START.get();
+        }
+        return lives;
+    }
+
+    public void setLives(int value) {
+        lives = Math.max(0, value);
+        markForSync();
+    }
+
+    public boolean hasSeenDeath() {
+        return seenDeath;
+    }
+
+    public void setSeenDeath(boolean value) {
+        seenDeath = value;
+        markForSync();
+    }
+
     // -- Sincronização
 
     public void markForSync() {
@@ -540,6 +565,8 @@ public class MagicData {
         places.forEach(p -> placeTag.add(p.save()));
         tag.put("Places", placeTag);
         tag.putBoolean("ApparitionLicense", apparitionLicense);
+        tag.putInt("Vidas", lives);
+        tag.putBoolean("PresenciouMorte", seenDeath);
         tag.putLong("LumosUntil", lumosUntil);
         if (lumosLight != null) {
             tag.put("LumosLight", NbtUtils.writeBlockPos(lumosLight));
@@ -576,6 +603,8 @@ public class MagicData {
             places.add(com.gabriel.hogwartsmod.apparition.ApparitionPoint.load(placeTag.getCompound(i)));
         }
         apparitionLicense = tag.getBoolean("ApparitionLicense");
+        lives = tag.contains("Vidas") ? tag.getInt("Vidas") : -1;
+        seenDeath = tag.getBoolean("PresenciouMorte");
         Profession loaded = Profession.byId(tag.getString("Profession"));
         profession = loaded == null ? Profession.NONE : loaded;
         missions.load(tag.getCompound("Missoes"));

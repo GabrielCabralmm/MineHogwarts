@@ -9,7 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Supplier;
 
 public enum Species {
-    HIPOGRIFO("hipogrifo", () -> ModEntities.HIPPOGRIFF.get());
+    HIPOGRIFO("hipogrifo", () -> ModEntities.HIPPOGRIFF.get()),
+    TESTRALIO("testralio", () -> ModEntities.THESTRAL.get());
 
     private final String id;
     private final Supplier<EntityType<? extends Entity>> type;
