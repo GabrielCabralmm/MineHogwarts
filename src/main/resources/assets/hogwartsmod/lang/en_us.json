@@ -521,7 +521,8 @@
   "screen.hogwartsmod.letter.to_hint": "recipient's name",
   "screen.hogwartsmod.letter.body_hint": "Write your letter here...",
   "screen.hogwartsmod.letter.draft_hint": "Esc keeps the draft",
-  "screen.hogwartsmod.letter.seal": "Seal",
-  "screen.hogwartsmod.letter.seal_confirm": "Confirm?",
-  "screen.hogwartsmod.letter.sealed_by": "Sealed by"
+  "screen.hogwartsmod.letter.sealed_by": "Sealed by",
+  "screen.hogwartsmod.letter.sign": "Sign",
+  "screen.hogwartsmod.letter.signing": "Signing...",
+  "screen.hogwartsmod.letter.hold_hint": "hold to seal"
 }

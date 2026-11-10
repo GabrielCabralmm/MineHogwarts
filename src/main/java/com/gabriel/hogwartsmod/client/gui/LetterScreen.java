@@ -27,16 +27,19 @@ public class LetterScreen extends Screen {
     private static final int SELECTION = 0x5A8E6A3A;
     private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
     private static final ResourceLocation SEAL = MissionScreen.tex("lacre");
+    private static final int BTN_W = 80;
+    private static final int BTN_H = 18;
+    private static final long HOLD_MS = 1500;
 
     private final InteractionHand hand;
-    private final boolean sealed;
-    private final String author;
+    private boolean sealed;
+    private String author;
     private final String initialTo;
     private final String initialText;
     private EditBox toBox;
     private Body body;
     private boolean bodyFocused = true;
-    private boolean confirmSeal;
+    private long holdStart = -1;
     private boolean sent;
     private int left;
     private int top;
@@ -110,7 +113,7 @@ public class LetterScreen extends Screen {
         HiRes.text(g, tr("screen.hogwartsmod.letter.to"), HiRes.Style.BOLD, 9f, x, top + 25, TITLE);
         g.fill(left + 50, top + 37, left + W - 20, top + 38, LINE);
         if (sealed) {
-            HiRes.text(g, HiRes.ellipsize(initialTo, HiRes.Style.ITALIC, 128 * HiRes.TEXT_SIZE / 9f), HiRes.Style.ITALIC, 9f, left + 52, top + 25, INK);
+            HiRes.text(g, HiRes.ellipsize(toBox.getValue(), HiRes.Style.ITALIC, 128 * HiRes.TEXT_SIZE / 9f), HiRes.Style.ITALIC, 9f, left + 52, top + 25, INK);
         } else {
             drawToField(g);
         }
@@ -185,9 +188,54 @@ public class LetterScreen extends Screen {
         String count = body.value().length() + "/" + LetterItem.MAX_TEXT;
         HiRes.text(g, count, HiRes.Style.ITALIC, 7f, bodyX(), y + 1, MUTED);
         HiRes.text(g, tr("screen.hogwartsmod.letter.draft_hint"), HiRes.Style.ITALIC, 7f, bodyX(), y + 9, MUTED);
+        int bx = signX();
+        int by = signY();
         boolean can = canSeal();
-        String label = tr(confirmSeal ? "screen.hogwartsmod.letter.seal_confirm" : "screen.hogwartsmod.letter.seal");
-        button(g, sealButtonX(), y, 76, label, can, WINE, mouseX, mouseY);
+        boolean hover = can && overSign(mouseX, mouseY);
+        float progress = 0f;
+        if (holdStart >= 0) {
+            if (!hover) {
+                holdStart = -1;
+            } else {
+                progress = Math.min(1f, (System.currentTimeMillis() - holdStart) / (float) HOLD_MS);
+            }
+        }
+        HiRes.image(g, MissionScreen.tex(!can ? "botao_assinar_d" : hover ? "botao_assinar_h" : "botao_assinar_n"), bx, by, BTN_W, BTN_H);
+        if (progress > 0f) {
+            g.enableScissor(bx, by, bx + Math.max(1, Math.round(BTN_W * progress)), by + BTN_H);
+            HiRes.image(g, MissionScreen.tex("botao_assinar_fill"), bx, by, BTN_W, BTN_H);
+            g.disableScissor();
+        }
+        String label = tr(progress > 0f ? "screen.hogwartsmod.letter.signing" : "screen.hogwartsmod.letter.sign");
+        HiRes.centered(g, label, HiRes.Style.BOLD, 8f, bx + BTN_W / 2f, by + 4, can ? 0xFFF6E6C8 : 0xFFB8A88C);
+        if (can) {
+            HiRes.centered(g, tr("screen.hogwartsmod.letter.hold_hint"), HiRes.Style.ITALIC, 6.5f, bx + BTN_W / 2f, by - 9, MUTED);
+        }
+        if (progress >= 1f) {
+            sign();
+        }
+    }
+
+    private void sign() {
+        holdStart = -1;
+        send(true);
+        sealed = true;
+        author = minecraft.player == null ? "" : minecraft.player.getGameProfile().getName();
+        toBox.setFocused(false);
+        bodyFocused = false;
+        removeWidget(toBox);
+    }
+
+    private int signX() {
+        return left + W - 20 - BTN_W;
+    }
+
+    private int signY() {
+        return top + H - 34;
+    }
+
+    private boolean overSign(double mx, double my) {
+        return mx >= signX() && mx < signX() + BTN_W && my >= signY() && my < signY() + BTN_H - 3;
     }
 
     private void drawSignature(GuiGraphics g) {
@@ -195,10 +243,6 @@ public class LetterScreen extends Screen {
         HiRes.image(g, SEAL, left + W - 52, sy, 30, 30);
         HiRes.right(g, tr("screen.hogwartsmod.letter.sealed_by"), HiRes.Style.ITALIC, left + W - 56, sy + 6, MUTED);
         HiRes.right(g, author, HiRes.Style.BOLD, left + W - 56, sy + 16, TITLE);
-    }
-
-    private int sealButtonX() {
-        return left + W - 20 - 76;
     }
 
     private boolean canSeal() {
@@ -218,18 +262,13 @@ public class LetterScreen extends Screen {
         if (sealed || button != 0) {
             return super.mouseClicked(mx, my, button);
         }
-        int by = top + H - 32;
-        if (mx >= sealButtonX() && mx < sealButtonX() + 76 && my >= by && my < by + 15 && canSeal()) {
-            click();
-            if (!confirmSeal) {
-                confirmSeal = true;
-                return true;
+        if (overSign(mx, my) && canSeal()) {
+            holdStart = System.currentTimeMillis();
+            if (minecraft != null) {
+                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.BOOK_PAGE_TURN, 1.0f));
             }
-            send(true);
-            onClose();
             return true;
         }
-        confirmSeal = false;
         if (mx >= left + 48 && mx < left + W - 18 && my >= top + 22 && my < top + 40) {
             focusTo();
             toBox.mouseClicked(mx, my, button);
@@ -242,6 +281,12 @@ public class LetterScreen extends Screen {
             return true;
         }
         return super.mouseClicked(mx, my, button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mx, double my, int button) {
+        holdStart = -1;
+        return super.mouseReleased(mx, my, button);
     }
 
     @Override
@@ -264,7 +309,6 @@ public class LetterScreen extends Screen {
         if (sealed) {
             return super.keyPressed(key, scan, modifiers);
         }
-        confirmSeal = false;
         if (!bodyFocused) {
             if (key == 257 || key == 335 || key == 258) {
                 focusBody();
@@ -283,7 +327,6 @@ public class LetterScreen extends Screen {
         if (sealed) {
             return false;
         }
-        confirmSeal = false;
         if (!bodyFocused) {
             return toBox.charTyped(c, modifiers);
         }
