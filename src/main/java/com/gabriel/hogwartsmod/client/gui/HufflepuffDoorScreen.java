@@ -77,7 +77,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
             HiRes.image(g, k < hits.size() ? COMB_FULL : COMB_EMPTY, dx, top + 130, 14, 14);
         }
         int bx = left + (W - BTN_W) / 2;
-        int by = top + H - 30;
+        int by = top + 152;
         boolean hover = over(mouseX, mouseY, bx, by, BTN_W, BTN_H - 2);
         HiRes.image(g, MissionScreen.tex("botao_lufa_" + (hover ? "h" : "n")), bx, by, BTN_W, BTN_H);
         HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.reset"), HiRes.Style.BOLD, 7.5f, bx + BTN_W / 2f, by + 3, GOLD);
@@ -145,7 +145,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
                 }
             }
             int bx = left + (W - BTN_W) / 2;
-            if (over(mx, my, bx, top + H - 30, BTN_W, BTN_H - 2)) {
+            if (over(mx, my, bx, top + 152, BTN_W, BTN_H - 2)) {
                 click();
                 reset();
                 return true;
