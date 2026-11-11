@@ -710,5 +710,10 @@
   "handle.hogwartsmod.espiral.name": "Espiral",
   "handle.hogwartsmod.nodoso.name": "Nodoso",
   "handle.hogwartsmod.nenhum": "sem cabo",
-  "handle.hogwartsmod.nenhum.name": "Sem cabo"
+  "handle.hogwartsmod.nenhum.name": "Sem cabo",
+  "item.hogwartsmod.cabo_liso": "Cabo Liso",
+  "item.hogwartsmod.cabo_anelado": "Cabo Anelado",
+  "item.hogwartsmod.cabo_espiral": "Cabo Espiral",
+  "item.hogwartsmod.cabo_nodoso": "Cabo Nodoso",
+  "item.hogwartsmod.cabo.hint": "Com o inventário aberto, clique com o botão direito numa varinha para encaixar"
 }

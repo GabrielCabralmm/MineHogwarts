@@ -707,5 +707,10 @@
   "handle.hogwartsmod.espiral.name": "Spiral",
   "handle.hogwartsmod.nodoso.name": "Knotted",
   "handle.hogwartsmod.nenhum": "no handle",
-  "handle.hogwartsmod.nenhum.name": "No handle"
+  "handle.hogwartsmod.nenhum.name": "No handle",
+  "item.hogwartsmod.cabo_liso": "Smooth Handle",
+  "item.hogwartsmod.cabo_anelado": "Ringed Handle",
+  "item.hogwartsmod.cabo_espiral": "Spiral Handle",
+  "item.hogwartsmod.cabo_nodoso": "Knotted Handle",
+  "item.hogwartsmod.cabo.hint": "With the inventory open, right-click a wand to fit it"
 }

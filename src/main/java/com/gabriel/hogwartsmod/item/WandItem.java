@@ -139,6 +139,33 @@ public class WandItem extends Item {
     }
 
     @Override
+    public boolean overrideOtherStackedOnMe(ItemStack wand, ItemStack carried, net.minecraft.world.inventory.Slot slot, net.minecraft.world.inventory.ClickAction action,
+                                            Player player, net.minecraft.world.entity.SlotAccess access) {
+        if (action != net.minecraft.world.inventory.ClickAction.SECONDARY || !(carried.getItem() instanceof com.gabriel.hogwartsmod.wand.HandleItem item)
+                || !com.gabriel.hogwartsmod.wand.Wands.isCustom(wand) || !slot.allowModification(player)) {
+            return false;
+        }
+        com.gabriel.hogwartsmod.wand.WandHandle old = com.gabriel.hogwartsmod.wand.Wands.handle(wand);
+        if (old == item.getHandle()) {
+            return true;
+        }
+        com.gabriel.hogwartsmod.wand.Wands.setHandle(wand, item.getHandle());
+        slot.setChanged();
+        carried.shrink(1);
+        net.minecraft.world.item.Item oldItem = old.getItem();
+        if (oldItem != null) {
+            ItemStack back = new ItemStack(oldItem);
+            if (carried.isEmpty()) {
+                access.set(back);
+            } else if (!player.getInventory().add(back)) {
+                player.drop(back, false);
+            }
+        }
+        player.playSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER, 0.8f, 1.3f);
+        return true;
+    }
+
+    @Override
     public Component getName(ItemStack stack) {
         com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.Wands.wood(stack);
         if (wood != null && com.gabriel.hogwartsmod.wand.Wands.isCustom(stack)) {

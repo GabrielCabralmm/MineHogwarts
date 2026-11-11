@@ -11,9 +11,19 @@ public enum WandHandle {
     NENHUM("nenhum");
 
     private final String id;
+    private net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> item;
 
     WandHandle(String id) {
         this.id = id;
+    }
+
+    @Nullable
+    public net.minecraft.world.item.Item getItem() {
+        return item == null ? null : item.get();
+    }
+
+    void bind(net.minecraftforge.registries.RegistryObject<net.minecraft.world.item.Item> item) {
+        this.item = item;
     }
 
     public String getId() {

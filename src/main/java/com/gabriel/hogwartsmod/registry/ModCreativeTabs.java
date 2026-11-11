@@ -54,6 +54,11 @@ public final class ModCreativeTabs {
                         for (com.gabriel.hogwartsmod.wand.WandCore core : com.gabriel.hogwartsmod.wand.WandCore.values()) {
                             output.accept(core.getItem());
                         }
+                        for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
+                            if (handle.getItem() != null) {
+                                output.accept(handle.getItem());
+                            }
+                        }
                     })
                     .build());
 

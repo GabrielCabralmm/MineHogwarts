@@ -24,6 +24,11 @@ public final class Wands {
         for (WandCore core : WandCore.values()) {
             core.bind(ModItems.ITEMS.register(core.getItemId(), () -> new Item(new Item.Properties())));
         }
+        for (WandHandle handle : WandHandle.values()) {
+            if (handle != WandHandle.NENHUM) {
+                handle.bind(ModItems.ITEMS.register("cabo_" + handle.getId(), () -> new HandleItem(handle, new Item.Properties().stacksTo(16))));
+            }
+        }
     }
 
     public static int clampLength(int quarters) {
@@ -70,6 +75,13 @@ public final class Wands {
         CompoundTag tag = tag(stack);
         WandHandle handle = tag == null ? null : WandHandle.byId(tag.getString("Cabo"));
         return handle == null ? WandHandle.NENHUM : handle;
+    }
+
+    public static void setHandle(ItemStack stack, WandHandle handle) {
+        CompoundTag tag = tag(stack);
+        if (tag != null) {
+            tag.putString("Cabo", handle.getId());
+        }
     }
 
     public static int length(ItemStack stack) {
