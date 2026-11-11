@@ -52,7 +52,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     }
 
     private int barrelY(int index) {
-        return top + 102 + (index % 3) * 40;
+        return top + 97 + (index % 3) * 40;
     }
 
     // -- Desenho
@@ -74,7 +74,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         }
         for (int k = 0; k < length; k++) {
             int dx = (int) cx - length * 7 + k * 14;
-            HiRes.image(g, k < hits.size() ? COMB_FULL : COMB_EMPTY, dx, top + 135, 14, 14);
+            HiRes.image(g, k < hits.size() ? COMB_FULL : COMB_EMPTY, dx, top + 130, 14, 14);
         }
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 30;
