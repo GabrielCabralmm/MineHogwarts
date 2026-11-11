@@ -69,8 +69,12 @@ public record ShopOffer(String id, Goods product, int galeoes, int sicles, int n
         return product.item() instanceof com.gabriel.hogwartsmod.creature.CreatureBagItem;
     }
 
+    public boolean isWandBox() {
+        return product.item() instanceof com.gabriel.hogwartsmod.wand.WandBoxItem;
+    }
+
     public boolean single() {
-        return species() != null || isLicense();
+        return species() != null || isLicense() || isWandBox();
     }
 
     public long price() {

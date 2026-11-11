@@ -27,6 +27,9 @@ public final class ModItems {
     public static final RegistryObject<Item> SORTING_HAT = ITEMS.register("chapeu_seletor",
             () -> new com.gabriel.hogwartsmod.item.SortingHatItem(new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> CAIXA_VARINHA = ITEMS.register("caixa_varinha",
+            () -> new com.gabriel.hogwartsmod.wand.WandBoxItem(new Item.Properties().stacksTo(1)));
+
     public static final RegistryObject<Item> GALEAO = ITEMS.register("galeao", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> SICLE = ITEMS.register("sicle", () -> new Item(new Item.Properties()));
     public static final RegistryObject<Item> NUQUE = ITEMS.register("nuque", () -> new Item(new Item.Properties()));

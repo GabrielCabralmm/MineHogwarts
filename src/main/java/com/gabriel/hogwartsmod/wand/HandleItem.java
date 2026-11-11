@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class HandleItem extends Item {
+    public static final int COLOR = 0x7A5234;
     private final WandHandle handle;
 
     public HandleItem(WandHandle handle, Properties properties) {

@@ -716,5 +716,19 @@
   "item.hogwartsmod.cabo_espiral": "Cabo Espiral",
   "item.hogwartsmod.cabo_nodoso": "Cabo Nodoso",
   "item.hogwartsmod.cabo.hint": "Com o inventário aberto, clique com o botão direito numa varinha para encaixar",
-  "tooltip.hogwartsmod.preview_hint": "Segure Shift para ver em 3D"
+  "tooltip.hogwartsmod.preview_hint": "Segure Shift para ver em 3D",
+  "item.hogwartsmod.caixa_varinha": "Caixa de Varinha",
+  "tooltip.hogwartsmod.wand_box.blank": "Abra para escolher sua varinha",
+  "tooltip.hogwartsmod.wand_box.open": "Botão direito para abrir",
+  "tooltip.hogwartsmod.wand.wood": "Madeira: %s",
+  "message.hogwartsmod.wand_chosen": "A varinha escolhe o bruxo... e ela escolheu você!",
+  "screen.hogwartsmod.wand_box": "Escolha sua varinha",
+  "screen.hogwartsmod.wand_box.subtitle": "Madeiras e núcleos comuns do Auxiliar de Varinhas",
+  "screen.hogwartsmod.wand_box.choose": "Esta é a minha varinha",
+  "screen.hogwartsmod.wand_box.confirm_title": "Tem certeza?",
+  "screen.hogwartsmod.wand_box.confirm_text": "Essa escolha não pode ser desfeita.",
+  "screen.hogwartsmod.wand_box.confirm": "Confirmar",
+  "screen.hogwartsmod.wand_box.back": "Voltar",
+  "screen.hogwartsmod.shop.has_first_wand": "Você já tem sua varinha",
+  "entity.hogwartsmod.auxiliar_varinhas": "Auxiliar de Varinhas"
 }

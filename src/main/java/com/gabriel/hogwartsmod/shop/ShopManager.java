@@ -61,6 +61,9 @@ public final class ShopManager {
         if (species != null && data != null && data.getCreatures().get(species) != null) {
             return "screen.hogwartsmod.shop.has_creature";
         }
+        if (kind == ShopKind.AUXILIAR_VARINHAS && offer.isWandBox() && data != null && data.hasFirstWand()) {
+            return "screen.hogwartsmod.shop.has_first_wand";
+        }
         if (offer.isLicense() && CreatureLicenseItem.has(player)) {
             return "screen.hogwartsmod.shop.has_license";
         }
@@ -134,6 +137,12 @@ public final class ShopManager {
                 }
             } else {
                 give(player, offer.product());
+            }
+            if (npc.getKind() == ShopKind.AUXILIAR_VARINHAS && offer.isWandBox()) {
+                com.gabriel.hogwartsmod.magic.MagicData data = com.gabriel.hogwartsmod.magic.MagicData.get(player);
+                if (data != null) {
+                    data.setFirstWand(true);
+                }
             }
             bought++;
         }

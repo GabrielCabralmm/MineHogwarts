@@ -6,19 +6,25 @@ import net.minecraftforge.registries.RegistryObject;
 import org.jetbrains.annotations.Nullable;
 
 public enum WandCore {
-    FENIX("fenix", "pena_fenix", 0xE8692A),
-    DRAGAO("dragao", "corda_coracao_dragao", 0xA8202A),
-    UNICORNIO("unicornio", "pelo_unicornio", 0xE6E4F2);
+    FENIX("fenix", "pena_fenix", false, 0xE8692A),
+    DRAGAO("dragao", "corda_coracao_dragao", true, 0xA8202A),
+    UNICORNIO("unicornio", "pelo_unicornio", true, 0xE6E4F2);
 
     private final String id;
     private final String itemId;
+    private final boolean common;
     private final int color;
     private RegistryObject<Item> item;
 
-    WandCore(String id, String itemId, int color) {
+    WandCore(String id, String itemId, boolean common, int color) {
         this.id = id;
         this.itemId = itemId;
+        this.common = common;
         this.color = color;
+    }
+
+    public boolean isCommon() {
+        return common;
     }
 
     public String getId() {

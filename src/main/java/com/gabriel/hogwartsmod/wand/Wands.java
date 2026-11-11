@@ -89,6 +89,26 @@ public final class Wands {
         return tag == null ? 44 : clampLength(tag.getInt("Comprimento"));
     }
 
+    public static void copyParts(ItemStack from, ItemStack to) {
+        CompoundTag tag = tag(from);
+        if (tag != null) {
+            to.getOrCreateTag().put(TAG, tag.copy());
+        }
+    }
+
+    public static void setOwner(ItemStack stack, Player player) {
+        CompoundTag tag = tag(stack);
+        if (tag != null) {
+            tag.putString("Dono", player.getGameProfile().getName());
+            tag.putUUID("DonoId", player.getUUID());
+        }
+    }
+
+    public static String owner(ItemStack stack) {
+        CompoundTag tag = tag(stack);
+        return tag == null ? "" : tag.getString("Dono");
+    }
+
     public static String maker(ItemStack stack) {
         CompoundTag tag = tag(stack);
         return tag == null ? "" : tag.getString("Fabricante");
@@ -128,6 +148,7 @@ public final class Wands {
         if (wood == null || core == null) {
             return;
         }
+        tooltip.add(Component.translatable("tooltip.hogwartsmod.wand.wood", wood.getDisplayName()).withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.hogwartsmod.wand.core", core.getDisplayName()).withStyle(ChatFormatting.GRAY));
         tooltip.add(Component.translatable("tooltip.hogwartsmod.wand.length", formatLength(length(stack)), handle(stack).getDisplayName()).withStyle(ChatFormatting.GRAY));
         WandStats s = stats(stack);

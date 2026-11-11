@@ -713,5 +713,19 @@
   "item.hogwartsmod.cabo_espiral": "Spiral Handle",
   "item.hogwartsmod.cabo_nodoso": "Knotted Handle",
   "item.hogwartsmod.cabo.hint": "With the inventory open, right-click a wand to fit it",
-  "tooltip.hogwartsmod.preview_hint": "Hold Shift to see it in 3D"
+  "tooltip.hogwartsmod.preview_hint": "Hold Shift to see it in 3D",
+  "item.hogwartsmod.caixa_varinha": "Wand Box",
+  "tooltip.hogwartsmod.wand_box.blank": "Open it to choose your wand",
+  "tooltip.hogwartsmod.wand_box.open": "Right-click to open",
+  "tooltip.hogwartsmod.wand.wood": "Wood: %s",
+  "message.hogwartsmod.wand_chosen": "The wand chooses the wizard... and it chose you!",
+  "screen.hogwartsmod.wand_box": "Choose your wand",
+  "screen.hogwartsmod.wand_box.subtitle": "Common woods and cores from the Wand Helper",
+  "screen.hogwartsmod.wand_box.choose": "This is my wand",
+  "screen.hogwartsmod.wand_box.confirm_title": "Are you sure?",
+  "screen.hogwartsmod.wand_box.confirm_text": "This choice cannot be undone.",
+  "screen.hogwartsmod.wand_box.confirm": "Confirm",
+  "screen.hogwartsmod.wand_box.back": "Back",
+  "screen.hogwartsmod.shop.has_first_wand": "You already have your wand",
+  "entity.hogwartsmod.auxiliar_varinhas": "Wand Helper"
 }

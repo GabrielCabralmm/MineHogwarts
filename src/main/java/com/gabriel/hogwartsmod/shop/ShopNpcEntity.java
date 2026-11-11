@@ -30,6 +30,7 @@ public class ShopNpcEntity extends HogwartsNpc {
         return switch (kind) {
             case COMERCIANTE -> "comerciante";
             case CONTRABANDISTA -> "contrabandista";
+            case AUXILIAR_VARINHAS -> "auxiliar_varinhas";
             default -> "mercador";
         };
     }

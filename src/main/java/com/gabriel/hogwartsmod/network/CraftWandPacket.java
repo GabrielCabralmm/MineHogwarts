@@ -46,7 +46,7 @@ public record CraftWandPacket(int quarters) {
         if (!(branch.getItem() instanceof BranchItem item) || core == null) {
             return false;
         }
-        ItemStack wand = Wands.create(item.getWood(), core, quarters, WandHandle.NENHUM, player.getGameProfile().getName());
+        ItemStack wand = com.gabriel.hogwartsmod.wand.WandBoxItem.filled(Wands.create(item.getWood(), core, quarters, WandHandle.NENHUM, player.getGameProfile().getName()));
         branch.shrink(1);
         menu.core().shrink(1);
         menu.slotsChanged(null);

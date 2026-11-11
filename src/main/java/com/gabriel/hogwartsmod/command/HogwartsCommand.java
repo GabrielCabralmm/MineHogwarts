@@ -147,6 +147,10 @@ public final class HogwartsCommand {
                                 .executes(ctx -> createShopNpc(ctx, null))
                                 .then(Commands.argument("nome", StringArgumentType.greedyString())
                                         .executes(ctx -> createShopNpc(ctx, StringArgumentType.getString(ctx, "nome")))))
+                        .then(Commands.literal("auxiliar_varinhas")
+                                .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.AUXILIAR_VARINHAS, null))
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.AUXILIAR_VARINHAS, StringArgumentType.getString(ctx, "nome")))))
                         .then(Commands.literal("comerciante")
                                 .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.COMERCIANTE, null))
                                 .then(Commands.argument("nome", StringArgumentType.greedyString())
@@ -453,14 +457,19 @@ public final class HogwartsCommand {
         }
         boolean smuggler = kind == com.gabriel.hogwartsmod.shop.ShopKind.CONTRABANDISTA;
         npc.setKind(kind);
-        npc.setOffers(smuggler ? com.gabriel.hogwartsmod.shop.Smugglers.get(source.getServer()).template() : com.gabriel.hogwartsmod.shop.Smugglers.merchantDefaults());
+        boolean helper = kind == com.gabriel.hogwartsmod.shop.ShopKind.AUXILIAR_VARINHAS;
+        if (helper) {
+            npc.setModel("auxiliar_varinhas");
+        }
+        npc.setOffers(smuggler ? com.gabriel.hogwartsmod.shop.Smugglers.get(source.getServer()).template()
+                : helper ? com.gabriel.hogwartsmod.shop.Smugglers.wandHelperDefaults() : com.gabriel.hogwartsmod.shop.Smugglers.merchantDefaults());
         Vec3 pos = source.getPosition();
         float yaw = source.getRotation().y + 180f;
         npc.moveTo(pos.x, pos.y, pos.z, yaw, 0f);
         npc.setYHeadRot(yaw);
         npc.setYBodyRot(yaw);
         npc.setCustomName(Component.literal(name != null ? name
-                : Component.translatable(smuggler ? "entity.hogwartsmod.contrabandista" : "entity.hogwartsmod.comerciante").getString()));
+                : Component.translatable(smuggler ? "entity.hogwartsmod.contrabandista" : helper ? "entity.hogwartsmod.auxiliar_varinhas" : "entity.hogwartsmod.comerciante").getString()));
         npc.setCustomNameVisible(true);
         source.getLevel().addFreshEntity(npc);
         source.sendSuccess(() -> Component.translatable("command.hogwartsmod.shop_npc_created", npc.getNpcName()), true);

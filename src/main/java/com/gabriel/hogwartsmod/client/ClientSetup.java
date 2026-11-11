@@ -119,7 +119,7 @@ public final class ClientSetup {
     public static void registerItemColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
         for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
             if (handle.getItem() != null) {
-                event.register((stack, tint) -> tint == 1 ? 0x7A5234 : 0xFFFFFF, handle.getItem());
+                event.register((stack, tint) -> tint == 1 ? com.gabriel.hogwartsmod.wand.HandleItem.COLOR : 0xFFFFFF, handle.getItem());
             }
         }
         event.register((stack, tint) -> {
@@ -131,8 +131,7 @@ public final class ClientSetup {
             if (tint != 1 || com.gabriel.hogwartsmod.wand.Wands.handle(stack) == com.gabriel.hogwartsmod.wand.WandHandle.NENHUM) {
                 return c;
             }
-            float f = 0.72f;
-            return ((int) (((c >> 16) & 255) * f) << 16) | ((int) (((c >> 8) & 255) * f) << 8) | (int) ((c & 255) * f);
+            return com.gabriel.hogwartsmod.wand.HandleItem.COLOR;
         }, com.gabriel.hogwartsmod.registry.ModItems.WAND.get());
     }
 

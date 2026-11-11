@@ -53,6 +53,7 @@ public class MagicData {
     private boolean pendingLevelUp;
     private int lives = -1;
     private boolean seenDeath;
+    private boolean firstWand;
     private boolean dirty = true;
     private boolean forceSync = true;
 
@@ -494,6 +495,15 @@ public class MagicData {
         markForSync();
     }
 
+    public boolean hasFirstWand() {
+        return firstWand;
+    }
+
+    public void setFirstWand(boolean value) {
+        firstWand = value;
+        markForSync();
+    }
+
     public boolean hasSeenDeath() {
         return seenDeath;
     }
@@ -567,6 +577,7 @@ public class MagicData {
         tag.putBoolean("ApparitionLicense", apparitionLicense);
         tag.putInt("Vidas", lives);
         tag.putBoolean("PresenciouMorte", seenDeath);
+        tag.putBoolean("PrimeiraVarinha", firstWand);
         tag.putLong("LumosUntil", lumosUntil);
         if (lumosLight != null) {
             tag.put("LumosLight", NbtUtils.writeBlockPos(lumosLight));
@@ -605,6 +616,7 @@ public class MagicData {
         apparitionLicense = tag.getBoolean("ApparitionLicense");
         lives = tag.contains("Vidas") ? tag.getInt("Vidas") : -1;
         seenDeath = tag.getBoolean("PresenciouMorte");
+        firstWand = tag.getBoolean("PrimeiraVarinha");
         Profession loaded = Profession.byId(tag.getString("Profession"));
         profession = loaded == null ? Profession.NONE : loaded;
         missions.load(tag.getCompound("Missoes"));

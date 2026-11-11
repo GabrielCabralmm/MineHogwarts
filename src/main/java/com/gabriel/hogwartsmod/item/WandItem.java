@@ -169,7 +169,8 @@ public class WandItem extends Item {
     public Component getName(ItemStack stack) {
         com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.Wands.wood(stack);
         if (wood != null && com.gabriel.hogwartsmod.wand.Wands.isCustom(stack)) {
-            return Component.translatable("item.hogwartsmod.wand.custom", wood.getDisplayName());
+            String owner = com.gabriel.hogwartsmod.wand.Wands.owner(stack);
+            return Component.translatable("item.hogwartsmod.wand.custom", owner.isEmpty() ? wood.getDisplayName() : Component.literal(owner));
         }
         return super.getName(stack);
     }
