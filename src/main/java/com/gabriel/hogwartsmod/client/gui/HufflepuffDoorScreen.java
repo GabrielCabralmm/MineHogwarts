@@ -19,7 +19,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     private static final int LID = 32;
     private static final int BTN_W = 62;
     private static final int BTN_H = 14;
-    private static final float[] TILT = {18f, 0f, -18f};
+    private static final float[] TILT = {14f, 0f, -14f};
     private static final ResourceLocation BACKGROUND = MissionScreen.tex("lufa_fundo");
     private static final ResourceLocation CREST = MissionScreen.tex("casa_lufa_lufa");
     private static final ResourceLocation SHADOW = MissionScreen.tex("sombra_barril");
@@ -103,18 +103,18 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         int x = barrelX(i);
         int y = barrelY(i);
         int lit = hits.indexOf(i + 1);
-        boolean hover = !rejecting && over(mouseX, mouseY, x - LID / 2, y - LID / 2, LID, LID);
+        boolean hover = !rejecting && Math.pow((mouseX - x) / 13.0, 2) + Math.pow((mouseY - y) / 20.0, 2) <= 1;
         boolean left = i < 3;
         ResourceLocation image = lit >= 0 ? (left ? BARREL_LIT : BARREL_LIT_LEFT) : (left ? BARREL : BARREL_LEFT);
-        int bw = 82;
-        int bh = 44;
-        int lidOffset = Math.round(bw * 18f / 112f);
+        int bw = 77;
+        int bh = 48;
+        int lidOffset = Math.round(bw * 22f / 96f);
         g.pose().pushPose();
         g.pose().translate(x + shake, y, 0);
         g.pose().mulPose(Axis.ZP.rotationDegrees(tilt(i)));
         HiRes.image(g, image, left ? -bw + lidOffset : -lidOffset, -bh / 2, bw, bh);
         if (hover) {
-            g.fill(-6, -14, 6, 14, 0x28FFFFFF);
+            g.fill(-9, -15, 9, 15, 0x22FFFFFF);
         }
         if (rejecting) {
             g.fill(left ? -bw + lidOffset : -lidOffset, -bh / 2 + 6, left ? lidOffset : bw - lidOffset, bh / 2 - 6, 0x40B02020);
@@ -161,7 +161,9 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
             for (int i = 0; i < 6; i++) {
                 int x = barrelX(i);
                 int y = barrelY(i);
-                if ((mx - x) * (mx - x) + (my - y) * (my - y) <= (LID / 2.0) * (LID / 2.0)) {
+                double ex = (mx - x) / 13.0;
+                double ey = (my - y) / 20.0;
+                if (ex * ex + ey * ey <= 1) {
                     hit(i + 1);
                     return true;
                 }
