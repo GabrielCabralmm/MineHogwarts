@@ -105,9 +105,9 @@ public class PackageScreen extends AbstractContainerScreen<PackageMenu> {
             HiRes.image(g, MissionScreen.tex("botao_assinar_fill"), bx, by, BTN_W, BTN_H);
             g.disableScissor();
         }
-        String label = tr(progress > 0f ? "screen.hogwartsmod.letter.signing" : "screen.hogwartsmod.letter.sign");
+        String label = tr(progress > 0f ? "screen.hogwartsmod.package.wrapping" : "screen.hogwartsmod.package.wrap");
         HiRes.centered(g, label, HiRes.Style.BOLD, 6.5f, bx + BTN_W / 2f, by + 2, can ? 0xFFF6E6C8 : 0xFFB8A88C);
-        String hint = tr(can ? "screen.hogwartsmod.letter.hold_hint" : "screen.hogwartsmod.package.empty");
+        String hint = tr(can ? "screen.hogwartsmod.package.hold_hint" : "screen.hogwartsmod.package.empty");
         HiRes.centered(g, hint, HiRes.Style.ITALIC, 6f, bx + BTN_W / 2f, by + 14, MUTED);
         if (progress >= 1f) {
             holdStart = -1;

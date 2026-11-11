@@ -545,8 +545,11 @@
   "screen.hogwartsmod.package.subtitle": "One stack of a single item",
   "screen.hogwartsmod.package.inventory": "Inventory",
   "screen.hogwartsmod.package.empty": "put an item in the box",
-  "screen.hogwartsmod.package.sealed": "Sealed and signed",
+  "screen.hogwartsmod.package.sealed": "Wrapped and signed",
   "screen.hogwartsmod.package.open": "Open",
-  "message.hogwartsmod.package_sealed": "Package sealed",
-  "message.hogwartsmod.owl_delivered_package": "%s brought you a package from %s"
+  "message.hogwartsmod.package_sealed": "Package wrapped",
+  "message.hogwartsmod.owl_delivered_package": "%s brought you a package from %s",
+  "screen.hogwartsmod.package.wrap": "Wrap",
+  "screen.hogwartsmod.package.wrapping": "Wrapping...",
+  "screen.hogwartsmod.package.hold_hint": "hold to wrap"
 }

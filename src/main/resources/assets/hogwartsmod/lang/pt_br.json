@@ -545,8 +545,11 @@
   "screen.hogwartsmod.package.subtitle": "Uma pilha de um único item",
   "screen.hogwartsmod.package.inventory": "Inventário",
   "screen.hogwartsmod.package.empty": "coloque um item na caixa",
-  "screen.hogwartsmod.package.sealed": "Lacrado e assinado",
+  "screen.hogwartsmod.package.sealed": "Embrulhado e assinado",
   "screen.hogwartsmod.package.open": "Abrir",
-  "message.hogwartsmod.package_sealed": "Pacote lacrado",
-  "message.hogwartsmod.owl_delivered_package": "%s trouxe um pacote de %s para você"
+  "message.hogwartsmod.package_sealed": "Pacote embrulhado",
+  "message.hogwartsmod.owl_delivered_package": "%s trouxe um pacote de %s para você",
+  "screen.hogwartsmod.package.wrap": "Embrulhar",
+  "screen.hogwartsmod.package.wrapping": "Embrulhando...",
+  "screen.hogwartsmod.package.hold_hint": "segure para embrulhar"
 }
