@@ -565,5 +565,6 @@
   "screen.hogwartsmod.shop.to_bag": "Goes straight to your Creature Bag",
   "message.hogwartsmod.creature_bought": "Your new creature (%s) went to your Creature Bag",
   "message.hogwartsmod.smuggler_near": "You hear sneaky footsteps nearby... someone is selling what they shouldn't.",
-  "message.hogwartsmod.smuggler_template": "These offers now apply to smugglers that appear on their own."
+  "message.hogwartsmod.smuggler_template": "These offers now apply to smugglers that appear on their own.",
+  "screen.hogwartsmod.shop.need_bag": "Creature Bag needed"
 }

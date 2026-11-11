@@ -55,6 +55,9 @@ public final class ShopManager {
     public static String blocker(Player player, ShopKind kind, ShopOffer offer) {
         com.gabriel.hogwartsmod.creature.Species species = offer.species();
         com.gabriel.hogwartsmod.magic.MagicData data = com.gabriel.hogwartsmod.magic.MagicData.get(player);
+        if (species != null && !hasBag(player)) {
+            return "screen.hogwartsmod.shop.need_bag";
+        }
         if (species != null && data != null && data.getCreatures().get(species) != null) {
             return "screen.hogwartsmod.shop.has_creature";
         }
@@ -65,6 +68,15 @@ public final class ShopManager {
             return "screen.hogwartsmod.shop.need_license";
         }
         return null;
+    }
+
+    public static boolean hasBag(Player player) {
+        for (ItemStack stack : player.getInventory().items) {
+            if (stack.getItem() instanceof com.gabriel.hogwartsmod.creature.CreatureBagItem) {
+                return true;
+            }
+        }
+        return player.getOffhandItem().getItem() instanceof com.gabriel.hogwartsmod.creature.CreatureBagItem;
     }
 
     public static boolean canBuy(Player player, ShopKind kind, ShopOffer offer) {
