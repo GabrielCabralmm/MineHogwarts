@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_features",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:meadow"
+  ],
+  "features": "hogwartsmod:arvore_sabugueiro",
+  "step": "vegetal_decoration"
+}

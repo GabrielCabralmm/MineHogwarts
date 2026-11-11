@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "hogwartsmod:block/tronco_videira_topo",
+    "side": "hogwartsmod:block/tronco_videira"
+  }
+}

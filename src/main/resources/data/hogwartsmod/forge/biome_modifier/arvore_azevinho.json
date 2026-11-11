@@ -1,0 +1,11 @@
+{
+  "type": "forge:add_features",
+  "biomes": [
+    "minecraft:taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:grove"
+  ],
+  "features": "hogwartsmod:arvore_azevinho",
+  "step": "vegetal_decoration"
+}

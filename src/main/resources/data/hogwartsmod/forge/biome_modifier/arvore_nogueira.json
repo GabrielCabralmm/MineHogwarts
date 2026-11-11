@@ -1,0 +1,9 @@
+{
+  "type": "forge:add_features",
+  "biomes": [
+    "minecraft:forest",
+    "minecraft:birch_forest"
+  ],
+  "features": "hogwartsmod:arvore_nogueira",
+  "step": "vegetal_decoration"
+}

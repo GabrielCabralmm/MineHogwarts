@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    {
+      "item": "hogwartsmod:tronco_ebano"
+    }
+  ],
+  "result": {
+    "item": "hogwartsmod:tabuas_ebano",
+    "count": 4
+  }
+}

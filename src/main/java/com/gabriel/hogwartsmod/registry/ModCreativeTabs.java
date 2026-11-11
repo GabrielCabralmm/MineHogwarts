@@ -41,6 +41,15 @@ public final class ModCreativeTabs {
                         ModItems.POTION_BOOKS.forEach(book -> output.accept(book.get()));
                         output.accept(ModItems.POCAO_WIGGENWELD.get());
                         output.accept(ModItems.POCAO_REVIGORANTE.get());
+                        for (com.gabriel.hogwartsmod.wand.WandWood wood : com.gabriel.hogwartsmod.wand.WandWood.values()) {
+                            if (!wood.isVanilla()) {
+                                output.accept(com.gabriel.hogwartsmod.wand.ModTrees.SAPLINGS.get(wood).get());
+                                output.accept(com.gabriel.hogwartsmod.wand.ModTrees.LOGS.get(wood).get());
+                                output.accept(com.gabriel.hogwartsmod.wand.ModTrees.PLANKS.get(wood).get());
+                                output.accept(com.gabriel.hogwartsmod.wand.ModTrees.LEAVES.get(wood).get());
+                            }
+                        }
+                        com.gabriel.hogwartsmod.wand.ModTrees.BRANCHES.values().forEach(branch -> output.accept(branch.get()));
                     })
                     .build());
 

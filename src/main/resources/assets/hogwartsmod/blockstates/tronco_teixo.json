@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "hogwartsmod:block/tronco_teixo",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "hogwartsmod:block/tronco_teixo"
+    },
+    "axis=z": {
+      "model": "hogwartsmod:block/tronco_teixo",
+      "x": 90
+    }
+  }
+}

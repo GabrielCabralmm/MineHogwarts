@@ -1,0 +1,9 @@
+{
+  "type": "forge:add_features",
+  "biomes": [
+    "minecraft:swamp",
+    "minecraft:river"
+  ],
+  "features": "hogwartsmod:arvore_salgueiro",
+  "step": "vegetal_decoration"
+}

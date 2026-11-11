@@ -1,0 +1,10 @@
+{
+  "type": "forge:add_features",
+  "biomes": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:savanna"
+  ],
+  "features": "hogwartsmod:arvore_videira",
+  "step": "vegetal_decoration"
+}

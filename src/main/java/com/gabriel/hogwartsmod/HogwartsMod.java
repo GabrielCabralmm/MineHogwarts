@@ -21,6 +21,7 @@ public class HogwartsMod {
 
     public HogwartsMod(FMLJavaModLoadingContext context) {
         IEventBus modBus = context.getModEventBus();
+        com.gabriel.hogwartsmod.wand.ModTrees.init();
         ModBlocks.BLOCKS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);

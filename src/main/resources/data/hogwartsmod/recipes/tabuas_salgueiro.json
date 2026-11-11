@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    {
+      "item": "hogwartsmod:tronco_salgueiro"
+    }
+  ],
+  "result": {
+    "item": "hogwartsmod:tabuas_salgueiro",
+    "count": 4
+  }
+}

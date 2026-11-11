@@ -14,6 +14,8 @@ public final class ModLootModifiers {
 
     public static final RegistryObject<Codec<AddItemLootModifier>> ADD_ITEM = SERIALIZERS.register("adicionar_item", AddItemLootModifier.CODEC);
 
+    public static final RegistryObject<Codec<com.gabriel.hogwartsmod.wand.AddDropLootModifier>> ADD_DROP = SERIALIZERS.register("adicionar_drop", com.gabriel.hogwartsmod.wand.AddDropLootModifier.CODEC);
+
     private ModLootModifiers() {
     }
 }
