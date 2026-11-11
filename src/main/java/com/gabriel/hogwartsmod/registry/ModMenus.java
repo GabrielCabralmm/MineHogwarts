@@ -14,6 +14,9 @@ public final class ModMenus {
     public static final RegistryObject<MenuType<PackageMenu>> PACOTE = MENUS.register("pacote",
             () -> IForgeMenuType.create(PackageMenu::new));
 
+    public static final RegistryObject<MenuType<com.gabriel.hogwartsmod.wand.WandBenchMenu>> BANCADA_VARINHAS = MENUS.register("bancada_varinhas",
+            () -> IForgeMenuType.create(com.gabriel.hogwartsmod.wand.WandBenchMenu::new));
+
     private ModMenus() {
     }
 }

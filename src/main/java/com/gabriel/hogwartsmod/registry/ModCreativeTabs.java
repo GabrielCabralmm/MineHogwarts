@@ -50,6 +50,7 @@ public final class ModCreativeTabs {
                             }
                         }
                         com.gabriel.hogwartsmod.wand.ModTrees.BRANCHES.values().forEach(branch -> output.accept(branch.get()));
+                        output.accept(ModBlocks.BANCADA_VARINHAS_ITEM.get());
                         for (com.gabriel.hogwartsmod.wand.WandCore core : com.gabriel.hogwartsmod.wand.WandCore.values()) {
                             output.accept(core.getItem());
                         }

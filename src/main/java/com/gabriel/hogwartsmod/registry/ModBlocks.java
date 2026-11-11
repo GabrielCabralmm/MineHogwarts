@@ -30,6 +30,12 @@ public final class ModBlocks {
     public static final RegistryObject<Item> CAULDRON_ITEM = ModItems.ITEMS.register("caldeirao",
             () -> new com.gabriel.hogwartsmod.potion.CauldronItem(CAULDRON.get(), new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Block> BANCADA_VARINHAS = BLOCKS.register("bancada_varinhas",
+            () -> new com.gabriel.hogwartsmod.wand.WandBenchBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.CRAFTING_TABLE).noOcclusion()));
+
+    public static final RegistryObject<Item> BANCADA_VARINHAS_ITEM = ModItems.ITEMS.register("bancada_varinhas",
+            () -> new net.minecraft.world.item.BlockItem(BANCADA_VARINHAS.get(), new Item.Properties()));
+
     private ModBlocks() {
     }
 }

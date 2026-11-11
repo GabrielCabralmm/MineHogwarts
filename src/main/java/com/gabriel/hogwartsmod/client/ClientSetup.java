@@ -36,6 +36,8 @@ public final class ClientSetup {
                 (stack, level, entity, seed) -> com.gabriel.hogwartsmod.mail.Mail.isSealed(stack) ? 1f : 0f));
         event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(com.gabriel.hogwartsmod.registry.ModMenus.PACOTE.get(),
                 com.gabriel.hogwartsmod.client.gui.PackageScreen::new));
+        event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(com.gabriel.hogwartsmod.registry.ModMenus.BANCADA_VARINHAS.get(),
+                com.gabriel.hogwartsmod.client.gui.WandBenchScreen::new));
         com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
         com.gabriel.hogwartsmod.creature.MountCreature.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
         com.gabriel.hogwartsmod.creature.MountCreature.clientSeesAll = com.gabriel.hogwartsmod.client.creature.ClientCreatures::seesThestrals;

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hogwartsmod:block/bancada_varinhas"
+    },
+    "facing=east": {
+      "model": "hogwartsmod:block/bancada_varinhas",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hogwartsmod:block/bancada_varinhas",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hogwartsmod:block/bancada_varinhas",
+      "y": 270
+    }
+  }
+}
