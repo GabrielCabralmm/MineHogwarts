@@ -15,9 +15,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -239,7 +236,7 @@ public final class DuelManager {
             if (count != duel.lastCount) {
                 duel.lastCount = count;
                 for (ServerPlayer p : List.of(a, b)) {
-                    title(p, Component.literal(String.valueOf(count)).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD), msg("salute"));
+                    cue(p, "count", count);
                     p.playNotifySound(SoundEvents.NOTE_BLOCK_HAT.get(), SoundSource.PLAYERS, 1f, 1.2f);
                 }
             }
@@ -248,7 +245,7 @@ public final class DuelManager {
         if (duel.lastCount != 0) {
             duel.lastCount = 0;
             for (ServerPlayer p : List.of(a, b)) {
-                title(p, msg("go").withStyle(ChatFormatting.RED, ChatFormatting.BOLD), Component.empty());
+                cue(p, "go", 0);
                 p.playNotifySound(SoundEvents.EVOKER_CAST_SPELL, SoundSource.PLAYERS, 1f, 1f);
             }
         }
@@ -287,10 +284,8 @@ public final class DuelManager {
         return Math.sqrt(dx * dx + dz * dz);
     }
 
-    private static void title(ServerPlayer p, Component title, Component subtitle) {
-        p.connection.send(new ClientboundSetTitlesAnimationPacket(0, 22, 4));
-        p.connection.send(new ClientboundSetSubtitleTextPacket(subtitle));
-        p.connection.send(new ClientboundSetTitleTextPacket(title));
+    private static void cue(ServerPlayer p, String kind, int number) {
+        ModNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.PLAYER.with(() -> p), new com.gabriel.hogwartsmod.network.DuelCuePacket(kind, number));
     }
 
     private static void updateBar(Duel duel, long now) {
@@ -446,9 +441,7 @@ public final class DuelManager {
         }
         for (ServerPlayer p : new ServerPlayer[]{pa, pb}) {
             if (p != null) {
-                title(p, winner == null ? msg("title_draw").withStyle(ChatFormatting.YELLOW)
-                        : p.getUUID().equals(winner) ? msg("title_win").withStyle(ChatFormatting.GOLD) : msg("title_lose").withStyle(ChatFormatting.GRAY),
-                        Component.empty());
+                cue(p, winner == null ? "draw" : p.getUUID().equals(winner) ? "win" : "lose", 0);
             }
         }
     }

@@ -62,6 +62,7 @@ public final class ClientSetup {
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "mission_tracker", com.gabriel.hogwartsmod.client.mission.MissionTracker.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "creature_health", com.gabriel.hogwartsmod.client.creature.ClientCreatures.INSTANCE);
         event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "lives", LivesHud.INSTANCE);
+        event.registerAboveAll("duel_cue", DuelCueHud.INSTANCE);
     }
 
     @SubscribeEvent

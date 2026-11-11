@@ -603,5 +603,8 @@
   "message.hogwartsmod.duel.coin_g": "%s Galeões",
   "message.hogwartsmod.duel.coin_s": "%s Sicles",
   "message.hogwartsmod.duel.coin_n": "%s Nuques",
-  "message.hogwartsmod.duel.bad_coin": "Moeda inválida: use galeoes, sicles ou nuques."
+  "message.hogwartsmod.duel.bad_coin": "Moeda inválida: use galeoes, sicles ou nuques.",
+  "message.hogwartsmod.duel.sub_win": "O adversário caiu diante de você",
+  "message.hogwartsmod.duel.sub_lose": "Você foi derrotado no duelo",
+  "message.hogwartsmod.duel.sub_draw": "Nenhum dos dois caiu a tempo"
 }
