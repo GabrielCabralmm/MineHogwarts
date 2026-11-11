@@ -47,12 +47,12 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     }
 
     private int barrelX(int index) {
-        int inset = index % 3 == 1 ? 86 : 70;
+        int inset = index % 3 == 1 ? 58 : 72;
         return left + (index < 3 ? inset : W - inset);
     }
 
     private int barrelY(int index) {
-        return top + 94 + (index % 3) * 42;
+        return top + 102 + (index % 3) * 40;
     }
 
     // -- Desenho
@@ -62,10 +62,10 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.image(g, CREST, (int) cx - 13, top + 10, 26, 30);
-        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx + 0.7f, top + 44.7f, 0xC0000000);
-        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 44, GOLD);
-        HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 57, CREAM);
+        HiRes.image(g, CREST, (int) cx - 13, top + 20, 26, 30);
+        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx + 0.7f, top + 54.7f, 0xC0000000);
+        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 54, GOLD);
+        HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 67, CREAM);
         long now = System.currentTimeMillis();
         boolean rejecting = rejectedAt >= 0 && now - rejectedAt < 450;
         float shake = rejecting ? (float) Math.sin(now / 25.0) * 2.5f : 0f;
@@ -74,7 +74,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         }
         for (int k = 0; k < length; k++) {
             int dx = (int) cx - length * 7 + k * 14;
-            HiRes.image(g, k < hits.size() ? COMB_FULL : COMB_EMPTY, dx, top + 122, 14, 14);
+            HiRes.image(g, k < hits.size() ? COMB_FULL : COMB_EMPTY, dx, top + 135, 14, 14);
         }
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 30;
