@@ -16,11 +16,17 @@ import static com.gabriel.hogwartsmod.client.gui.MissionScreen.*;
 public class HufflepuffDoorScreen extends HouseDoorScreen {
     private static final int W = 280;
     private static final int H = 218;
-    private static final int LID = 38;
+    private static final int LID = 32;
     private static final int BTN_W = 62;
     private static final int BTN_H = 14;
-    private static final float[] TILT = {22f, 0f, -22f};
-    private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
+    private static final float[] TILT = {18f, 0f, -18f};
+    private static final ResourceLocation BACKGROUND = MissionScreen.tex("lufa_fundo");
+    private static final ResourceLocation CREST = MissionScreen.tex("casa_lufa_lufa");
+    private static final ResourceLocation SHADOW = MissionScreen.tex("sombra_barril");
+    private static final ResourceLocation COMB_FULL = MissionScreen.tex("favo_cheio");
+    private static final ResourceLocation COMB_EMPTY = MissionScreen.tex("favo_vazio");
+    private static final int GOLD = 0xFFF2C64A;
+    private static final int CREAM = 0xFFE8D6B0;
     private static final ResourceLocation BARREL = MissionScreen.tex("barril");
     private static final ResourceLocation BARREL_LIT = MissionScreen.tex("barril_aceso");
     private static final ResourceLocation BARREL_LEFT = MissionScreen.tex("barril_esq");
@@ -50,7 +56,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     }
 
     private int barrelY(int index) {
-        return top + 80 + (index % 3) * 44;
+        return top + 90 + (index % 3) * 38;
     }
 
     private float tilt(int index) {
@@ -63,27 +69,33 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     @Override
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         renderBackground(g);
-        HiRes.image(g, PAPER, left, top, W, H);
+        HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 14, TITLE);
-        HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 27, MUTED);
+        HiRes.image(g, CREST, (int) cx - 13, top + 10, 26, 30);
+        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx + 0.7f, top + 44.7f, 0xC0000000);
+        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 44, GOLD);
+        HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 57, CREAM);
         long now = System.currentTimeMillis();
         boolean rejecting = rejectedAt >= 0 && now - rejectedAt < 450;
         float shake = rejecting ? (float) Math.sin(now / 25.0) * 2.5f : 0f;
         for (int i = 0; i < 6; i++) {
+            int x = barrelX(i);
+            int y = barrelY(i);
+            int dx = i < 3 ? -34 : -6;
+            HiRes.image(g, SHADOW, x + dx, y + 12, 36, 12);
+        }
+        for (int i = 0; i < 6; i++) {
             drawBarrel(g, i, mouseX, mouseY, shake, rejecting);
         }
         for (int k = 0; k < length; k++) {
-            int dx = (int) cx - length * 5 + k * 10 + 1;
-            int c = k < hits.size() ? 0xFFE8B923 : 0xFFC4AA7C;
-            g.fill(dx, top + 120, dx + 7, top + 127, 0xFF6E4A2C);
-            g.fill(dx + 1, top + 121, dx + 6, top + 126, c);
+            int dx = (int) cx - length * 7 + k * 14;
+            HiRes.image(g, k < hits.size() ? COMB_FULL : COMB_EMPTY, dx, top + 122, 14, 14);
         }
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 30;
         boolean hover = over(mouseX, mouseY, bx, by, BTN_W, BTN_H - 2);
-        HiRes.image(g, MissionScreen.tex("botao_couro_largo_" + (hover ? "h" : "n")), bx, by, BTN_W, BTN_H);
-        HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.reset"), HiRes.Style.BOLD, 7.5f, bx + BTN_W / 2f, by + 3, 0xFFF6E6C8);
+        HiRes.image(g, MissionScreen.tex("botao_lufa_" + (hover ? "h" : "n")), bx, by, BTN_W, BTN_H);
+        HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.reset"), HiRes.Style.BOLD, 7.5f, bx + BTN_W / 2f, by + 3, GOLD);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -94,8 +106,8 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         boolean hover = !rejecting && over(mouseX, mouseY, x - LID / 2, y - LID / 2, LID, LID);
         boolean left = i < 3;
         ResourceLocation image = lit >= 0 ? (left ? BARREL_LIT : BARREL_LIT_LEFT) : (left ? BARREL : BARREL_LEFT);
-        int bw = 96;
-        int bh = 52;
+        int bw = 82;
+        int bh = 44;
         int lidOffset = Math.round(bw * 18f / 112f);
         g.pose().pushPose();
         g.pose().translate(x + shake, y, 0);
