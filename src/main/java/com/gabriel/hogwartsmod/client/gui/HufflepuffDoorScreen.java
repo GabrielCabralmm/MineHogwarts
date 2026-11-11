@@ -1,7 +1,6 @@
 package com.gabriel.hogwartsmod.client.gui;
 
 import com.gabriel.hogwartsmod.house.door.HouseDoors;
-import com.mojang.math.Axis;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -16,21 +15,17 @@ import static com.gabriel.hogwartsmod.client.gui.MissionScreen.*;
 public class HufflepuffDoorScreen extends HouseDoorScreen {
     private static final int W = 280;
     private static final int H = 218;
-    private static final int LID = 32;
+    private static final int RADIUS = 20;
     private static final int BTN_W = 62;
     private static final int BTN_H = 14;
-    private static final float[] TILT = {14f, 0f, -14f};
     private static final ResourceLocation BACKGROUND = MissionScreen.tex("lufa_fundo");
     private static final ResourceLocation CREST = MissionScreen.tex("casa_lufa_lufa");
-    private static final ResourceLocation SHADOW = MissionScreen.tex("sombra_barril");
     private static final ResourceLocation COMB_FULL = MissionScreen.tex("favo_cheio");
     private static final ResourceLocation COMB_EMPTY = MissionScreen.tex("favo_vazio");
     private static final int GOLD = 0xFFF2C64A;
     private static final int CREAM = 0xFFE8D6B0;
     private static final ResourceLocation BARREL = MissionScreen.tex("barril");
     private static final ResourceLocation BARREL_LIT = MissionScreen.tex("barril_aceso");
-    private static final ResourceLocation BARREL_LEFT = MissionScreen.tex("barril_esq");
-    private static final ResourceLocation BARREL_LIT_LEFT = MissionScreen.tex("barril_aceso_esq");
 
     private final int length;
     private final List<Integer> hits = new ArrayList<>();
@@ -52,16 +47,12 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     }
 
     private int barrelX(int index) {
-        return left + (index < 3 ? 96 : W - 96);
+        int inset = index % 3 == 1 ? 86 : 70;
+        return left + (index < 3 ? inset : W - inset);
     }
 
     private int barrelY(int index) {
-        return top + 90 + (index % 3) * 38;
-    }
-
-    private float tilt(int index) {
-        float t = TILT[index % 3];
-        return index < 3 ? t : -t;
+        return top + 94 + (index % 3) * 42;
     }
 
     // -- Desenho
@@ -78,12 +69,6 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         long now = System.currentTimeMillis();
         boolean rejecting = rejectedAt >= 0 && now - rejectedAt < 450;
         float shake = rejecting ? (float) Math.sin(now / 25.0) * 2.5f : 0f;
-        for (int i = 0; i < 6; i++) {
-            int x = barrelX(i);
-            int y = barrelY(i);
-            int dx = i < 3 ? -34 : -6;
-            HiRes.image(g, SHADOW, x + dx, y + 12, 36, 12);
-        }
         for (int i = 0; i < 6; i++) {
             drawBarrel(g, i, mouseX, mouseY, shake, rejecting);
         }
@@ -103,26 +88,19 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         int x = barrelX(i);
         int y = barrelY(i);
         int lit = hits.indexOf(i + 1);
-        boolean hover = !rejecting && Math.pow((mouseX - x) / 13.0, 2) + Math.pow((mouseY - y) / 20.0, 2) <= 1;
-        boolean left = i < 3;
-        ResourceLocation image = lit >= 0 ? (left ? BARREL_LIT : BARREL_LIT_LEFT) : (left ? BARREL : BARREL_LEFT);
-        int bw = 77;
-        int bh = 48;
-        int lidOffset = Math.round(bw * 22f / 96f);
-        g.pose().pushPose();
-        g.pose().translate(x + shake, y, 0);
-        g.pose().mulPose(Axis.ZP.rotationDegrees(tilt(i)));
-        HiRes.image(g, image, left ? -bw + lidOffset : -lidOffset, -bh / 2, bw, bh);
-        if (hover) {
-            g.fill(-9, -15, 9, 15, 0x22FFFFFF);
-        }
+        boolean hover = !rejecting && Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2) <= RADIUS * RADIUS;
+        int size = RADIUS * 2 + 4;
+        float lift = hover ? 1.5f : 0f;
         if (rejecting) {
-            g.fill(left ? -bw + lidOffset : -lidOffset, -bh / 2 + 6, left ? lidOffset : bw - lidOffset, bh / 2 - 6, 0x40B02020);
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 0.5f, 0.45f, 1f);
+        } else if (hover) {
+            com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1.15f, 1.12f, 1.05f, 1f);
         }
-        g.pose().popPose();
+        HiRes.image(g, lit >= 0 ? BARREL_LIT : BARREL, Math.round(x + shake - size / 2f - lift), Math.round(y - size / 2f - lift), size, size);
+        com.mojang.blaze3d.systems.RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         if (lit >= 0) {
-            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 12f, x + shake + 0.6f, y - 6 + 0.6f, 0x80000000);
-            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 12f, x + shake, y - 6, 0xFF4A2A0C);
+            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 13f, x + shake + 0.7f, y - 7 + 0.7f, 0x80000000);
+            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 13f, x + shake, y - 7, 0xFF4A2A0C);
         }
     }
 
@@ -161,9 +139,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
             for (int i = 0; i < 6; i++) {
                 int x = barrelX(i);
                 int y = barrelY(i);
-                double ex = (mx - x) / 13.0;
-                double ey = (my - y) / 20.0;
-                if (ex * ex + ey * ey <= 1) {
+                if ((mx - x) * (mx - x) + (my - y) * (my - y) <= RADIUS * RADIUS) {
                     hit(i + 1);
                     return true;
                 }
