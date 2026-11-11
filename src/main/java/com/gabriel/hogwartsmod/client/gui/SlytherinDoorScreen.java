@@ -75,20 +75,39 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
         HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 14, TITLE);
         HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 27, MUTED);
         int y = cylY();
-        g.fill(ringX(0) - 6, y - 2, ringX(value.length - 1) + RING_W + 6, y + CYL_H + 2, 0xFF2A2E2C);
+        int x0 = ringX(0) - 6;
+        int x1 = ringX(value.length - 1) + RING_W + 6;
+        g.fill(x0 + 2, y + 4, x1 + 2, y + CYL_H + 6, 0x40000000);
+        g.fill(x0, y - 2, x1, y + CYL_H + 2, 0xFF1E2220);
         for (int i = 0; i < value.length; i++) {
             drawRing(g, i, mouseX, mouseY);
         }
+        cap(g, x0 - 8, y);
+        cap(g, x1, y);
         int mid = y + CYL_H / 2;
-        g.fill(ringX(0) - 6, mid - 15, ringX(value.length - 1) + RING_W + 6, mid - 14, 0xFF7FD8A0);
-        g.fill(ringX(0) - 6, mid + 14, ringX(value.length - 1) + RING_W + 6, mid + 15, 0xFF7FD8A0);
-        g.fill(ringX(0) - 6, mid - 14, ringX(value.length - 1) + RING_W + 6, mid + 14, 0x2232C070);
+        float pulse = 0.5f + 0.5f * (float) Math.sin(System.currentTimeMillis() / 400.0);
+        int glow = (int) (0x18 + 0x18 * pulse);
+        g.fill(x0, mid - 14, x1, mid + 14, (glow << 24) | 0x32C070);
+        g.fill(x0, mid - 15, x1, mid - 14, 0xFF7FD8A0);
+        g.fill(x0, mid + 14, x1, mid + 15, 0xFF7FD8A0);
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 32;
         boolean hover = over(mouseX, mouseY, bx, by, BTN_W, BTN_H - 2);
         HiRes.image(g, MissionScreen.tex("botao_couro_largo_" + (hover ? "h" : "n")), bx, by, BTN_W, BTN_H);
         HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.open"), HiRes.Style.BOLD, 7.5f, bx + BTN_W / 2f, by + 3, 0xFFF6E6C8);
         super.render(g, mouseX, mouseY, partialTick);
+    }
+
+    private static void cap(GuiGraphics g, int x, int y) {
+        for (int r = -4; r < CYL_H + 4; r++) {
+            double t = (r - CYL_H / 2.0) / (CYL_H / 2.0 + 4);
+            float light = (float) Math.cos(t * Math.PI / 2);
+            int red = (int) (90 + 110 * light);
+            int green = (int) (60 + 80 * light);
+            int blue = (int) (24 + 30 * light);
+            g.fill(x, y + r, x + 8, y + r + 1, 0xFF000000 | (red << 16) | (green << 8) | blue);
+        }
+        g.fill(x + 3, y + CYL_H / 2 - 3, x + 5, y + CYL_H / 2 + 3, 0xFF4A3214);
     }
 
     private void drawRing(GuiGraphics g, int i, int mouseX, int mouseY) {
@@ -99,7 +118,15 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
             float light = (float) Math.cos(t * Math.PI / 2);
             int c = (int) (40 + 70 * light);
             g.fill(x, y + r, x + RING_W, y + r + 1, 0xFF000000 | (c << 16) | ((c + 6) << 8) | (c + 2));
+            for (int k = 0; k < RING_W; k += 3) {
+                int n = ((k * 73 + r * 151 + i * 37) % 11);
+                if (n < 2) {
+                    g.fill(x + k, y + r, x + k + 1, y + r + 1, n == 0 ? 0x22000000 : 0x14FFFFFF);
+                }
+            }
         }
+        g.fill(x, y, x + RING_W, y + 2, 0x66000000);
+        g.fill(x, y + CYL_H - 2, x + RING_W, y + CYL_H, 0x66000000);
         g.fill(x, y, x + 1, y + CYL_H, 0x55000000);
         g.fill(x + RING_W - 1, y, x + RING_W, y + CYL_H, 0x55000000);
         g.enableScissor(x, y, x + RING_W, y + CYL_H);
@@ -126,6 +153,7 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
         sound(SoundEvents.STONE_BUTTON_CLICK_ON, 0.6f + 0.1f * ring);
     }
 
+    @Override
     public void submit() {
         int[] combo = new int[value.length];
         for (int i = 0; i < value.length; i++) {

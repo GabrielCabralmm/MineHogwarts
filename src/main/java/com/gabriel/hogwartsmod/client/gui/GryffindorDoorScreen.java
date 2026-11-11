@@ -1,7 +1,6 @@
 package com.gabriel.hogwartsmod.client.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -9,11 +8,10 @@ import net.minecraft.resources.ResourceLocation;
 import static com.gabriel.hogwartsmod.client.gui.MissionScreen.*;
 
 public class GryffindorDoorScreen extends HouseDoorScreen {
-    private static final int W = 190;
-    private static final int H = 230;
+    private static final int W = 200;
+    private static final int H = 232;
     private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
     private static final ResourceLocation LADY = MissionScreen.tex("porta_dama");
-    private EditBox field;
 
     public GryffindorDoorScreen(BlockPos pos) {
         super(pos, Component.translatable("screen.hogwartsmod.door.grifinoria"));
@@ -30,16 +28,8 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
     }
 
     @Override
-    protected void init() {
-        super.init();
-        String value = field == null ? "" : field.getValue();
-        field = new EditBox(font, left + 35, top + H - 50, W - 70, 12, Component.empty());
-        field.setBordered(false);
-        field.setMaxLength(48);
-        field.setTextColor(INK);
-        field.setValue(value);
-        addRenderableWidget(field);
-        setInitialFocus(field);
+    protected boolean acceptsText() {
+        return true;
     }
 
     @Override
@@ -47,33 +37,23 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, PAPER, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.image(g, LADY, left + (W - 96) / 2, top + 16, 96, 128);
-        float bob = (float) Math.sin(System.currentTimeMillis() / 260.0) * 1.5f;
-        HiRes.centered(g, tr("screen.hogwartsmod.door.grifinoria.ask"), HiRes.Style.ITALIC, 9f, cx, top + 152 + bob, TITLE);
-        g.fill(left + 32, top + H - 37, left + W - 32, top + H - 36, LINE);
-        if (field.getValue().isEmpty() && !field.isFocused()) {
-            HiRes.centered(g, tr("screen.hogwartsmod.door.password_hint"), HiRes.Style.ITALIC, 7f, cx, top + H - 49, MUTED);
-        }
-        HiRes.centered(g, tr("screen.hogwartsmod.door.enter_hint"), HiRes.Style.ITALIC, 6.5f, cx, top + H - 30, MUTED);
+        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 8.5f, cx, top + 12, TITLE);
+        g.fill(left + 50, top + 23, left + W - 50, top + 24, LINE);
+        HiRes.image(g, LADY, left + (W - 96) / 2, top + 30, 96, 128);
+        double time = System.currentTimeMillis() / 1000.0;
+        float bob = (float) Math.sin(time * 4) * 1.5f;
+        HiRes.centered(g, "♪", HiRes.Style.ITALIC, 9f, cx - 44 + (float) Math.sin(time * 3) * 2, top + 164 - bob, WINE);
+        HiRes.centered(g, "♫", HiRes.Style.ITALIC, 9f, cx + 44 + (float) Math.cos(time * 3) * 2, top + 164 + bob, WINE);
+        HiRes.centered(g, tr("screen.hogwartsmod.door.grifinoria.ask"), HiRes.Style.ITALIC, 10f, cx, top + 166 + bob * 0.5f, TITLE);
+        drawField(g, cx, top + H - 50, 64, tr("screen.hogwartsmod.door.password_hint"));
+        HiRes.centered(g, tr("screen.hogwartsmod.door.enter_hint"), HiRes.Style.ITALIC, 6.5f, cx, top + H - 28, MUTED);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
-    public void type(String text) {
-        field.setValue(text);
-    }
-
-    public void submit() {
-        if (!field.getValue().isBlank()) {
-            send(field.getValue(), new int[0], 0);
-        }
-    }
-
     @Override
-    public boolean keyPressed(int key, int scan, int modifiers) {
-        if (key == 257 || key == 335) {
-            submit();
-            return true;
+    public void submit() {
+        if (!typed.toString().isBlank()) {
+            send(typed.toString(), new int[0], 0);
         }
-        return super.keyPressed(key, scan, modifiers);
     }
 }

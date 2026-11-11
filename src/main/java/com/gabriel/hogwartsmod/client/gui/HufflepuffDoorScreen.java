@@ -23,6 +23,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
     private static final ResourceLocation BARREL = MissionScreen.tex("barril");
     private static final ResourceLocation BARREL_LIT = MissionScreen.tex("barril_aceso");
+    private static final ResourceLocation BARREL_SIDE = MissionScreen.tex("barril_lado");
 
     private final int length;
     private final List<Integer> hits = new ArrayList<>();
@@ -71,8 +72,12 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         for (int i = 0; i < 6; i++) {
             drawBarrel(g, i, mouseX, mouseY, shake, rejecting);
         }
-        String progress = hits.size() + " / " + length;
-        HiRes.centered(g, progress, HiRes.Style.ITALIC, 7f, cx, top + 106, MUTED);
+        for (int k = 0; k < length; k++) {
+            int dx = (int) cx - length * 5 + k * 10 + 1;
+            int c = k < hits.size() ? 0xFFE8B923 : 0xFFC4AA7C;
+            g.fill(dx, top + 108, dx + 7, top + 115, 0xFF6E4A2C);
+            g.fill(dx + 1, top + 109, dx + 6, top + 114, c);
+        }
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 30;
         boolean hover = over(mouseX, mouseY, bx, by, BTN_W, BTN_H - 2);
@@ -90,14 +95,8 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         g.pose().translate(x + shake, y, 0);
         g.pose().mulPose(Axis.ZP.rotationDegrees(tilt(i)));
         int side = i < 3 ? -1 : 1;
-        int bodyX0 = side < 0 ? -LID / 2 - 34 : 4;
-        int bodyX1 = side < 0 ? -4 : LID / 2 + 34;
-        g.fill(bodyX0, -LID / 2 + 3, bodyX1, LID / 2 - 3, 0xFF6E4A2C);
-        for (int s = -LID / 2 + 7; s < LID / 2 - 3; s += 6) {
-            g.fill(bodyX0, s, bodyX1, s + 1, 0xFF4E3420);
-        }
-        int hoop = side < 0 ? -LID / 2 - 18 : LID / 2 + 14;
-        g.fill(hoop, -LID / 2 + 3, hoop + 4, LID / 2 - 3, 0xFF6A6A72);
+        int bodyW = 52;
+        HiRes.image(g, BARREL_SIDE, side < 0 ? -bodyW - 2 : 2, -LID / 2 + 2, bodyW, LID - 4);
         g.pose().scale(0.72f, 1f, 1f);
         HiRes.image(g, lit >= 0 ? BARREL_LIT : BARREL, -LID / 2, -LID / 2, LID, LID);
         if (hover) {
@@ -108,7 +107,8 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         }
         g.pose().popPose();
         if (lit >= 0) {
-            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 11f, x + shake, y - 6, 0xFF5A3A14);
+            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 12f, x + shake + 0.6f, y - 6 + 0.6f, 0x80000000);
+            HiRes.centered(g, String.valueOf(lit + 1), HiRes.Style.BOLD, 12f, x + shake, y - 6, 0xFF4A2A0C);
         }
     }
 
@@ -135,6 +135,10 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
             sound(SoundEvents.BARREL_CLOSE, 0.6f);
         }
         super.onResult(result == HouseDoors.RESULT_WRONG ? HouseDoors.RESULT_STEP : result);
+    }
+
+    @Override
+    protected void submit() {
     }
 
     @Override
