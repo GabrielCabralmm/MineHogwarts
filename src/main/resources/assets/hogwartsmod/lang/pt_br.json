@@ -715,5 +715,6 @@
   "item.hogwartsmod.cabo_anelado": "Cabo Anelado",
   "item.hogwartsmod.cabo_espiral": "Cabo Espiral",
   "item.hogwartsmod.cabo_nodoso": "Cabo Nodoso",
-  "item.hogwartsmod.cabo.hint": "Com o inventário aberto, clique com o botão direito numa varinha para encaixar"
+  "item.hogwartsmod.cabo.hint": "Com o inventário aberto, clique com o botão direito numa varinha para encaixar",
+  "tooltip.hogwartsmod.preview_hint": "Segure Shift para ver em 3D"
 }

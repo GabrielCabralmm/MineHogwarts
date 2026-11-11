@@ -95,6 +95,11 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerExtraModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
         event.register(com.gabriel.hogwartsmod.client.potion.CauldronRenderer.SPOON);
+        for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
+            if (handle != com.gabriel.hogwartsmod.wand.WandHandle.NENHUM) {
+                event.register(WandPreview.handleModel(handle));
+            }
+        }
     }
 
     private static float wandModel(net.minecraft.world.item.ItemStack stack) {
@@ -106,7 +111,17 @@ public final class ClientSetup {
     }
 
     @SubscribeEvent
+    public static void registerTooltips(net.minecraftforge.client.event.RegisterClientTooltipComponentFactoriesEvent event) {
+        event.register(WandPreview.Data.class, WandPreview.Renderer::new);
+    }
+
+    @SubscribeEvent
     public static void registerItemColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+        for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
+            if (handle.getItem() != null) {
+                event.register((stack, tint) -> tint == 1 ? 0x7A5234 : 0xFFFFFF, handle.getItem());
+            }
+        }
         event.register((stack, tint) -> {
             com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.Wands.wood(stack);
             if (wood == null || !com.gabriel.hogwartsmod.wand.Wands.isCustom(stack)) {

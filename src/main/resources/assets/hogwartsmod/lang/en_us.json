@@ -712,5 +712,6 @@
   "item.hogwartsmod.cabo_anelado": "Ringed Handle",
   "item.hogwartsmod.cabo_espiral": "Spiral Handle",
   "item.hogwartsmod.cabo_nodoso": "Knotted Handle",
-  "item.hogwartsmod.cabo.hint": "With the inventory open, right-click a wand to fit it"
+  "item.hogwartsmod.cabo.hint": "With the inventory open, right-click a wand to fit it",
+  "tooltip.hogwartsmod.preview_hint": "Hold Shift to see it in 3D"
 }
