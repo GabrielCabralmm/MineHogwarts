@@ -38,6 +38,8 @@ public final class ClientSetup {
                 com.gabriel.hogwartsmod.client.gui.PackageScreen::new));
         event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(com.gabriel.hogwartsmod.registry.ModMenus.BANCADA_VARINHAS.get(),
                 com.gabriel.hogwartsmod.client.gui.WandBenchScreen::new));
+        event.enqueueWork(() -> net.minecraft.client.gui.screens.MenuScreens.register(com.gabriel.hogwartsmod.registry.ModMenus.BANCADA_VASSOURAS.get(),
+                com.gabriel.hogwartsmod.client.gui.BroomBenchScreen::new));
         com.gabriel.hogwartsmod.entity.BroomEntity.clientPilot = ClientBroom::pilot;
         com.gabriel.hogwartsmod.creature.MountCreature.clientPilot = com.gabriel.hogwartsmod.client.creature.ClientCreatures::pilot;
         com.gabriel.hogwartsmod.creature.MountCreature.clientSeesAll = com.gabriel.hogwartsmod.client.creature.ClientCreatures::seesThestrals;
@@ -57,6 +59,7 @@ public final class ClientSetup {
         event.registerEntityRenderer(ModEntities.OWL.get(), com.gabriel.hogwartsmod.client.creature.OwlRenderer::new);
         event.registerEntityRenderer(ModEntities.THESTRAL.get(), c -> new com.gabriel.hogwartsmod.client.creature.MountRenderer<>(c, "testralio", 1.55f, 1.0f));
         event.registerEntityRenderer(ModEntities.BROOM.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
+        event.registerEntityRenderer(ModEntities.BROOM_CARGO.get(), com.gabriel.hogwartsmod.client.render.BroomRenderer::new);
     }
 
     @SubscribeEvent
@@ -117,6 +120,15 @@ public final class ClientSetup {
 
     @SubscribeEvent
     public static void registerItemColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+        for (com.gabriel.hogwartsmod.broom.BroomType type : com.gabriel.hogwartsmod.broom.BroomType.values()) {
+            event.register((stack, tint) -> {
+                if (tint != 0) {
+                    return 0xFFFFFF;
+                }
+                com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.broom.Brooms.wood(stack);
+                return wood == null ? type.getDefaultColor() : wood.getColor();
+            }, type.item());
+        }
         for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
             if (handle.getItem() != null) {
                 event.register((stack, tint) -> tint == 1 ? com.gabriel.hogwartsmod.wand.HandleItem.COLOR : 0xFFFFFF, handle.getItem());

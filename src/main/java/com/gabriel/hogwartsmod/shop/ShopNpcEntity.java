@@ -31,6 +31,7 @@ public class ShopNpcEntity extends HogwartsNpc {
             case COMERCIANTE -> "comerciante";
             case CONTRABANDISTA -> "contrabandista";
             case AUXILIAR_VARINHAS -> "auxiliar_varinhas";
+            case AUXILIAR_VASSOURAS -> "auxiliar_vassouras";
             default -> "mercador";
         };
     }

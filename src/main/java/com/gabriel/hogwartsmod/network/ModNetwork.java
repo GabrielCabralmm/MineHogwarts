@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "24";
+    private static final String VERSION = "25";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -62,6 +62,8 @@ public final class ModNetwork {
                 .encoder(SendOwlPacket::encode).decoder(SendOwlPacket::decode).consumerMainThread(SendOwlPacket::handle).add();
         CHANNEL.messageBuilder(ChooseWandPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChooseWandPacket::encode).decoder(ChooseWandPacket::decode).consumerMainThread(ChooseWandPacket::handle).add();
+        CHANNEL.messageBuilder(CraftBroomPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(CraftBroomPacket::encode).decoder(CraftBroomPacket::decode).consumerMainThread(CraftBroomPacket::handle).add();
         CHANNEL.messageBuilder(CraftWandPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(CraftWandPacket::encode).decoder(CraftWandPacket::decode).consumerMainThread(CraftWandPacket::handle).add();
         CHANNEL.messageBuilder(PackagePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)

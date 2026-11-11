@@ -1,7 +1,7 @@
 package com.gabriel.hogwartsmod.shop;
 
 public enum ShopKind {
-    LOJA, COMERCIANTE, CONTRABANDISTA, AUXILIAR_VARINHAS;
+    LOJA, COMERCIANTE, CONTRABANDISTA, AUXILIAR_VARINHAS, AUXILIAR_VASSOURAS;
 
     public static ShopKind of(int ordinal) {
         ShopKind[] all = values();

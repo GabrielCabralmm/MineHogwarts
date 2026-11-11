@@ -66,6 +66,10 @@ public class Smugglers extends SavedData {
         return List.of(offer("varinha", ModItems.CAIXA_VARINHA.get(), 7, 0));
     }
 
+    public static List<ShopOffer> broomHelperDefaults() {
+        return List.of(offer("vassoura", ModItems.BROOM_STANDARD.get(), 3, 0), offer("cerdas", ModItems.FEIXE_CERDAS.get(), 0, 4));
+    }
+
     public static List<ShopOffer> smugglerDefaults() {
         return List.of(
                 offer("bolsa", ModItems.BOLSA_CRIATURAS.get(), 4, 0),

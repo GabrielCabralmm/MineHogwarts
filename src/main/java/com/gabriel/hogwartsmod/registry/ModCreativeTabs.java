@@ -21,6 +21,11 @@ public final class ModCreativeTabs {
                         output.accept(ModBlocks.PULPIT_ITEM.get());
                         output.accept(ModItems.BROOM_SPORT.get());
                         output.accept(ModItems.BROOM_TRANSPORT.get());
+                        output.accept(ModItems.BROOM_CARGO.get());
+                        output.accept(ModItems.BROOM_STANDARD.get());
+                        output.accept(ModBlocks.BANCADA_VASSOURAS_ITEM.get());
+                        output.accept(ModItems.FEIXE_CERDAS.get());
+                        ModItems.BROOM_HANDLES.values().forEach(handle -> output.accept(handle.get()));
                         output.accept(ModItems.ZONE_WAND.get());
                         output.accept(ModItems.SORTING_HAT.get());
                         output.accept(ModItems.COIN_POUCH.get());

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "hogwartsmod:item/vassoura_cabo_icone",
+    "layer1": "hogwartsmod:item/vassoura_padrao_cerdas"
+  }
+}

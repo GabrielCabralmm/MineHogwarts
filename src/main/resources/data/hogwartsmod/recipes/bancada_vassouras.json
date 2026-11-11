@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " C ",
+    "PTP",
+    "L L"
+  ],
+  "key": {
+    "C": {
+      "tag": "hogwartsmod:cabos_vassoura"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "T": {
+      "item": "minecraft:crafting_table"
+    },
+    "L": {
+      "tag": "minecraft:logs"
+    }
+  },
+  "result": {
+    "item": "hogwartsmod:bancada_vassouras"
+  }
+}

@@ -63,6 +63,12 @@ public final class ModEntities {
                     .clientTrackingRange(10)
                     .build("vassoura"));
 
+    public static final RegistryObject<EntityType<BroomEntity>> BROOM_CARGO = ENTITIES.register("vassoura_carga",
+            () -> EntityType.Builder.<BroomEntity>of(com.gabriel.hogwartsmod.entity.CargoBroomEntity::new, MobCategory.MISC)
+                    .sized(1.0f, 0.4f)
+                    .clientTrackingRange(10)
+                    .build("vassoura_carga"));
+
     private ModEntities() {
     }
 }

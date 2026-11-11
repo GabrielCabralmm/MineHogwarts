@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "hogwartsmod:block/bancada_vassouras"
+    },
+    "facing=east": {
+      "model": "hogwartsmod:block/bancada_vassouras",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "hogwartsmod:block/bancada_vassouras",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "hogwartsmod:block/bancada_vassouras",
+      "y": 270
+    }
+  }
+}

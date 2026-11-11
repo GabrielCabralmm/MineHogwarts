@@ -21,6 +21,23 @@ public final class ModItems {
     public static final RegistryObject<Item> BROOM_TRANSPORT = ITEMS.register("vassoura_transporte",
             () -> new BroomItem(BroomType.TRANSPORT, new Item.Properties().stacksTo(1)));
 
+    public static final RegistryObject<Item> BROOM_STANDARD = ITEMS.register("vassoura_padrao",
+            () -> new BroomItem(BroomType.STANDARD, new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> BROOM_CARGO = ITEMS.register("vassoura_carga",
+            () -> new BroomItem(BroomType.CARGO, new Item.Properties().stacksTo(1)));
+
+    public static final RegistryObject<Item> FEIXE_CERDAS = ITEMS.register("feixe_cerdas", () -> new Item(new Item.Properties()));
+
+    public static final java.util.Map<com.gabriel.hogwartsmod.wand.WandWood, RegistryObject<Item>> BROOM_HANDLES = new java.util.EnumMap<>(com.gabriel.hogwartsmod.wand.WandWood.class);
+
+    static {
+        for (com.gabriel.hogwartsmod.wand.WandWood wood : com.gabriel.hogwartsmod.wand.WandWood.values()) {
+            BROOM_HANDLES.put(wood, ITEMS.register("cabo_vassoura_" + wood.getId(),
+                    () -> new com.gabriel.hogwartsmod.broom.BroomHandleItem(wood, new Item.Properties().stacksTo(16))));
+        }
+    }
+
     public static final RegistryObject<Item> ZONE_WAND = ITEMS.register("varinha_zonas",
             () -> new com.gabriel.hogwartsmod.item.ZoneWandItem(new Item.Properties().stacksTo(1)));
 

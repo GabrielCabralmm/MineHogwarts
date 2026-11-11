@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "hogwartsmod:item/cabo_vassoura_sabugueiro"
+  }
+}

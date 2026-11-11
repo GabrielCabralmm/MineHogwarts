@@ -17,6 +17,9 @@ public final class ModMenus {
     public static final RegistryObject<MenuType<com.gabriel.hogwartsmod.wand.WandBenchMenu>> BANCADA_VARINHAS = MENUS.register("bancada_varinhas",
             () -> IForgeMenuType.create(com.gabriel.hogwartsmod.wand.WandBenchMenu::new));
 
+    public static final RegistryObject<MenuType<com.gabriel.hogwartsmod.broom.BroomBenchMenu>> BANCADA_VASSOURAS = MENUS.register("bancada_vassouras",
+            () -> IForgeMenuType.create(com.gabriel.hogwartsmod.broom.BroomBenchMenu::new));
+
     private ModMenus() {
     }
 }

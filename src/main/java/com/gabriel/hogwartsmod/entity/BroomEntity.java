@@ -30,10 +30,12 @@ public class BroomEntity extends Entity implements FlyingMount {
     private static final EntityDataAccessor<Integer> TYPE = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> BOOST = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<String> WOOD = SynchedEntityData.defineId(BroomEntity.class, EntityDataSerializers.STRING);
 
     public static java.util.function.Consumer<BroomEntity> clientPilot = broom -> {
     };
 
+    private String maker = "";
     private float speed;
     private float stamina = -1;
     private float pendingTurn;
@@ -53,7 +55,7 @@ public class BroomEntity extends Entity implements FlyingMount {
     }
 
     public static BroomEntity create(Level level, BroomType type, Vec3 pos, float yaw, UUID owner) {
-        BroomEntity broom = new BroomEntity(ModEntities.BROOM.get(), level);
+        BroomEntity broom = type == BroomType.CARGO ? new CargoBroomEntity(ModEntities.BROOM_CARGO.get(), level) : new BroomEntity(ModEntities.BROOM.get(), level);
         broom.entityData.set(TYPE, type.ordinal());
         broom.entityData.set(OWNER, Optional.of(owner));
         broom.moveTo(pos.x, pos.y, pos.z, yaw, 0);
@@ -65,10 +67,32 @@ public class BroomEntity extends Entity implements FlyingMount {
         entityData.define(TYPE, 0);
         entityData.define(OWNER, Optional.empty());
         entityData.define(BOOST, false);
+        entityData.define(WOOD, "");
     }
 
     public BroomType getBroomType() {
         return BroomType.byOrdinal(entityData.get(TYPE));
+    }
+
+    @Nullable
+    public com.gabriel.hogwartsmod.wand.WandWood getWood() {
+        return com.gabriel.hogwartsmod.wand.WandWood.byId(entityData.get(WOOD));
+    }
+
+    public void loadFromItem(ItemStack stack) {
+        com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.broom.Brooms.wood(stack);
+        entityData.set(WOOD, wood == null ? "" : wood.getId());
+        maker = com.gabriel.hogwartsmod.broom.Brooms.maker(stack);
+    }
+
+    public ItemStack displayItem() {
+        ItemStack stack = new ItemStack(getBroomType().item());
+        com.gabriel.hogwartsmod.broom.Brooms.setParts(stack, getWood(), maker);
+        return stack;
+    }
+
+    public ItemStack toItem() {
+        return displayItem();
     }
 
     @Nullable
@@ -93,7 +117,7 @@ public class BroomEntity extends Entity implements FlyingMount {
         }
         if (player.isSecondaryUseActive()) {
             if (!level().isClientSide && getPassengers().isEmpty()) {
-                ItemStack stack = new ItemStack(getBroomType() == BroomType.SPORT ? ModItems.BROOM_SPORT.get() : ModItems.BROOM_TRANSPORT.get());
+                ItemStack stack = toItem();
                 if (!player.addItem(stack)) {
                     player.drop(stack, false);
                 }
@@ -189,7 +213,7 @@ public class BroomEntity extends Entity implements FlyingMount {
 
     @Override
     public ItemStack getPickResult() {
-        return new ItemStack(getBroomType() == BroomType.SPORT ? ModItems.BROOM_SPORT.get() : ModItems.BROOM_TRANSPORT.get());
+        return toItem();
     }
 
     // -- Voo
@@ -333,11 +357,15 @@ public class BroomEntity extends Entity implements FlyingMount {
     protected void readAdditionalSaveData(CompoundTag tag) {
         entityData.set(TYPE, tag.getInt("Type"));
         entityData.set(OWNER, tag.hasUUID("Owner") ? Optional.of(tag.getUUID("Owner")) : Optional.empty());
+        entityData.set(WOOD, tag.getString("Madeira"));
+        maker = tag.getString("Fabricante");
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.putInt("Type", entityData.get(TYPE));
+        tag.putString("Madeira", entityData.get(WOOD));
+        tag.putString("Fabricante", maker);
         UUID owner = getOwner();
         if (owner != null) {
             tag.putUUID("Owner", owner);
