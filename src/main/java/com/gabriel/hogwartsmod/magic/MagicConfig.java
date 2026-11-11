@@ -20,6 +20,9 @@ public final class MagicConfig {
     public static final ForgeConfigSpec.BooleanValue BROOM_THEFT;
     public static final ForgeConfigSpec.BooleanValue POTION_BOOKS_IN_CHESTS;
     public static final ForgeConfigSpec.BooleanValue LIVES_ENABLED;
+    public static final ForgeConfigSpec.BooleanValue SMUGGLER_SPAWNS;
+    public static final ForgeConfigSpec.IntValue SMUGGLER_CHANCE;
+    public static final ForgeConfigSpec.IntValue SMUGGLER_MINUTES;
     public static final ForgeConfigSpec.IntValue LIVES_START;
     public static final ForgeConfigSpec.IntValue LIVES_WITNESS_RANGE;
     public static final ForgeConfigSpec.IntValue LEARN_XP_BASE;
@@ -57,6 +60,11 @@ public final class MagicConfig {
         builder.pop();
         builder.push("pocoes");
         POTION_BOOKS_IN_CHESTS = builder.comment("Livros de poções podem aparecer nos baús das estruturas").define("livrosNosBaus", true);
+        builder.pop();
+        builder.push("contrabandista");
+        SMUGGLER_SPAWNS = builder.comment("O Contrabandista de Criaturas aparece sozinho à noite perto de algum jogador").define("aparecer", true);
+        SMUGGLER_CHANCE = builder.comment("Chance (%) de aparecer a cada 2 minutos de noite, se não houver outro").defineInRange("chance", 15, 0, 100);
+        SMUGGLER_MINUTES = builder.comment("Quantos minutos ele fica antes de sumir").defineInRange("duracaoMinutos", 10, 1, 120);
         builder.pop();
         builder.push("vidas");
         LIVES_ENABLED = builder.comment("Ativa o sistema de vidas (apenas em servidores). Ao chegar a zero, a morte é definitiva e o jogador é banido").define("ativo", false);

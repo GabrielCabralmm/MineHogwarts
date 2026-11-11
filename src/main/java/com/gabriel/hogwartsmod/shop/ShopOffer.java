@@ -56,6 +56,23 @@ public record ShopOffer(String id, Goods product, int galeoes, int sicles, int n
         return new ShopOffer(UUID.randomUUID().toString().substring(0, 8), new Goods("minecraft:bread", 1), 0, 1, 0, List.of());
     }
 
+    @org.jetbrains.annotations.Nullable
+    public com.gabriel.hogwartsmod.creature.Species species() {
+        return com.gabriel.hogwartsmod.creature.Species.ofEgg(product.item());
+    }
+
+    public boolean isLicense() {
+        return product.item() instanceof CreatureLicenseItem;
+    }
+
+    public boolean isBag() {
+        return product.item() instanceof com.gabriel.hogwartsmod.creature.CreatureBagItem;
+    }
+
+    public boolean single() {
+        return species() != null || isLicense();
+    }
+
     public long price() {
         return (long) galeoes * 17 * 29 + (long) sicles * 29 + nuques;
     }
@@ -67,9 +84,16 @@ public record ShopOffer(String id, Goods product, int galeoes, int sicles, int n
     public ShopOffer sanitized() {
         Goods p = product.item() == Items.AIR ? new Goods("minecraft:bread", 1) : product;
         p = p.withCount(Math.max(1, Math.min(p.item().getMaxStackSize() * 4, p.count())));
+        if (isSingle(p)) {
+            p = p.withCount(1);
+        }
         return new ShopOffer(id, p, clamp(galeoes), clamp(sicles), clamp(nuques),
                 costs.stream().filter(c -> c.item() != Items.AIR).limit(MAX_COSTS)
                         .map(c -> c.withCount(Math.max(1, Math.min(c.item().getMaxStackSize() * 4, c.count())))).toList());
+    }
+
+    private static boolean isSingle(Goods p) {
+        return com.gabriel.hogwartsmod.creature.Species.ofEgg(p.item()) != null || p.item() instanceof CreatureLicenseItem;
     }
 
     private static int clamp(int v) {

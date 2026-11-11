@@ -551,5 +551,19 @@
   "message.hogwartsmod.owl_delivered_package": "%s brought you a package from %s",
   "screen.hogwartsmod.package.wrap": "Wrap",
   "screen.hogwartsmod.package.wrapping": "Wrapping...",
-  "screen.hogwartsmod.package.hold_hint": "hold to wrap"
+  "screen.hogwartsmod.package.hold_hint": "hold to wrap",
+  "item.hogwartsmod.licenca_criaturas": "Magical Creature License",
+  "item.hogwartsmod.licenca_criaturas.owner": "Licensed to: %s",
+  "item.hogwartsmod.licenca_criaturas.hint": "Lets you buy creatures from the Merchant",
+  "entity.hogwartsmod.comerciante": "Creature Merchant",
+  "entity.hogwartsmod.contrabandista": "Creature Smuggler",
+  "screen.hogwartsmod.shop.tamed": "Tamed %s",
+  "screen.hogwartsmod.shop.requires_license": "Creature license",
+  "screen.hogwartsmod.shop.need_license": "License needed",
+  "screen.hogwartsmod.shop.has_license": "You already have the license",
+  "screen.hogwartsmod.shop.has_creature": "Already one in your bag",
+  "screen.hogwartsmod.shop.to_bag": "Goes straight to your Creature Bag",
+  "message.hogwartsmod.creature_bought": "Your new creature (%s) went to your Creature Bag",
+  "message.hogwartsmod.smuggler_near": "You hear sneaky footsteps nearby... someone is selling what they shouldn't.",
+  "message.hogwartsmod.smuggler_template": "These offers now apply to smugglers that appear on their own."
 }

@@ -139,6 +139,14 @@ public final class HogwartsCommand {
                                 .executes(ctx -> createShopNpc(ctx, null))
                                 .then(Commands.argument("nome", StringArgumentType.greedyString())
                                         .executes(ctx -> createShopNpc(ctx, StringArgumentType.getString(ctx, "nome")))))
+                        .then(Commands.literal("comerciante")
+                                .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.COMERCIANTE, null))
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.COMERCIANTE, StringArgumentType.getString(ctx, "nome")))))
+                        .then(Commands.literal("contrabandista")
+                                .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.CONTRABANDISTA, null))
+                                .then(Commands.argument("nome", StringArgumentType.greedyString())
+                                        .executes(ctx -> createCreatureShop(ctx, com.gabriel.hogwartsmod.shop.ShopKind.CONTRABANDISTA, StringArgumentType.getString(ctx, "nome")))))
                         .then(Commands.literal("modelo")
                                 .then(Commands.argument("modelo", StringArgumentType.word())
                                         .executes(HogwartsCommand::setNpcModel)))
@@ -415,6 +423,28 @@ public final class HogwartsCommand {
         npc.setYHeadRot(yaw);
         npc.setYBodyRot(yaw);
         npc.setCustomName(Component.literal(name != null ? name : Component.translatable("entity.hogwartsmod.npc_loja").getString()));
+        npc.setCustomNameVisible(true);
+        source.getLevel().addFreshEntity(npc);
+        source.sendSuccess(() -> Component.translatable("command.hogwartsmod.shop_npc_created", npc.getNpcName()), true);
+        return 1;
+    }
+
+    private static int createCreatureShop(CommandContext<CommandSourceStack> ctx, com.gabriel.hogwartsmod.shop.ShopKind kind, @Nullable String name) {
+        CommandSourceStack source = ctx.getSource();
+        com.gabriel.hogwartsmod.shop.ShopNpcEntity npc = ModEntities.SHOP_NPC.get().create(source.getLevel());
+        if (npc == null) {
+            return 0;
+        }
+        boolean smuggler = kind == com.gabriel.hogwartsmod.shop.ShopKind.CONTRABANDISTA;
+        npc.setKind(kind);
+        npc.setOffers(smuggler ? com.gabriel.hogwartsmod.shop.Smugglers.get(source.getServer()).template() : com.gabriel.hogwartsmod.shop.Smugglers.merchantDefaults());
+        Vec3 pos = source.getPosition();
+        float yaw = source.getRotation().y + 180f;
+        npc.moveTo(pos.x, pos.y, pos.z, yaw, 0f);
+        npc.setYHeadRot(yaw);
+        npc.setYBodyRot(yaw);
+        npc.setCustomName(Component.literal(name != null ? name
+                : Component.translatable(smuggler ? "entity.hogwartsmod.contrabandista" : "entity.hogwartsmod.comerciante").getString()));
         npc.setCustomNameVisible(true);
         source.getLevel().addFreshEntity(npc);
         source.sendSuccess(() -> Component.translatable("command.hogwartsmod.shop_npc_created", npc.getNpcName()), true);

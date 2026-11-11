@@ -56,7 +56,16 @@ public class ShopScreen extends Screen {
         return minecraft == null ? null : minecraft.player;
     }
 
+    private com.gabriel.hogwartsmod.shop.ShopKind kind() {
+        return com.gabriel.hogwartsmod.shop.ShopKind.of(data.kind());
+    }
+
     static String goodsName(ShopOffer.Goods goods) {
+        com.gabriel.hogwartsmod.creature.Species species = com.gabriel.hogwartsmod.creature.Species.ofEgg(goods.item());
+        if (species != null) {
+            String key = "screen.hogwartsmod.shop.tamed." + species.getId();
+            return net.minecraft.client.resources.language.I18n.exists(key) ? tr(key) : tr("screen.hogwartsmod.shop.tamed", species.getDisplayName().getString());
+        }
         String name = goods.item().getDescription().getString();
         return goods.count() > 1 ? goods.count() + "× " + name : name;
     }
@@ -91,7 +100,7 @@ public class ShopScreen extends Screen {
             if (chosen || hover) {
                 HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 2, chosen ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
-            boolean afford = player != null && ShopManager.canBuy(player, offer);
+            boolean afford = player != null && ShopManager.canBuy(player, kind(), offer);
             MissionScreen.item(g, offer.product().stack(), x + 2, y + 1, 11);
             HiRes.text(g, HiRes.ellipsize(goodsName(offer.product()), HiRes.Style.REGULAR, w - 18), HiRes.Style.REGULAR, x + 16, y + 2,
                     afford ? INK : MUTED);
@@ -162,9 +171,24 @@ public class ShopScreen extends Screen {
             HiRes.text(g, mine, HiRes.Style.ITALIC, 7f, x + w - mw, y + 1, ok ? GREEN : WINE);
             y += 12;
         }
-        boolean afford = player != null && ShopManager.canBuy(player, offer);
-        HiRes.centered(g, tr("screen.hogwartsmod.shop.bulk", ShopManager.BULK), HiRes.Style.ITALIC, 7f, cx, top + H - 42, MUTED);
-        String label = afford ? tr("screen.hogwartsmod.shop.buy") : tr(coinsOk ? "screen.hogwartsmod.shop.missing_items" : "screen.hogwartsmod.shop.missing_coins");
+        if (ShopManager.needsLicense(kind(), offer)) {
+            boolean licensed = player != null && com.gabriel.hogwartsmod.shop.CreatureLicenseItem.has(player);
+            MissionScreen.item(g, new ItemStack(com.gabriel.hogwartsmod.registry.ModItems.LICENCA_CRIATURAS.get()), x, y - 1, 10);
+            HiRes.text(g, tr("screen.hogwartsmod.shop.requires_license"), HiRes.Style.REGULAR, x + 13, y, licensed ? INK : WINE);
+            if (licensed) {
+                HiRes.image(g, MissionScreen.tex("check"), x + w - 10, y - 1, 9, 9);
+            }
+            y += 12;
+        }
+        String blocked = player == null ? null : ShopManager.blocker(player, kind(), offer);
+        boolean afford = player != null && ShopManager.canBuy(player, kind(), offer);
+        if (!offer.single()) {
+            HiRes.centered(g, tr("screen.hogwartsmod.shop.bulk", ShopManager.BULK), HiRes.Style.ITALIC, 7f, cx, top + H - 42, MUTED);
+        } else if (offer.species() != null) {
+            HiRes.centered(g, tr("screen.hogwartsmod.shop.to_bag"), HiRes.Style.ITALIC, 7f, cx, top + H - 42, MUTED);
+        }
+        String label = afford ? tr("screen.hogwartsmod.shop.buy") : blocked != null ? tr(blocked)
+                : tr(coinsOk ? "screen.hogwartsmod.shop.missing_items" : "screen.hogwartsmod.shop.missing_coins");
         button(g, x, top + H - 30, w, label, afford, GREEN, mouseX, mouseY);
     }
 
@@ -194,8 +218,8 @@ public class ShopScreen extends Screen {
         ShopOffer offer = current();
         int bx = left + 174;
         int by = top + H - 30;
-        if (offer != null && mx >= bx && mx < bx + 128 && my >= by && my < by + 15 && player() != null && ShopManager.canBuy(player(), offer)) {
-            ModNetwork.CHANNEL.sendToServer(new ShopBuyPacket(data.entity(), offer.id(), hasShiftDown() ? ShopManager.BULK : 1));
+        if (offer != null && mx >= bx && mx < bx + 128 && my >= by && my < by + 15 && player() != null && ShopManager.canBuy(player(), kind(), offer)) {
+            ModNetwork.CHANNEL.sendToServer(new ShopBuyPacket(data.entity(), offer.id(), hasShiftDown() && !offer.single() ? ShopManager.BULK : 1));
             click();
             return true;
         }

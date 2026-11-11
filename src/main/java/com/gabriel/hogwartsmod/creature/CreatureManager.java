@@ -75,6 +75,33 @@ public final class CreatureManager {
         return true;
     }
 
+    // -- Compra
+
+    public static boolean giveTamed(ServerPlayer player, Species species) {
+        MagicData data = MagicData.get(player);
+        if (data == null || data.getCreatures().get(species) != null) {
+            return false;
+        }
+        if (!(species.getType().create(player.level()) instanceof TamableAnimal creature)) {
+            return false;
+        }
+        creature.tame(player);
+        creature.setHealth(creature.getMaxHealth());
+        CompoundTag tag = new CompoundTag();
+        creature.saveWithoutId(tag);
+        tag.remove("UUID");
+        tag.remove("Pos");
+        tag.remove("Motion");
+        data.getCreatures().put(new CreatureStore.Entry(species, tag, creature.getMaxHealth(), null));
+        creature.discard();
+        data.markForSync();
+        ServerLevel level = player.serverLevel();
+        level.sendParticles(ParticleTypes.END_ROD, player.getX(), player.getY() + 1, player.getZ(), 12, 0.4, 0.5, 0.4, 0.05);
+        level.playSound(null, player.blockPosition(), SoundEvents.BUNDLE_INSERT, SoundSource.PLAYERS, 1f, 0.7f);
+        say(player, Component.translatable("message.hogwartsmod.creature_bought", species.getDisplayName()), ChatFormatting.GOLD);
+        return true;
+    }
+
     // -- Invocar
 
     public static void summon(ServerPlayer player, String speciesId) {

@@ -18,6 +18,8 @@ import java.util.List;
 public class ShopNpcEntity extends HogwartsNpc {
     public static final int MAX_OFFERS = 8;
     private final List<ShopOffer> offers = new ArrayList<>();
+    private ShopKind kind = ShopKind.LOJA;
+    private long leaveAt = -1;
 
     public ShopNpcEntity(EntityType<? extends ShopNpcEntity> type, Level level) {
         super(type, level);
@@ -25,7 +27,38 @@ public class ShopNpcEntity extends HogwartsNpc {
 
     @Override
     protected String defaultModel() {
-        return "mercador";
+        return switch (kind) {
+            case COMERCIANTE -> "comerciante";
+            case CONTRABANDISTA -> "contrabandista";
+            default -> "mercador";
+        };
+    }
+
+    public ShopKind getKind() {
+        return kind;
+    }
+
+    public void setKind(ShopKind value) {
+        kind = value;
+    }
+
+    public void setLeaveAt(long gameTime) {
+        leaveAt = gameTime;
+    }
+
+    public boolean isWandering() {
+        return leaveAt >= 0;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!level().isClientSide && leaveAt >= 0 && level().getGameTime() >= leaveAt) {
+            ((net.minecraft.server.level.ServerLevel) level()).sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
+                    getX(), getY() + 1, getZ(), 30, 0.3, 0.6, 0.3, 0.02);
+            level().playSound(null, blockPosition(), net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT, net.minecraft.sounds.SoundSource.NEUTRAL, 0.6f, 0.6f);
+            discard();
+        }
     }
 
     public List<ShopOffer> getOffers() {
@@ -69,11 +102,15 @@ public class ShopNpcEntity extends HogwartsNpc {
         ListTag list = new ListTag();
         offers.forEach(o -> list.add(o.save()));
         tag.put("Ofertas", list);
+        tag.putString("Tipo", kind.name());
+        tag.putLong("VaiEmbora", leaveAt);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
         super.readAdditionalSaveData(tag);
+        kind = ShopKind.of(tag.getString("Tipo"));
+        leaveAt = tag.contains("VaiEmbora") ? tag.getLong("VaiEmbora") : -1;
         offers.clear();
         ListTag list = tag.getList("Ofertas", Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {

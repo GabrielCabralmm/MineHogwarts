@@ -44,6 +44,19 @@ public enum Species {
     }
 
     @Nullable
+    public static Species ofEgg(net.minecraft.world.item.Item item) {
+        if (item instanceof net.minecraft.world.item.SpawnEggItem egg) {
+            EntityType<?> type = egg.getType(null);
+            for (Species s : values()) {
+                if (type == s.getType()) {
+                    return s;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
     public static Species of(Entity entity) {
         for (Species s : values()) {
             if (entity.getType() == s.getType()) {

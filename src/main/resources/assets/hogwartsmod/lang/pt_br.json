@@ -551,5 +551,22 @@
   "message.hogwartsmod.owl_delivered_package": "%s trouxe um pacote de %s para você",
   "screen.hogwartsmod.package.wrap": "Embrulhar",
   "screen.hogwartsmod.package.wrapping": "Embrulhando...",
-  "screen.hogwartsmod.package.hold_hint": "segure para embrulhar"
+  "screen.hogwartsmod.package.hold_hint": "segure para embrulhar",
+  "item.hogwartsmod.licenca_criaturas": "Licença de Criaturas Mágicas",
+  "item.hogwartsmod.licenca_criaturas.owner": "Licenciado: %s",
+  "item.hogwartsmod.licenca_criaturas.hint": "Permite comprar criaturas com o Comerciante",
+  "entity.hogwartsmod.comerciante": "Comerciante de Criaturas",
+  "entity.hogwartsmod.contrabandista": "Contrabandista de Criaturas",
+  "screen.hogwartsmod.shop.tamed": "%s domesticado",
+  "screen.hogwartsmod.shop.requires_license": "Licença de criaturas",
+  "screen.hogwartsmod.shop.need_license": "Falta a licença",
+  "screen.hogwartsmod.shop.has_license": "Você já tem a licença",
+  "screen.hogwartsmod.shop.has_creature": "Já tem uma na bolsa",
+  "screen.hogwartsmod.shop.to_bag": "Vai direto para a Bolsa de Criaturas",
+  "message.hogwartsmod.creature_bought": "Sua nova criatura (%s) foi para a Bolsa de Criaturas",
+  "message.hogwartsmod.smuggler_near": "Você ouve passos furtivos por perto... alguém está vendendo algo que não devia.",
+  "message.hogwartsmod.smuggler_template": "Essas ofertas passam a valer para os contrabandistas que aparecem sozinhos.",
+  "screen.hogwartsmod.shop.tamed.coruja": "Coruja domesticada",
+  "screen.hogwartsmod.shop.tamed.hipogrifo": "Hipogrifo domesticado",
+  "screen.hogwartsmod.shop.tamed.testralio": "Testrálio domesticado"
 }

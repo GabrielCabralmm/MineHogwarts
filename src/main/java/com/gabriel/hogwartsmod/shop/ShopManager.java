@@ -26,7 +26,8 @@ public final class ShopManager {
     // -- Telas
 
     public static void open(ServerPlayer player, ShopNpcEntity npc) {
-        ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player), new OpenShopPacket(npc.getId(), npc.getNpcName(), npc.getOffers()));
+        ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> player),
+                new OpenShopPacket(npc.getId(), npc.getNpcName(), npc.getKind().ordinal(), npc.getOffers()));
     }
 
     public static void openEditor(ServerPlayer player, ShopNpcEntity npc) {
@@ -46,7 +47,31 @@ public final class ShopManager {
         return n;
     }
 
-    public static boolean canBuy(Player player, ShopOffer offer) {
+    public static boolean needsLicense(ShopKind kind, ShopOffer offer) {
+        return kind == ShopKind.COMERCIANTE && (offer.species() != null || offer.isBag());
+    }
+
+    @org.jetbrains.annotations.Nullable
+    public static String blocker(Player player, ShopKind kind, ShopOffer offer) {
+        com.gabriel.hogwartsmod.creature.Species species = offer.species();
+        com.gabriel.hogwartsmod.magic.MagicData data = com.gabriel.hogwartsmod.magic.MagicData.get(player);
+        if (species != null && data != null && data.getCreatures().get(species) != null) {
+            return "screen.hogwartsmod.shop.has_creature";
+        }
+        if (offer.isLicense() && CreatureLicenseItem.has(player)) {
+            return "screen.hogwartsmod.shop.has_license";
+        }
+        if (needsLicense(kind, offer) && !CreatureLicenseItem.has(player)) {
+            return "screen.hogwartsmod.shop.need_license";
+        }
+        return null;
+    }
+
+    public static boolean canBuy(Player player, ShopKind kind, ShopOffer offer) {
+        return blocker(player, kind, offer) == null && canPay(player, offer);
+    }
+
+    public static boolean canPay(Player player, ShopOffer offer) {
         if (Wallet.value(player) < offer.price()) {
             return false;
         }
@@ -67,8 +92,14 @@ public final class ShopManager {
             return;
         }
         int bought = 0;
-        for (int i = 0; i < Math.max(1, Math.min(BULK, times)); i++) {
-            if (!canBuy(player, offer) || !Wallet.pay(player, offer.galeoes(), offer.sicles(), offer.nuques())) {
+        String blocked = blocker(player, npc.getKind(), offer);
+        if (blocked != null) {
+            player.displayClientMessage(Component.translatable(blocked).withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
+        int max = offer.single() ? 1 : Math.max(1, Math.min(BULK, times));
+        for (int i = 0; i < max; i++) {
+            if (!canPay(player, offer) || !Wallet.pay(player, offer.galeoes(), offer.sicles(), offer.nuques())) {
                 break;
             }
             for (ShopOffer.Goods cost : offer.costs()) {
@@ -81,7 +112,17 @@ public final class ShopManager {
                     }
                 }
             }
-            give(player, offer.product());
+            if (offer.species() != null) {
+                com.gabriel.hogwartsmod.creature.CreatureManager.giveTamed(player, offer.species());
+            } else if (offer.isLicense()) {
+                ItemStack license = new ItemStack(offer.product().item());
+                CreatureLicenseItem.bind(license, player);
+                if (!player.getInventory().add(license)) {
+                    player.drop(license, false);
+                }
+            } else {
+                give(player, offer.product());
+            }
             bought++;
         }
         if (bought == 0) {
@@ -91,7 +132,7 @@ public final class ShopManager {
         npc.talk();
         player.level().playSound(null, player.blockPosition(), SoundEvents.CHAIN_STEP, SoundSource.PLAYERS, 1f, 1.6f);
         player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 1.2f);
-        player.displayClientMessage(Component.translatable("message.hogwartsmod.shop_bought",
+        if (offer.species() == null) player.displayClientMessage(Component.translatable("message.hogwartsmod.shop_bought",
                 offer.product().count() * bought, offer.product().item().getDescription()).withStyle(ChatFormatting.GOLD), true);
         player.inventoryMenu.broadcastChanges();
     }
@@ -122,6 +163,10 @@ public final class ShopManager {
         }
         npc.setModel(model);
         npc.setOffers(offers);
+        if (npc.getKind() == ShopKind.CONTRABANDISTA) {
+            Smugglers.get(player.server).setTemplate(npc.getOffers());
+            player.sendSystemMessage(Component.translatable("message.hogwartsmod.smuggler_template").withStyle(ChatFormatting.GRAY));
+        }
         player.displayClientMessage(Component.translatable("message.hogwartsmod.mission_npc_saved", npc.getNpcName())
                 .withStyle(ChatFormatting.GOLD), true);
     }
