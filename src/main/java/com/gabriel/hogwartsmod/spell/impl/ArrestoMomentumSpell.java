@@ -25,7 +25,7 @@ public class ArrestoMomentumSpell extends Spell {
     }
 
     public double getRadius(MagicData data) {
-        return 5 + data.getMastery(this);
+        return (5 + data.getMastery(this)) * data.wandStats().range();
     }
 
     public int getDuration(MagicData data) {

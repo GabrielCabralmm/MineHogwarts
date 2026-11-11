@@ -47,6 +47,12 @@ public final class WandPreview {
         if (!previewable(stack)) {
             return;
         }
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player != null && stack.is(ModItems.WAND.get()) && Wands.isForeign(stack, mc.player)) {
+            event.getTooltipElements().add(Either.left(Component.translatable("tooltip.hogwartsmod.wand.foreign",
+                    com.gabriel.hogwartsmod.magic.MagicConfig.FOREIGN_WAND_DAMAGE.get(), com.gabriel.hogwartsmod.magic.MagicConfig.FOREIGN_WAND_COOLDOWN.get())
+                    .withStyle(ChatFormatting.RED)));
+        }
         if (Screen.hasShiftDown()) {
             event.getTooltipElements().add(Either.right(new Data(stack)));
         } else {

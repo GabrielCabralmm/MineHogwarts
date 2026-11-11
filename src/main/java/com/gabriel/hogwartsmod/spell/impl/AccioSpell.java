@@ -27,7 +27,7 @@ public class AccioSpell extends Spell {
     }
 
     public double getRange(MagicData data) {
-        return 16 + 6 * data.getMastery(this);
+        return (16 + 6 * data.getMastery(this)) * data.wandStats().range();
     }
 
     @Override

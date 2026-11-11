@@ -727,5 +727,6 @@
   "screen.hogwartsmod.wand_box.confirm": "Confirm",
   "screen.hogwartsmod.wand_box.back": "Back",
   "screen.hogwartsmod.shop.has_first_wand": "You already have your wand",
-  "entity.hogwartsmod.auxiliar_varinhas": "Wand Helper"
+  "entity.hogwartsmod.auxiliar_varinhas": "Wand Helper",
+  "tooltip.hogwartsmod.wand.foreign": "This wand is not yours: −%s%% damage, +%s%% cooldown"
 }

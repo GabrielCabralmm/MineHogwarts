@@ -32,6 +32,7 @@ public class WandItem extends Item {
             notify(player, level, Component.translatable("message.hogwartsmod.no_cast_flying"));
             return InteractionResultHolder.fail(stack);
         }
+        data.setWandStats(com.gabriel.hogwartsmod.wand.Wands.effective(player, stack));
         Spell spell = data.getActiveSpell();
         long now = level.getGameTime();
         if (spell == null) {
@@ -64,7 +65,7 @@ public class WandItem extends Item {
                     String.format("%.1f", cooldown / 20f)));
             return InteractionResultHolder.fail(stack);
         }
-        if (data.getReserve() < spell.getCost()) {
+        if (data.getReserve() < data.scaledCost(spell)) {
             notify(player, level, Component.translatable("message.hogwartsmod.no_reserve"));
             return InteractionResultHolder.fail(stack);
         }
@@ -73,15 +74,15 @@ public class WandItem extends Item {
                 if (!spell.startHold(sp, data)) {
                     return InteractionResultHolder.fail(stack);
                 }
-                data.spend(spell.getCost());
+                data.spend(data.scaledCost(spell));
                 ModNetwork.playAnimation(sp, spell.getDelivery().getAnimation());
             }
             player.startUsingItem(hand);
             return InteractionResultHolder.consume(stack);
         }
         if (player instanceof ServerPlayer sp) {
-            data.spend(spell.getCost());
-            data.setCooldown(spell, now, spell.getCooldownTicks());
+            data.spend(data.scaledCost(spell));
+            data.setCooldown(spell, now, data.scaledCooldown(spell));
             ModNetwork.playAnimation(sp, spell.getDelivery().getAnimation());
             int release = spell.getDelivery().getReleaseTick();
             if (release <= 0) {
@@ -105,6 +106,7 @@ public class WandItem extends Item {
             player.stopUsingItem();
             return;
         }
+        data.setWandStats(com.gabriel.hogwartsmod.wand.Wands.effective(player, stack));
         int held = getUseDuration(stack) - remaining;
         if (!spell.tickHold(player, data, held)) {
             player.stopUsingItem();
@@ -120,7 +122,7 @@ public class WandItem extends Item {
         Spell spell = data == null ? null : data.getActiveSpell();
         if (spell != null && spell.isSustained()) {
             spell.stopHold(player, data);
-            data.setCooldown(spell, level.getGameTime(), spell.getCooldownTicks());
+            data.setCooldown(spell, level.getGameTime(), data.scaledCooldown(spell));
             ModNetwork.stopAnimation(player);
         }
         if (data != null) {

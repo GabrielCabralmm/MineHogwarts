@@ -22,6 +22,8 @@ public final class MagicConfig {
     public static final ForgeConfigSpec.BooleanValue LIVES_ENABLED;
     public static final ForgeConfigSpec.BooleanValue SMUGGLER_SPAWNS;
     public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> DUEL_BLOCKED_SPELLS;
+    public static final ForgeConfigSpec.IntValue FOREIGN_WAND_DAMAGE;
+    public static final ForgeConfigSpec.IntValue FOREIGN_WAND_COOLDOWN;
     public static final ForgeConfigSpec.IntValue DUEL_XP_WIN;
     public static final ForgeConfigSpec.IntValue DUEL_XP_LOSE;
     public static final ForgeConfigSpec.IntValue SMUGGLER_CHANCE;
@@ -63,6 +65,10 @@ public final class MagicConfig {
         builder.pop();
         builder.push("pocoes");
         POTION_BOOKS_IN_CHESTS = builder.comment("Livros de poções podem aparecer nos baús das estruturas").define("livrosNosBaus", true);
+        builder.pop();
+        builder.push("varinhas");
+        FOREIGN_WAND_DAMAGE = builder.comment("Dano a menos (%) ao usar uma varinha de outro dono").defineInRange("penalidadeDano", 25, 0, 100);
+        FOREIGN_WAND_COOLDOWN = builder.comment("Recarga a mais (%) ao usar uma varinha de outro dono").defineInRange("penalidadeRecarga", 30, 0, 500);
         builder.pop();
         builder.push("duelos");
         DUEL_BLOCKED_SPELLS = builder.comment("Feitiços proibidos em duelos (ids)").defineListAllowEmpty("feiticosBloqueados",

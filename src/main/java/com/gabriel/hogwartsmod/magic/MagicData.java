@@ -54,6 +54,7 @@ public class MagicData {
     private int lives = -1;
     private boolean seenDeath;
     private boolean firstWand;
+    private com.gabriel.hogwartsmod.wand.WandStats wandStats = com.gabriel.hogwartsmod.wand.WandStats.NEUTRAL;
     private boolean dirty = true;
     private boolean forceSync = true;
 
@@ -188,7 +189,12 @@ public class MagicData {
     }
 
     public boolean addMastery(Spell spell, int uses, int xpGain) {
-        masteryUses.merge(spell.getId(), uses, Integer::sum);
+        float scaled = uses * wandStats.mastery();
+        int gained = (int) scaled;
+        if (Math.random() < scaled - gained) {
+            gained++;
+        }
+        masteryUses.merge(spell.getId(), gained, Integer::sum);
         markForSync();
         return addXp(xpGain);
     }
@@ -493,6 +499,22 @@ public class MagicData {
     public void setLives(int value) {
         lives = Math.max(0, value);
         markForSync();
+    }
+
+    public com.gabriel.hogwartsmod.wand.WandStats wandStats() {
+        return wandStats;
+    }
+
+    public void setWandStats(com.gabriel.hogwartsmod.wand.WandStats value) {
+        wandStats = value;
+    }
+
+    public int scaledCooldown(Spell spell) {
+        return Math.max(1, Math.round(spell.getCooldownTicks() * wandStats.cooldown()));
+    }
+
+    public float scaledCost(Spell spell) {
+        return spell.getCost() * wandStats.cost();
     }
 
     public boolean hasFirstWand() {

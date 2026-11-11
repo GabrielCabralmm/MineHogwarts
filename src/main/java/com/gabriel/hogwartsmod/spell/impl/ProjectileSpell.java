@@ -24,7 +24,7 @@ public abstract class ProjectileSpell extends Spell {
         SpellProjectileEntity projectile = new SpellProjectileEntity(caster.level(), caster, this);
         Vec3 tip = wandTip(caster);
         projectile.setPos(tip.x, tip.y, tip.z);
-        projectile.shootFromRotation(caster, caster.getXRot(), caster.getYRot(), 0.0f, 2.2f, 0.0f);
+        projectile.shootFromRotation(caster, caster.getXRot(), caster.getYRot(), 0.0f, 2.2f * data.wandStats().range(), 0.0f);
         caster.level().addFreshEntity(projectile);
         if (caster.level() instanceof ServerLevel server) {
             SpellFx.castFlash(server, tip, getColor());

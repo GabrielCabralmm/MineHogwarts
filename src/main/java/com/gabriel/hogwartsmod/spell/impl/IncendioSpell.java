@@ -28,7 +28,7 @@ public class IncendioSpell extends Spell {
     }
 
     public float getDamage(MagicData data) {
-        return 1.5f + 0.5f * data.getMastery(this);
+        return (1.5f + 0.5f * data.getMastery(this)) * data.wandStats().damage();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class IncendioSpell extends Spell {
         if (ticksHeld % 2 != 0) {
             return true;
         }
-        Vec3 end = start.add(caster.getLookAngle().scale(RANGE));
+        Vec3 end = start.add(caster.getLookAngle().scale(RANGE * data.wandStats().range()));
         HitResult blockHit = server.clip(new ClipContext(start, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, caster));
         if (blockHit.getType() != HitResult.Type.MISS) {
             end = blockHit.getLocation();
@@ -59,7 +59,7 @@ public class IncendioSpell extends Spell {
         }
         AABB box = caster.getBoundingBox().expandTowards(end.subtract(start)).inflate(1.0);
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(caster, start, end, box,
-                e -> e instanceof LivingEntity && e != caster && !e.isSpectator(), RANGE * RANGE);
+                e -> e instanceof LivingEntity && e != caster && !e.isSpectator(), RANGE * RANGE * data.wandStats().range() * data.wandStats().range());
         if (hit == null || !(hit.getEntity() instanceof LivingEntity target)) {
             return true;
         }

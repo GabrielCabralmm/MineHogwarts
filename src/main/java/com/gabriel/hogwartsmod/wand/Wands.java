@@ -104,6 +104,27 @@ public final class Wands {
         }
     }
 
+    @Nullable
+    public static java.util.UUID ownerId(ItemStack stack) {
+        CompoundTag tag = tag(stack);
+        return tag != null && tag.hasUUID("DonoId") ? tag.getUUID("DonoId") : null;
+    }
+
+    public static boolean isForeign(ItemStack stack, Player player) {
+        java.util.UUID owner = ownerId(stack);
+        return owner != null && !owner.equals(player.getUUID());
+    }
+
+    public static WandStats effective(Player player, ItemStack stack) {
+        WandStats s = stats(stack);
+        if (!isForeign(stack, player)) {
+            return s;
+        }
+        float damage = 1f - com.gabriel.hogwartsmod.magic.MagicConfig.FOREIGN_WAND_DAMAGE.get() / 100f;
+        float cooldown = 1f + com.gabriel.hogwartsmod.magic.MagicConfig.FOREIGN_WAND_COOLDOWN.get() / 100f;
+        return new WandStats(s.damage() * damage, s.range(), s.cooldown() * cooldown, s.cost(), s.shield(), s.mastery());
+    }
+
     public static String owner(ItemStack stack) {
         CompoundTag tag = tag(stack);
         return tag == null ? "" : tag.getString("Dono");

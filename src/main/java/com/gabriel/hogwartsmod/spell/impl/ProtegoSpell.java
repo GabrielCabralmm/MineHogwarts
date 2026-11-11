@@ -31,7 +31,7 @@ public class ProtegoSpell extends Spell {
     }
 
     public float getShieldMaxHp(MagicData data) {
-        return 40f + 10f * data.getMastery(this);
+        return (40f + 10f * data.getMastery(this)) * data.wandStats().shield();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class ProtegoSpell extends Spell {
 
     @Override
     public boolean tickHold(ServerPlayer caster, MagicData data, int ticksHeld) {
-        if (!data.isShielding() || !data.spend(DRAIN_PER_TICK)) {
+        if (!data.isShielding() || !data.spend(DRAIN_PER_TICK * data.wandStats().cost())) {
             return false;
         }
         return true;

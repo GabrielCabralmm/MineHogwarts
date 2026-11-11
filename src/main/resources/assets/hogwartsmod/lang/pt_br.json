@@ -730,5 +730,6 @@
   "screen.hogwartsmod.wand_box.confirm": "Confirmar",
   "screen.hogwartsmod.wand_box.back": "Voltar",
   "screen.hogwartsmod.shop.has_first_wand": "Você já tem sua varinha",
-  "entity.hogwartsmod.auxiliar_varinhas": "Auxiliar de Varinhas"
+  "entity.hogwartsmod.auxiliar_varinhas": "Auxiliar de Varinhas",
+  "tooltip.hogwartsmod.wand.foreign": "Esta varinha não é sua: −%s%% de dano, +%s%% de recarga"
 }
