@@ -14,8 +14,8 @@ import java.util.List;
 import static com.gabriel.hogwartsmod.client.gui.MissionScreen.*;
 
 public class HufflepuffDoorScreen extends HouseDoorScreen {
-    private static final int W = 260;
-    private static final int H = 200;
+    private static final int W = 280;
+    private static final int H = 218;
     private static final int LID = 38;
     private static final int BTN_W = 62;
     private static final int BTN_H = 14;
@@ -23,7 +23,8 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
     private static final ResourceLocation BARREL = MissionScreen.tex("barril");
     private static final ResourceLocation BARREL_LIT = MissionScreen.tex("barril_aceso");
-    private static final ResourceLocation BARREL_SIDE = MissionScreen.tex("barril_lado");
+    private static final ResourceLocation BARREL_LEFT = MissionScreen.tex("barril_esq");
+    private static final ResourceLocation BARREL_LIT_LEFT = MissionScreen.tex("barril_aceso_esq");
 
     private final int length;
     private final List<Integer> hits = new ArrayList<>();
@@ -45,11 +46,11 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
     }
 
     private int barrelX(int index) {
-        return left + (index < 3 ? 78 : W - 78);
+        return left + (index < 3 ? 96 : W - 96);
     }
 
     private int barrelY(int index) {
-        return top + 66 + (index % 3) * 42;
+        return top + 80 + (index % 3) * 44;
     }
 
     private float tilt(int index) {
@@ -75,8 +76,8 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         for (int k = 0; k < length; k++) {
             int dx = (int) cx - length * 5 + k * 10 + 1;
             int c = k < hits.size() ? 0xFFE8B923 : 0xFFC4AA7C;
-            g.fill(dx, top + 108, dx + 7, top + 115, 0xFF6E4A2C);
-            g.fill(dx + 1, top + 109, dx + 6, top + 114, c);
+            g.fill(dx, top + 120, dx + 7, top + 127, 0xFF6E4A2C);
+            g.fill(dx + 1, top + 121, dx + 6, top + 126, c);
         }
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 30;
@@ -91,19 +92,20 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         int y = barrelY(i);
         int lit = hits.indexOf(i + 1);
         boolean hover = !rejecting && over(mouseX, mouseY, x - LID / 2, y - LID / 2, LID, LID);
+        boolean left = i < 3;
+        ResourceLocation image = lit >= 0 ? (left ? BARREL_LIT : BARREL_LIT_LEFT) : (left ? BARREL : BARREL_LEFT);
+        int bw = 96;
+        int bh = 52;
+        int lidOffset = Math.round(bw * 18f / 112f);
         g.pose().pushPose();
         g.pose().translate(x + shake, y, 0);
         g.pose().mulPose(Axis.ZP.rotationDegrees(tilt(i)));
-        int side = i < 3 ? -1 : 1;
-        int bodyW = 52;
-        HiRes.image(g, BARREL_SIDE, side < 0 ? -bodyW - 2 : 2, -LID / 2 + 2, bodyW, LID - 4);
-        g.pose().scale(0.72f, 1f, 1f);
-        HiRes.image(g, lit >= 0 ? BARREL_LIT : BARREL, -LID / 2, -LID / 2, LID, LID);
+        HiRes.image(g, image, left ? -bw + lidOffset : -lidOffset, -bh / 2, bw, bh);
         if (hover) {
-            g.fill(-LID / 2 + 4, -LID / 2 + 4, LID / 2 - 4, LID / 2 - 4, 0x30FFFFFF);
+            g.fill(-6, -14, 6, 14, 0x28FFFFFF);
         }
         if (rejecting) {
-            g.fill(-LID / 2 + 4, -LID / 2 + 4, LID / 2 - 4, LID / 2 - 4, 0x55B02020);
+            g.fill(left ? -bw + lidOffset : -lidOffset, -bh / 2 + 6, left ? lidOffset : bw - lidOffset, bh / 2 - 6, 0x40B02020);
         }
         g.pose().popPose();
         if (lit >= 0) {

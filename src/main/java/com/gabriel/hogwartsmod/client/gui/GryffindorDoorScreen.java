@@ -12,6 +12,7 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
     private static final int H = 232;
     private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
     private static final ResourceLocation LADY = MissionScreen.tex("porta_dama");
+    private static final ResourceLocation FRAME = MissionScreen.tex("moldura_retrato");
 
     public GryffindorDoorScreen(BlockPos pos) {
         super(pos, Component.translatable("screen.hogwartsmod.door.grifinoria"));
@@ -39,7 +40,13 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
         float cx = left + W / 2f;
         HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 8.5f, cx, top + 12, TITLE);
         g.fill(left + 50, top + 23, left + W - 50, top + 24, LINE);
-        HiRes.image(g, LADY, left + (W - 96) / 2, top + 30, 96, 128);
+        int fw = 102;
+        int fh = 132;
+        int fx = left + (W - fw) / 2;
+        int fy = top + 28;
+        int border = Math.round(fw * 20f / 136f);
+        HiRes.image(g, LADY, fx + border - 2, fy + border - 2, fw - border * 2 + 4, fh - border * 2 + 4);
+        HiRes.image(g, FRAME, fx, fy, fw, fh);
         double time = System.currentTimeMillis() / 1000.0;
         float bob = (float) Math.sin(time * 4) * 1.5f;
         HiRes.centered(g, "♪", HiRes.Style.ITALIC, 9f, cx - 44 + (float) Math.sin(time * 3) * 2, top + 164 - bob, WINE);
