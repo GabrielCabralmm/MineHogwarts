@@ -24,6 +24,7 @@ public class HogwartsMod {
         ModBlocks.BLOCKS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
+        com.gabriel.hogwartsmod.registry.ModMenus.MENUS.register(modBus);
         ModEntities.ENTITIES.register(modBus);
         ModCreativeTabs.TABS.register(modBus);
         ModParticles.PARTICLES.register(modBus);

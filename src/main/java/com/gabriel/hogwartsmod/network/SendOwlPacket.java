@@ -1,7 +1,7 @@
 package com.gabriel.hogwartsmod.network;
 
 import com.gabriel.hogwartsmod.creature.OwlEntity;
-import com.gabriel.hogwartsmod.mail.LetterItem;
+import com.gabriel.hogwartsmod.mail.Mail;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -40,7 +40,7 @@ public record SendOwlPacket(int owl, InteractionHand hand, UUID recipient) {
         }
         ItemStack held = player.getItemInHand(packet.hand);
         ServerPlayer target = player.server.getPlayerList().getPlayer(packet.recipient);
-        if (!(held.getItem() instanceof LetterItem) || !LetterItem.isSealed(held) || target == null) {
+        if (!Mail.isSealed(held) || target == null) {
             return false;
         }
         owl.startDelivery(held.split(1), player, target);

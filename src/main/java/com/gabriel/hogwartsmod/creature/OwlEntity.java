@@ -1,6 +1,6 @@
 package com.gabriel.hogwartsmod.creature;
 
-import com.gabriel.hogwartsmod.mail.LetterItem;
+import com.gabriel.hogwartsmod.mail.Mail;
 import com.gabriel.hogwartsmod.mail.OwlPost;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -142,7 +142,7 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
         if (held.getItem() instanceof CreatureBagItem) {
             return InteractionResult.PASS;
         }
-        if (held.getItem() instanceof LetterItem) {
+        if (Mail.isMail(held)) {
             return interactLetter(player, hand, held);
         }
         if (isBusy()) {
@@ -197,7 +197,7 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
             problem = Component.translatable("message.hogwartsmod.creature_not_yours");
         } else if (isBusy()) {
             problem = Component.translatable("message.hogwartsmod.owl_busy");
-        } else if (!LetterItem.isSealed(letter)) {
+        } else if (!Mail.isSealed(letter)) {
             problem = Component.translatable("message.hogwartsmod.owl_unsigned");
         }
         if (problem != null) {
@@ -309,11 +309,12 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
         if (!returning) {
             ItemStack letter = carried;
             carried = ItemStack.EMPTY;
+            boolean parcel = Mail.isPackage(letter);
             if (!target.getInventory().add(letter)) {
                 target.drop(letter, false);
             }
             playSound(SoundEvents.ITEM_PICKUP, 0.8f, 0.9f);
-            target.sendSystemMessage(Component.translatable("message.hogwartsmod.owl_delivered", getDisplayName(), senderName).withStyle(ChatFormatting.GOLD));
+            target.sendSystemMessage(Component.translatable(parcel ? "message.hogwartsmod.owl_delivered_package" : "message.hogwartsmod.owl_delivered", getDisplayName(), senderName).withStyle(ChatFormatting.GOLD));
             if (getOwner() instanceof ServerPlayer owner) {
                 owner.displayClientMessage(Component.translatable("message.hogwartsmod.owl_delivered_sender", recipientName).withStyle(ChatFormatting.GOLD), true);
             }
