@@ -13,7 +13,7 @@ import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
 public final class ModNetwork {
-    private static final String VERSION = "25";
+    private static final String VERSION = "26";
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "main"), () -> VERSION, VERSION::equals, VERSION::equals);
 
@@ -62,6 +62,12 @@ public final class ModNetwork {
                 .encoder(SendOwlPacket::encode).decoder(SendOwlPacket::decode).consumerMainThread(SendOwlPacket::handle).add();
         CHANNEL.messageBuilder(ChooseWandPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(ChooseWandPacket::encode).decoder(ChooseWandPacket::decode).consumerMainThread(ChooseWandPacket::handle).add();
+        CHANNEL.messageBuilder(OpenHouseDoorPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(OpenHouseDoorPacket::encode).decoder(OpenHouseDoorPacket::decode).consumerMainThread(OpenHouseDoorPacket::handle).add();
+        CHANNEL.messageBuilder(HouseDoorAttemptPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(HouseDoorAttemptPacket::encode).decoder(HouseDoorAttemptPacket::decode).consumerMainThread(HouseDoorAttemptPacket::handle).add();
+        CHANNEL.messageBuilder(HouseDoorResultPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(HouseDoorResultPacket::encode).decoder(HouseDoorResultPacket::decode).consumerMainThread(HouseDoorResultPacket::handle).add();
         CHANNEL.messageBuilder(CraftBroomPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
                 .encoder(CraftBroomPacket::encode).decoder(CraftBroomPacket::decode).consumerMainThread(CraftBroomPacket::handle).add();
         CHANNEL.messageBuilder(CraftWandPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)

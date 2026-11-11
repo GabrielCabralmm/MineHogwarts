@@ -42,6 +42,18 @@ public final class ModBlocks {
     public static final RegistryObject<Item> BANCADA_VASSOURAS_ITEM = ModItems.ITEMS.register("bancada_vassouras",
             () -> new net.minecraft.world.item.BlockItem(BANCADA_VASSOURAS.get(), new Item.Properties()));
 
+    public static final java.util.Map<com.gabriel.hogwartsmod.house.House, RegistryObject<Block>> HOUSE_DOORS = new java.util.EnumMap<>(com.gabriel.hogwartsmod.house.House.class);
+
+    static {
+        for (com.gabriel.hogwartsmod.house.House house : com.gabriel.hogwartsmod.house.House.values()) {
+            RegistryObject<Block> door = BLOCKS.register("porta_" + house.getId(), () -> new com.gabriel.hogwartsmod.house.door.HouseDoorBlock(house,
+                    net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.STONE)
+                            .strength(3f, 3600000f).noOcclusion().noLootTable()));
+            HOUSE_DOORS.put(house, door);
+            ModItems.ITEMS.register("porta_" + house.getId(), () -> new net.minecraft.world.item.DoubleHighBlockItem(door.get(), new Item.Properties()));
+        }
+    }
+
     private ModBlocks() {
     }
 }

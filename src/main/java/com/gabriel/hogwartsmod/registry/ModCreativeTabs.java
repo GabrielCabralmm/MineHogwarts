@@ -28,6 +28,7 @@ public final class ModCreativeTabs {
                         ModItems.BROOM_HANDLES.values().forEach(handle -> output.accept(handle.get()));
                         output.accept(ModItems.ZONE_WAND.get());
                         output.accept(ModItems.SORTING_HAT.get());
+                        ModBlocks.HOUSE_DOORS.values().forEach(door -> output.accept(door.get()));
                         output.accept(ModItems.COIN_POUCH.get());
                         output.accept(ModItems.GALEAO.get());
                         output.accept(ModItems.SICLE.get());

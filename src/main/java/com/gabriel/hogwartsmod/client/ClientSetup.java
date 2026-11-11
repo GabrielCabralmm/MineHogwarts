@@ -52,6 +52,7 @@ public final class ClientSetup {
                 com.gabriel.hogwartsmod.client.potion.CauldronRenderer::new);
         event.registerEntityRenderer(ModEntities.SPELL_PROJECTILE.get(), NoopRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.PULPIT.get(), PulpitRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.HOUSE_DOOR.get(), com.gabriel.hogwartsmod.client.render.HouseDoorRenderer::new);
         event.registerEntityRenderer(ModEntities.PROFESSOR_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.MISSION_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
         event.registerEntityRenderer(ModEntities.SHOP_NPC.get(), com.gabriel.hogwartsmod.client.npc.NpcRenderer::new);
@@ -98,6 +99,9 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerExtraModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
         event.register(com.gabriel.hogwartsmod.client.potion.CauldronRenderer.SPOON);
+        for (net.minecraft.resources.ResourceLocation door : com.gabriel.hogwartsmod.client.render.HouseDoorRenderer.ALL) {
+            event.register(door);
+        }
         for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
             if (handle != com.gabriel.hogwartsmod.wand.WandHandle.NENHUM) {
                 event.register(WandPreview.handleModel(handle));
