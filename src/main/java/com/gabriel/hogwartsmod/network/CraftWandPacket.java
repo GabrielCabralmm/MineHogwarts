@@ -19,26 +19,25 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public record CraftWandPacket(int quarters, WandHandle handle) {
+public record CraftWandPacket(int quarters) {
 
     public static void encode(CraftWandPacket packet, FriendlyByteBuf buf) {
         buf.writeVarInt(packet.quarters);
-        buf.writeEnum(packet.handle);
     }
 
     public static CraftWandPacket decode(FriendlyByteBuf buf) {
-        return new CraftWandPacket(buf.readVarInt(), buf.readEnum(WandHandle.class));
+        return new CraftWandPacket(buf.readVarInt());
     }
 
     public static void handle(CraftWandPacket packet, Supplier<NetworkEvent.Context> ctx) {
         ServerPlayer player = ctx.get().getSender();
         if (player != null) {
-            craft(player, packet.quarters, packet.handle);
+            craft(player, packet.quarters);
         }
         ctx.get().setPacketHandled(true);
     }
 
-    public static boolean craft(ServerPlayer player, int quarters, WandHandle handle) {
+    public static boolean craft(ServerPlayer player, int quarters) {
         if (!(player.containerMenu instanceof WandBenchMenu menu) || !WandBenchBlock.canUse(player)) {
             return false;
         }
@@ -47,7 +46,7 @@ public record CraftWandPacket(int quarters, WandHandle handle) {
         if (!(branch.getItem() instanceof BranchItem item) || core == null) {
             return false;
         }
-        ItemStack wand = Wands.create(item.getWood(), core, quarters, handle, player.getGameProfile().getName());
+        ItemStack wand = Wands.create(item.getWood(), core, quarters, WandHandle.NENHUM, player.getGameProfile().getName());
         branch.shrink(1);
         menu.core().shrink(1);
         menu.slotsChanged(null);

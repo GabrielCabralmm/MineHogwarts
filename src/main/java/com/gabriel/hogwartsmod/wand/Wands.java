@@ -69,7 +69,7 @@ public final class Wands {
     public static WandHandle handle(ItemStack stack) {
         CompoundTag tag = tag(stack);
         WandHandle handle = tag == null ? null : WandHandle.byId(tag.getString("Cabo"));
-        return handle == null ? WandHandle.LISO : handle;
+        return handle == null ? WandHandle.NENHUM : handle;
     }
 
     public static int length(ItemStack stack) {

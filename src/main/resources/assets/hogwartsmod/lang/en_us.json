@@ -705,5 +705,7 @@
   "handle.hogwartsmod.liso.name": "Smooth",
   "handle.hogwartsmod.anelado.name": "Ringed",
   "handle.hogwartsmod.espiral.name": "Spiral",
-  "handle.hogwartsmod.nodoso.name": "Knotted"
+  "handle.hogwartsmod.nodoso.name": "Knotted",
+  "handle.hogwartsmod.nenhum": "no handle",
+  "handle.hogwartsmod.nenhum.name": "No handle"
 }

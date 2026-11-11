@@ -708,5 +708,7 @@
   "handle.hogwartsmod.liso.name": "Liso",
   "handle.hogwartsmod.anelado.name": "Anelado",
   "handle.hogwartsmod.espiral.name": "Espiral",
-  "handle.hogwartsmod.nodoso.name": "Nodoso"
+  "handle.hogwartsmod.nodoso.name": "Nodoso",
+  "handle.hogwartsmod.nenhum": "sem cabo",
+  "handle.hogwartsmod.nenhum.name": "Sem cabo"
 }

@@ -208,6 +208,7 @@ public final class HogwartsCommand {
                                 .then(Commands.argument("madeira", StringArgumentType.word()).suggests(WOODS)
                                         .then(Commands.argument("nucleo", StringArgumentType.word()).suggests(CORES)
                                                 .then(Commands.argument("comprimento", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(9, 14))
+                                                        .executes(HogwartsCommand::giveWand)
                                                         .then(Commands.argument("cabo", StringArgumentType.word()).suggests(HANDLES)
                                                                 .executes(HogwartsCommand::giveWand)))))))
                 .then(Commands.literal("profissao").requires(STAFF)
@@ -520,7 +521,8 @@ public final class HogwartsCommand {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
         com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.WandWood.byId(StringArgumentType.getString(ctx, "madeira"));
         com.gabriel.hogwartsmod.wand.WandCore core = com.gabriel.hogwartsmod.wand.WandCore.byId(StringArgumentType.getString(ctx, "nucleo"));
-        com.gabriel.hogwartsmod.wand.WandHandle handle = com.gabriel.hogwartsmod.wand.WandHandle.byId(StringArgumentType.getString(ctx, "cabo"));
+        com.gabriel.hogwartsmod.wand.WandHandle handle = ctx.getNodes().stream().anyMatch(n -> n.getNode().getName().equals("cabo"))
+                ? com.gabriel.hogwartsmod.wand.WandHandle.byId(StringArgumentType.getString(ctx, "cabo")) : com.gabriel.hogwartsmod.wand.WandHandle.NENHUM;
         if (wood == null || core == null || handle == null) {
             throw BAD_WAND.create();
         }

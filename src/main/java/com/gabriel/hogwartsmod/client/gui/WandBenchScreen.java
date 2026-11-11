@@ -31,12 +31,10 @@ public class WandBenchScreen extends AbstractContainerScreen<WandBenchMenu> {
     private static final int ARROW = 9;
     private static final long HOLD_MS = 2000;
     private static final int ROW_Y = 92;
-    private static final int LEN_X = 14;
-    private static final int HANDLE_X = 92;
+    private static final int LEN_X = 53;
     private static final int FIELD_W = 70;
 
     private int quarters = 44;
-    private int handle;
     private long holdStart = -1;
 
     public WandBenchScreen(WandBenchMenu menu, Inventory inventory, Component title) {
@@ -51,7 +49,7 @@ public class WandBenchScreen extends AbstractContainerScreen<WandBenchMenu> {
         if (!(branch.getItem() instanceof BranchItem item) || core == null) {
             return ItemStack.EMPTY;
         }
-        return Wands.create(item.getWood(), core, quarters, WandHandle.values()[handle], null);
+        return Wands.create(item.getWood(), core, quarters, WandHandle.NENHUM, null);
     }
 
     private int craftX() {
@@ -91,7 +89,6 @@ public class WandBenchScreen extends AbstractContainerScreen<WandBenchMenu> {
         partSlot(g, WandBenchMenu.CORE_X, WandBenchMenu.CORE_Y, "screen.hogwartsmod.bench.core", menu.core());
         drawPreview(g);
         drawSelector(g, mouseX, mouseY, LEN_X, "screen.hogwartsmod.bench.length", Wands.formatLength(quarters) + "\"");
-        drawSelector(g, mouseX, mouseY, HANDLE_X, "screen.hogwartsmod.bench.handle", tr("handle.hogwartsmod." + WandHandle.values()[handle].getId() + ".name"));
         HiRes.text(g, tr("screen.hogwartsmod.package.inventory"), HiRes.Style.BOLD, 7.5f, leftPos + 8, topPos + WandBenchMenu.INV_Y - 11, INK);
         for (Slot slot : menu.slots) {
             if (slot.index >= 2) {
@@ -220,12 +217,11 @@ public class WandBenchScreen extends AbstractContainerScreen<WandBenchMenu> {
     // -- Interação
 
     public void craft() {
-        ModNetwork.CHANNEL.sendToServer(new CraftWandPacket(quarters, WandHandle.values()[handle]));
+        ModNetwork.CHANNEL.sendToServer(new CraftWandPacket(quarters));
     }
 
-    public void choose(int quarters, int handle) {
+    public void choose(int quarters) {
         this.quarters = Wands.clampLength(quarters);
-        this.handle = Math.floorMod(handle, WandHandle.values().length);
     }
 
     private void click() {
@@ -246,16 +242,6 @@ public class WandBenchScreen extends AbstractContainerScreen<WandBenchMenu> {
             }
             if (over(mx, my, leftPos + LEN_X + FIELD_W - ARROW, y, ARROW, ARROW + 2)) {
                 quarters = Wands.clampLength(quarters + step);
-                click();
-                return true;
-            }
-            if (over(mx, my, leftPos + HANDLE_X, y, ARROW, ARROW + 2)) {
-                choose(quarters, handle - 1);
-                click();
-                return true;
-            }
-            if (over(mx, my, leftPos + HANDLE_X + FIELD_W - ARROW, y, ARROW, ARROW + 2)) {
-                choose(quarters, handle + 1);
                 click();
                 return true;
             }

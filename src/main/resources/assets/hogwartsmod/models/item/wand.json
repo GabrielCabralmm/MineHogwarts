@@ -147,6 +147,42 @@
         "hogwartsmod:modelo": 0.24
       },
       "model": "hogwartsmod:item/varinha/nodoso_14"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.25
+      },
+      "model": "hogwartsmod:item/varinha/nenhum_9"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.26
+      },
+      "model": "hogwartsmod:item/varinha/nenhum_10"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.27
+      },
+      "model": "hogwartsmod:item/varinha/nenhum_11"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.28
+      },
+      "model": "hogwartsmod:item/varinha/nenhum_12"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.29
+      },
+      "model": "hogwartsmod:item/varinha/nenhum_13"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.3
+      },
+      "model": "hogwartsmod:item/varinha/nenhum_14"
     }
   ]
 }

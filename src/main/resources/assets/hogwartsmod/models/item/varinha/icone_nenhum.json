@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "hogwartsmod:item/varinha_haste",
+    "layer1": "hogwartsmod:item/varinha_cabo_nenhum"
+  }
+}

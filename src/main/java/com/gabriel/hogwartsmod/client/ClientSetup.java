@@ -113,7 +113,7 @@ public final class ClientSetup {
                 return 0xFFFFFF;
             }
             int c = wood.getColor();
-            if (tint != 1) {
+            if (tint != 1 || com.gabriel.hogwartsmod.wand.Wands.handle(stack) == com.gabriel.hogwartsmod.wand.WandHandle.NENHUM) {
                 return c;
             }
             float f = 0.72f;

@@ -7,7 +7,8 @@ public enum WandHandle {
     LISO("liso"),
     ANELADO("anelado"),
     ESPIRAL("espiral"),
-    NODOSO("nodoso");
+    NODOSO("nodoso"),
+    NENHUM("nenhum");
 
     private final String id;
 
