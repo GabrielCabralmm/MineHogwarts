@@ -46,6 +46,14 @@ public final class HogwartsCommand {
     private static final Predicate<CommandSourceStack> STAFF = source -> source.hasPermission(2);
     private static final SuggestionProvider<CommandSourceStack> PROFESSIONS = (ctx, builder) ->
             SharedSuggestionProvider.suggest(Stream.of(Profession.values()).map(Profession::getId), builder);
+    private static final SuggestionProvider<CommandSourceStack> WOODS = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.of(com.gabriel.hogwartsmod.wand.WandWood.values()).map(com.gabriel.hogwartsmod.wand.WandWood::getId), builder);
+    private static final SuggestionProvider<CommandSourceStack> CORES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.of(com.gabriel.hogwartsmod.wand.WandCore.values()).map(com.gabriel.hogwartsmod.wand.WandCore::getId), builder);
+    private static final SuggestionProvider<CommandSourceStack> HANDLES = (ctx, builder) ->
+            SharedSuggestionProvider.suggest(Stream.of(com.gabriel.hogwartsmod.wand.WandHandle.values()).map(com.gabriel.hogwartsmod.wand.WandHandle::getId), builder);
+    private static final SimpleCommandExceptionType BAD_WAND =
+            new SimpleCommandExceptionType(Component.translatable("command.hogwartsmod.wand_invalid"));
     private static final DynamicCommandExceptionType NO_DATA =
             new DynamicCommandExceptionType(name -> Component.translatable("command.hogwartsmod.no_data", name));
     private static final SuggestionProvider<CommandSourceStack> PUBLIC_PLACES = (ctx, builder) ->
@@ -195,6 +203,13 @@ public final class HogwartsCommand {
                                         .executes(ctx -> setHouse(ctx, false))
                                         .then(Commands.literal("anunciar")
                                                 .executes(ctx -> setHouse(ctx, true))))))
+                .then(Commands.literal("varinha").requires(STAFF)
+                        .then(Commands.argument("alvo", EntityArgument.player())
+                                .then(Commands.argument("madeira", StringArgumentType.word()).suggests(WOODS)
+                                        .then(Commands.argument("nucleo", StringArgumentType.word()).suggests(CORES)
+                                                .then(Commands.argument("comprimento", com.mojang.brigadier.arguments.DoubleArgumentType.doubleArg(9, 14))
+                                                        .then(Commands.argument("cabo", StringArgumentType.word()).suggests(HANDLES)
+                                                                .executes(HogwartsCommand::giveWand)))))))
                 .then(Commands.literal("profissao").requires(STAFF)
                         .then(Commands.argument("alvo", EntityArgument.player())
                                 .then(Commands.argument("profissao", StringArgumentType.word()).suggests(PROFESSIONS)
@@ -498,6 +513,24 @@ public final class HogwartsCommand {
         String name = npc.getNpcName();
         npc.discard();
         ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.npc_removed", name), true);
+        return 1;
+    }
+
+    private static int giveWand(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "alvo");
+        com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.WandWood.byId(StringArgumentType.getString(ctx, "madeira"));
+        com.gabriel.hogwartsmod.wand.WandCore core = com.gabriel.hogwartsmod.wand.WandCore.byId(StringArgumentType.getString(ctx, "nucleo"));
+        com.gabriel.hogwartsmod.wand.WandHandle handle = com.gabriel.hogwartsmod.wand.WandHandle.byId(StringArgumentType.getString(ctx, "cabo"));
+        if (wood == null || core == null || handle == null) {
+            throw BAD_WAND.create();
+        }
+        int quarters = (int) Math.round(com.mojang.brigadier.arguments.DoubleArgumentType.getDouble(ctx, "comprimento") * 4);
+        net.minecraft.world.item.ItemStack wand = com.gabriel.hogwartsmod.wand.Wands.create(wood, core, quarters, handle, null);
+        Component name = wand.getHoverName();
+        if (!target.getInventory().add(wand)) {
+            target.drop(wand, false);
+        }
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.hogwartsmod.wand_given", name, target.getDisplayName()), true);
         return 1;
     }
 

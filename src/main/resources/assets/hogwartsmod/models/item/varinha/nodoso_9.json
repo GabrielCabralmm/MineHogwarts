@@ -1,0 +1,15 @@
+{
+  "loader": "forge:separate_transforms",
+  "gui_light": "front",
+  "base": {
+    "parent": "hogwartsmod:item/varinha/3d_nodoso_9"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "hogwartsmod:item/varinha/icone_nodoso"
+    },
+    "fixed": {
+      "parent": "hogwartsmod:item/varinha/icone_nodoso"
+    }
+  }
+}

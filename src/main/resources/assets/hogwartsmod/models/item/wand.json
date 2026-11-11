@@ -2,5 +2,151 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "hogwartsmod:item/wand"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.01
+      },
+      "model": "hogwartsmod:item/varinha/liso_9"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.02
+      },
+      "model": "hogwartsmod:item/varinha/liso_10"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.03
+      },
+      "model": "hogwartsmod:item/varinha/liso_11"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.04
+      },
+      "model": "hogwartsmod:item/varinha/liso_12"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.05
+      },
+      "model": "hogwartsmod:item/varinha/liso_13"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.06
+      },
+      "model": "hogwartsmod:item/varinha/liso_14"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.07
+      },
+      "model": "hogwartsmod:item/varinha/anelado_9"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.08
+      },
+      "model": "hogwartsmod:item/varinha/anelado_10"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.09
+      },
+      "model": "hogwartsmod:item/varinha/anelado_11"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.1
+      },
+      "model": "hogwartsmod:item/varinha/anelado_12"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.11
+      },
+      "model": "hogwartsmod:item/varinha/anelado_13"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.12
+      },
+      "model": "hogwartsmod:item/varinha/anelado_14"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.13
+      },
+      "model": "hogwartsmod:item/varinha/espiral_9"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.14
+      },
+      "model": "hogwartsmod:item/varinha/espiral_10"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.15
+      },
+      "model": "hogwartsmod:item/varinha/espiral_11"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.16
+      },
+      "model": "hogwartsmod:item/varinha/espiral_12"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.17
+      },
+      "model": "hogwartsmod:item/varinha/espiral_13"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.18
+      },
+      "model": "hogwartsmod:item/varinha/espiral_14"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.19
+      },
+      "model": "hogwartsmod:item/varinha/nodoso_9"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.2
+      },
+      "model": "hogwartsmod:item/varinha/nodoso_10"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.21
+      },
+      "model": "hogwartsmod:item/varinha/nodoso_11"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.22
+      },
+      "model": "hogwartsmod:item/varinha/nodoso_12"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.23
+      },
+      "model": "hogwartsmod:item/varinha/nodoso_13"
+    },
+    {
+      "predicate": {
+        "hogwartsmod:modelo": 0.24
+      },
+      "model": "hogwartsmod:item/varinha/nodoso_14"
+    }
+  ]
 }

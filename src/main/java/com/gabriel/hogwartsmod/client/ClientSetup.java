@@ -29,6 +29,8 @@ public final class ClientSetup {
         event.enqueueWork(() -> net.minecraft.client.renderer.item.ItemProperties.register(com.gabriel.hogwartsmod.registry.ModItems.ENVELOPE.get(),
                 net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "selada"),
                 (stack, level, entity, seed) -> com.gabriel.hogwartsmod.mail.LetterItem.isSealed(stack) ? 1f : 0f));
+        event.enqueueWork(() -> net.minecraft.client.renderer.item.ItemProperties.register(com.gabriel.hogwartsmod.registry.ModItems.WAND.get(),
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "modelo"), (stack, level, entity, seed) -> wandModel(stack)));
         event.enqueueWork(() -> net.minecraft.client.renderer.item.ItemProperties.register(com.gabriel.hogwartsmod.registry.ModItems.PACOTE.get(),
                 net.minecraft.resources.ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "selada"),
                 (stack, level, entity, seed) -> com.gabriel.hogwartsmod.mail.Mail.isSealed(stack) ? 1f : 0f));
@@ -91,6 +93,30 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerExtraModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
         event.register(com.gabriel.hogwartsmod.client.potion.CauldronRenderer.SPOON);
+    }
+
+    private static float wandModel(net.minecraft.world.item.ItemStack stack) {
+        if (!com.gabriel.hogwartsmod.wand.Wands.isCustom(stack)) {
+            return 0f;
+        }
+        int inch = Math.min(14, com.gabriel.hogwartsmod.wand.Wands.length(stack) / 4);
+        return (1 + com.gabriel.hogwartsmod.wand.Wands.handle(stack).ordinal() * 6 + inch - 9) / 100f;
+    }
+
+    @SubscribeEvent
+    public static void registerItemColors(net.minecraftforge.client.event.RegisterColorHandlersEvent.Item event) {
+        event.register((stack, tint) -> {
+            com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.Wands.wood(stack);
+            if (wood == null || !com.gabriel.hogwartsmod.wand.Wands.isCustom(stack)) {
+                return 0xFFFFFF;
+            }
+            int c = wood.getColor();
+            if (tint != 1) {
+                return c;
+            }
+            float f = 0.72f;
+            return ((int) (((c >> 16) & 255) * f) << 16) | ((int) (((c >> 8) & 255) * f) << 8) | (int) ((c & 255) * f);
+        }, com.gabriel.hogwartsmod.registry.ModItems.WAND.get());
     }
 
     @SubscribeEvent

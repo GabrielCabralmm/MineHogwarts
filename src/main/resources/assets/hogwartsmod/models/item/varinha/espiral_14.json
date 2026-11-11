@@ -1,0 +1,15 @@
+{
+  "loader": "forge:separate_transforms",
+  "gui_light": "front",
+  "base": {
+    "parent": "hogwartsmod:item/varinha/3d_espiral_14"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "hogwartsmod:item/varinha/icone_espiral"
+    },
+    "fixed": {
+      "parent": "hogwartsmod:item/varinha/icone_espiral"
+    }
+  }
+}

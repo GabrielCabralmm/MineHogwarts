@@ -138,6 +138,20 @@ public class WandItem extends Item {
         return UseAnim.NONE;
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        com.gabriel.hogwartsmod.wand.WandWood wood = com.gabriel.hogwartsmod.wand.Wands.wood(stack);
+        if (wood != null && com.gabriel.hogwartsmod.wand.Wands.isCustom(stack)) {
+            return Component.translatable("item.hogwartsmod.wand.custom", wood.getDisplayName());
+        }
+        return super.getName(stack);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level, java.util.List<Component> tooltip, net.minecraft.world.item.TooltipFlag flag) {
+        com.gabriel.hogwartsmod.wand.Wands.appendTooltip(stack, tooltip);
+    }
+
     public static boolean isCombat(Spell spell) {
         return switch (spell.getCategory()) {
             case CONTROLE, FORCA, DANO, IMPERDOAVEL -> true;
