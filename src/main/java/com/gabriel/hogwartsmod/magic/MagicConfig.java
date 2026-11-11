@@ -21,6 +21,9 @@ public final class MagicConfig {
     public static final ForgeConfigSpec.BooleanValue POTION_BOOKS_IN_CHESTS;
     public static final ForgeConfigSpec.BooleanValue LIVES_ENABLED;
     public static final ForgeConfigSpec.BooleanValue SMUGGLER_SPAWNS;
+    public static final ForgeConfigSpec.ConfigValue<java.util.List<? extends String>> DUEL_BLOCKED_SPELLS;
+    public static final ForgeConfigSpec.IntValue DUEL_XP_WIN;
+    public static final ForgeConfigSpec.IntValue DUEL_XP_LOSE;
     public static final ForgeConfigSpec.IntValue SMUGGLER_CHANCE;
     public static final ForgeConfigSpec.IntValue SMUGGLER_MINUTES;
     public static final ForgeConfigSpec.IntValue LIVES_START;
@@ -60,6 +63,12 @@ public final class MagicConfig {
         builder.pop();
         builder.push("pocoes");
         POTION_BOOKS_IN_CHESTS = builder.comment("Livros de poções podem aparecer nos baús das estruturas").define("livrosNosBaus", true);
+        builder.pop();
+        builder.push("duelos");
+        DUEL_BLOCKED_SPELLS = builder.comment("Feitiços proibidos em duelos (ids)").defineListAllowEmpty("feiticosBloqueados",
+                java.util.List.of("avada_kedavra", "crucio", "imperio"), o -> o instanceof String);
+        DUEL_XP_WIN = builder.comment("Experiência mágica para quem vence um duelo").defineInRange("xpVitoria", 10, 0, 1000);
+        DUEL_XP_LOSE = builder.comment("Experiência mágica para quem perde ou empata").defineInRange("xpDerrota", 5, 0, 1000);
         builder.pop();
         builder.push("contrabandista");
         SMUGGLER_SPAWNS = builder.comment("O Contrabandista de Criaturas aparece sozinho à noite perto de algum jogador").define("aparecer", true);

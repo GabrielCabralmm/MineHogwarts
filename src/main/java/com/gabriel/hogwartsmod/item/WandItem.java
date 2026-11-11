@@ -42,6 +42,9 @@ public class WandItem extends Item {
             com.gabriel.hogwartsmod.zone.Zones.warn(player, com.gabriel.hogwartsmod.zone.ZoneRule.COMBATE);
             return InteractionResultHolder.fail(stack);
         }
+        if (player instanceof ServerPlayer duelist && com.gabriel.hogwartsmod.duel.DuelManager.blocksSpell(duelist, spell)) {
+            return InteractionResultHolder.fail(stack);
+        }
         if (!data.knows(spell)) {
             notify(player, level, Component.translatable("message.hogwartsmod.not_learned", spell.getDisplayName()));
             return InteractionResultHolder.fail(stack);
