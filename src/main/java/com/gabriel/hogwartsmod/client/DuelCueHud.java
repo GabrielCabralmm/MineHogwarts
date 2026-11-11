@@ -11,10 +11,6 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 public final class DuelCueHud implements IGuiOverlay {
     public static final DuelCueHud INSTANCE = new DuelCueHud();
     private static final int OUTLINE = 0xFF1C1008;
-    private static final int[] GOLD = {0xFFFFEBA8, 0xFFF0BC45, 0xFFA8701A};
-    private static final int[] GREEN = {0xFFC8F5B0, 0xFF5CC85A, 0xFF1F6E2C};
-    private static final int[] RED = {0xFFFFB4A4, 0xFFDA4438, 0xFF8A1A16};
-    private static final int[] CREAM = {0xFFFFF8E6, 0xFFEADBB8, 0xFFB79E70};
 
     private static String cue = "";
     private static int number;
@@ -53,41 +49,35 @@ public final class DuelCueHud implements IGuiOverlay {
         String title;
         String subtitle = "";
         int color;
-        int[] grad;
         float size;
         switch (cue) {
             case "count" -> {
                 title = String.valueOf(number);
                 subtitle = tr("message.hogwartsmod.duel.salute");
                 color = 0xFFF2C14E;
-                grad = GOLD;
                 size = 34f;
             }
             case "go" -> {
                 title = tr("message.hogwartsmod.duel.go");
                 color = 0xFFF4C542;
-                grad = GOLD;
                 size = 26f;
             }
             case "win" -> {
                 title = tr("message.hogwartsmod.duel.title_win");
                 subtitle = tr("message.hogwartsmod.duel.sub_win");
-                color = 0xFF5CC85A;
-                grad = GREEN;
+                color = 0xFF4FC34D;
                 size = 26f;
             }
             case "lose" -> {
                 title = tr("message.hogwartsmod.duel.title_lose");
                 subtitle = tr("message.hogwartsmod.duel.sub_lose");
-                color = 0xFFD9443A;
-                grad = RED;
+                color = 0xFFE0433A;
                 size = 26f;
             }
             default -> {
                 title = tr("message.hogwartsmod.duel.title_draw");
                 subtitle = tr("message.hogwartsmod.duel.sub_draw");
                 color = 0xFFEADBB8;
-                grad = CREAM;
                 size = 26f;
             }
         }
@@ -103,7 +93,7 @@ public final class DuelCueHud implements IGuiOverlay {
         for (int[] o : new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {1, 1}, {2, 2}}) {
             HiRes.text(g, title, HiRes.Style.BOLD, size, -w / 2f + o[0], -h / 2f + o[1], OUTLINE);
         }
-        HiRes.textured(g, title, HiRes.Style.BOLD, size, -w / 2f, -h / 2f, grad[0], grad[1], grad[2]);
+        HiRes.text(g, title, HiRes.Style.BOLD, size, -w / 2f, -h / 2f, color);
         g.pose().popPose();
         float lineY = cy + h / 2f + 4;
         float half = Math.max(w / 2f + 26, 70);
