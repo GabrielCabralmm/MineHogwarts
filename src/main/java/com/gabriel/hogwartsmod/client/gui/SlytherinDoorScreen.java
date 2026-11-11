@@ -10,16 +10,16 @@ import static com.gabriel.hogwartsmod.client.gui.MissionScreen.*;
 
 public class SlytherinDoorScreen extends HouseDoorScreen {
     private static final int W = 250;
-    private static final int H = 190;
+    private static final int H = 212;
     private static final int RING_W = 44;
     private static final int GAP = 6;
     private static final int CYL_H = 70;
     private static final int STEP = 26;
     private static final int BTN_W = 62;
     private static final int BTN_H = 14;
-    private static final ResourceLocation PAPER = MissionScreen.tex("carta_papel");
-    private static final ResourceLocation UP = MissionScreen.tex("arrow_up_ink");
-    private static final ResourceLocation DOWN = MissionScreen.tex("arrow_down_ink");
+    private static final ResourceLocation BACKGROUND = MissionScreen.tex("sonserina_fundo");
+    private static final ResourceLocation CREST = MissionScreen.tex("casa_sonserina");
+    private static final int SILVER = 0xFFDDE6E2;
 
     private final int symbols;
     private final int[] value;
@@ -49,7 +49,7 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
     }
 
     private int cylY() {
-        return top + 62;
+        return top + 86;
     }
 
     private static ResourceLocation symbol(int index) {
@@ -70,10 +70,11 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
             }
         }
         renderBackground(g);
-        HiRes.image(g, PAPER, left, top, W, H);
+        HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 14, TITLE);
-        HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 27, MUTED);
+        HiRes.image(g, CREST, (int) cx - 13, top + 12, 26, 30);
+        shadowed(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 46, SILVER);
+        HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 59, 0xFF9CC8AE);
         int y = cylY();
         int x0 = ringX(0) - 6;
         int x1 = ringX(value.length - 1) + RING_W + 6;
@@ -93,8 +94,8 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
         int bx = left + (W - BTN_W) / 2;
         int by = top + H - 32;
         boolean hover = over(mouseX, mouseY, bx, by, BTN_W, BTN_H - 2);
-        HiRes.image(g, MissionScreen.tex("botao_couro_largo_" + (hover ? "h" : "n")), bx, by, BTN_W, BTN_H);
-        HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.open"), HiRes.Style.BOLD, 7.5f, bx + BTN_W / 2f, by + 3, 0xFFF6E6C8);
+        HiRes.image(g, MissionScreen.tex("botao_sonserina_" + (hover ? "h" : "n")), bx, by, BTN_W, BTN_H);
+        HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.open"), HiRes.Style.BOLD, 7.5f, bx + BTN_W / 2f, by + 3, SILVER);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -141,8 +142,8 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
         g.disableScissor();
         boolean up = over(mouseX, mouseY, x + RING_W / 2 - 6, y - 16, 12, 12);
         boolean down = over(mouseX, mouseY, x + RING_W / 2 - 6, y + CYL_H + 4, 12, 12);
-        HiRes.image(g, up ? MissionScreen.tex("arrow_up_wine") : UP, x + RING_W / 2 - 5, y - 15, 10, 10);
-        HiRes.image(g, down ? MissionScreen.tex("arrow_down_wine") : DOWN, x + RING_W / 2 - 5, y + CYL_H + 5, 10, 10);
+        HiRes.centered(g, "▲", HiRes.Style.BOLD, 9f, x + RING_W / 2f, y - 16, up ? 0xFF8CF0B4 : SILVER);
+        HiRes.centered(g, "▼", HiRes.Style.BOLD, 9f, x + RING_W / 2f, y + CYL_H + 4, down ? 0xFF8CF0B4 : SILVER);
     }
 
     // -- Interação

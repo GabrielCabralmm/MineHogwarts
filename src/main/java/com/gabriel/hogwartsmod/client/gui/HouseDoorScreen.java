@@ -40,18 +40,21 @@ public abstract class HouseDoorScreen extends Screen {
 
     protected final StringBuilder typed = new StringBuilder();
     protected int maxTyped = 48;
+    protected int fieldInk = MissionScreen.INK;
+    protected int fieldMuted = MissionScreen.MUTED;
+    protected int fieldLine = MissionScreen.LINE;
 
     protected void drawField(net.minecraft.client.gui.GuiGraphics g, float cx, int y, int halfWidth, String hint) {
-        g.fill((int) cx - halfWidth, y + 12, (int) cx + halfWidth, y + 13, MissionScreen.LINE);
-        g.fill((int) cx - halfWidth + 10, y + 14, (int) cx + halfWidth - 10, y + 15, 0x30C4AA7C);
+        g.fill((int) cx - halfWidth, y + 12, (int) cx + halfWidth, y + 13, fieldLine);
+        g.fill((int) cx - halfWidth + 10, y + 14, (int) cx + halfWidth - 10, y + 15, (fieldLine & 0x00FFFFFF) | 0x30000000);
         if (typed.length() == 0) {
-            HiRes.centered(g, hint, HiRes.Style.ITALIC, 7.5f, cx, y + 2, MissionScreen.MUTED);
+            HiRes.centered(g, hint, HiRes.Style.ITALIC, 7.5f, cx, y + 2, fieldMuted);
         } else {
             String shown = HiRes.ellipsize(typed.toString(), HiRes.Style.REGULAR, halfWidth * 2 * HiRes.TEXT_SIZE / 9f);
-            HiRes.centered(g, shown, HiRes.Style.REGULAR, 9f, cx, y + 1, MissionScreen.INK);
+            HiRes.centered(g, shown, HiRes.Style.REGULAR, 9f, cx, y + 1, fieldInk);
             if ((System.currentTimeMillis() / 500) % 2 == 0) {
                 float w = HiRes.width(shown, HiRes.Style.REGULAR, 9f);
-                g.fill((int) (cx + w / 2f) + 1, y + 1, (int) (cx + w / 2f) + 2, y + 11, MissionScreen.INK);
+                g.fill((int) (cx + w / 2f) + 1, y + 1, (int) (cx + w / 2f) + 2, y + 11, fieldInk);
             }
         }
     }
@@ -124,6 +127,11 @@ public abstract class HouseDoorScreen extends Screen {
         if (minecraft != null) {
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1f));
         }
+    }
+
+    protected static void shadowed(net.minecraft.client.gui.GuiGraphics g, String text, HiRes.Style style, float size, float cx, float y, int color) {
+        HiRes.centered(g, text, style, size, cx + 0.7f, y + 0.7f, 0xC0000000);
+        HiRes.centered(g, text, style, size, cx, y, color);
     }
 
     protected static boolean over(double mx, double my, int x, int y, int w, int h) {
