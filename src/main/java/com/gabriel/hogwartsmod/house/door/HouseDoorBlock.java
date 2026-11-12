@@ -35,7 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class HouseDoorBlock extends HorizontalDirectionalBlock implements EntityBlock {
-    public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 24);
+    public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 29);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty PASS = BooleanProperty.create("passagem");
     private static final java.util.Map<Integer, VoxelShape> SHAPES = new java.util.concurrent.ConcurrentHashMap<>();
