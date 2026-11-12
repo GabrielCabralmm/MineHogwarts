@@ -114,7 +114,8 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         int col = part % width - width / 2;
         int row = part / width;
         return switch (house) {
-            case GRIFINORIA, LUFA_LUFA -> row < 2 && col == 0;
+            case GRIFINORIA -> row < 2 && col == 0;
+            case LUFA_LUFA -> row < 3 && col == 0;
             case SONSERINA -> row < 2 && Math.abs(col) <= 1;
             case CORVINAL -> row < 3 && (col == -1 || col == 0);
         };
