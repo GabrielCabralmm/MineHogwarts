@@ -63,8 +63,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     private static int height(House house) {
         return switch (house) {
             case GRIFINORIA -> 3;
-            case SONSERINA -> 4;
-            case LUFA_LUFA -> 5;
+            case SONSERINA, LUFA_LUFA -> 4;
             case CORVINAL -> 6;
         };
     }
@@ -77,7 +76,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return switch (house) {
             case SONSERINA -> edge && row >= 2 ? 12 : 0;
             case CORVINAL -> edge && row == 3 ? 13 : 0;
-            case LUFA_LUFA -> edge && row >= 3 ? 13 : 0;
+            case LUFA_LUFA -> row == 3 && (col == 1 || col == 3) ? 13 : 0;
             case GRIFINORIA -> 0;
         };
     }
@@ -114,8 +113,8 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         int col = part % width - width / 2;
         int row = part / width;
         return switch (house) {
-            case GRIFINORIA -> row < 2 && col == 0;
-            case SONSERINA, LUFA_LUFA -> row < 2 && Math.abs(col) <= 1;
+            case GRIFINORIA, LUFA_LUFA -> row < 2 && col == 0;
+            case SONSERINA -> row < 2 && Math.abs(col) <= 1;
             case CORVINAL -> row < 3 && (col == -1 || col == 0);
         };
     }
@@ -212,7 +211,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
             case GRIFINORIA -> 22;
             case SONSERINA -> 48;
             case CORVINAL -> 44;
-            case LUFA_LUFA -> 36;
+            case LUFA_LUFA -> 38;
         };
     }
 

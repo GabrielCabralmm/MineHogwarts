@@ -65,26 +65,31 @@ public final class HouseDoorEffects {
 
     private static void hufflepuff(HouseDoorBlockEntity door, Level level, int tick) {
         RandomSource rnd = level.random;
-        for (int knock : new int[]{3, 6, 11, 14, 17}) {
-            if (tick == knock) {
-                sound(door, level, 0, 24, SoundEvents.WOOD_HIT, 1f, 1.3f);
-                sound(door, level, 0, 24, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), 0.6f, 0.9f);
+        int[][] knocks = {{2, -34, 26}, {8, 34, 26}, {13, -32, 8}, {19, 32, 8}};
+        for (int[] knock : knocks) {
+            if (tick == knock[0]) {
+                sound(door, level, knock[1], knock[2], SoundEvents.WOOD_HIT, 1f, 1.3f);
+                sound(door, level, knock[1], knock[2], SoundEvents.NOTE_BLOCK_BASEDRUM.value(), 0.6f, 0.9f);
+                Vec3 p = at(door, knock[1], knock[2], -12);
+                level.addParticle(YELLOW, p.x, p.y, p.z, 0, 0.02, 0);
             }
         }
-        if (tick == 21) {
-            sound(door, level, 0, 20, SoundEvents.BARREL_OPEN, 1f, 0.8f);
-            sound(door, level, 0, 20, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.2f);
+        if (tick == 25) {
+            sound(door, level, 0, 25, SoundEvents.CHAIN_HIT, 0.8f, 1.2f);
         }
-        if (tick == 26) {
-            sound(door, level, 0, 20, SoundEvents.WOOD_PLACE, 0.8f, 0.7f);
+        if (tick == 29) {
+            sound(door, level, 0, 25, SoundEvents.BARREL_OPEN, 1f, 0.6f);
+            sound(door, level, 0, 25, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.2f);
         }
-        if (tick >= 21 && tick < 38) {
-            BlockParticleOption wood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BARREL.defaultBlockState());
+        if (tick >= 29 && tick < 44) {
             for (int i = 0; i < 2; i++) {
-                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 44, rnd.nextFloat() * 34, -10);
-                level.addParticle(wood, p.x, p.y, p.z, 0, 0, 0);
-                Vec3 q = at(door, (rnd.nextFloat() - 0.5f) * 44, rnd.nextFloat() * 34, -11);
+                double ang = rnd.nextDouble() * Math.PI * 2;
+                Vec3 q = at(door, Math.cos(ang) * 22, 25 + Math.sin(ang) * 22, -13);
                 level.addParticle(YELLOW, q.x, q.y, q.z, 0, 0.02, 0);
+            }
+            if (tick % 3 == 0) {
+                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 30, 10 + rnd.nextFloat() * 30, -6);
+                level.addParticle(ParticleTypes.HAPPY_VILLAGER, p.x, p.y, p.z, 0, 0, 0);
             }
         }
     }
