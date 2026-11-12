@@ -24,6 +24,8 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
     private Boolean lastOpen;
     private boolean wasOpen;
     private int openTicks = -1;
+    private Boolean seenOpen;
+    private long changeTick = Long.MIN_VALUE;
 
     public HouseDoorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.HOUSE_DOOR.get(), pos, state);
@@ -47,6 +49,10 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
 
     public void clientTick() {
         boolean open = getBlockState().getValue(HouseDoorBlock.OPEN);
+        if (seenOpen != null && seenOpen != open && level != null) {
+            changeTick = level.getGameTime();
+        }
+        seenOpen = open;
         if (open && !wasOpen) {
             openTicks = 0;
         }
@@ -54,6 +60,13 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
         if (open && openTicks >= 0) {
             HouseDoorEffects.opening(this, openTicks++);
         }
+    }
+
+    public float secondsSinceChange(float partialTick) {
+        if (changeTick == Long.MIN_VALUE || level == null) {
+            return Float.MAX_VALUE;
+        }
+        return (level.getGameTime() - changeTick + partialTick) / 20f;
     }
 
     @Override

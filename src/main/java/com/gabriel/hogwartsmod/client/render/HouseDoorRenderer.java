@@ -1,6 +1,7 @@
 package com.gabriel.hogwartsmod.client.render;
 
 import com.gabriel.hogwartsmod.HogwartsMod;
+import com.gabriel.hogwartsmod.house.House;
 import com.gabriel.hogwartsmod.house.door.HouseDoorBlock;
 import com.gabriel.hogwartsmod.house.door.HouseDoorBlockEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -30,6 +31,15 @@ public class HouseDoorRenderer extends GeoBlockRenderer<HouseDoorBlockEntity> {
 
     public HouseDoorRenderer(BlockEntityRendererProvider.Context context) {
         super(new Model());
+    }
+
+    @Override
+    public void renderFinal(PoseStack pose, HouseDoorBlockEntity door, software.bernie.geckolib.cache.object.BakedGeoModel model, MultiBufferSource buffers,
+                            VertexConsumer buffer, float partialTick, int light, int overlay, float red, float green, float blue, float alpha) {
+        super.renderFinal(pose, door, model, buffers, buffer, partialTick, light, overlay, red, green, blue, alpha);
+        if (buffers != null && door.getBlockState().getBlock() instanceof HouseDoorBlock block && block.getHouse() == House.SONSERINA) {
+            SlytherinSerpent.render(door, partialTick, pose, buffers, light);
+        }
     }
 
     @Override
