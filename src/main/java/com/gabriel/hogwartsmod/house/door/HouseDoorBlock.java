@@ -76,7 +76,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return switch (house) {
             case SONSERINA -> edge && row >= 2 ? 12 : 0;
             case CORVINAL -> edge && row == 3 ? 13 : 0;
-            case LUFA_LUFA -> row == 3 && (col == 1 || col == 3) ? 13 : 0;
+            case LUFA_LUFA -> row == 3 && edge ? 13 : 0;
             case GRIFINORIA -> 0;
         };
     }

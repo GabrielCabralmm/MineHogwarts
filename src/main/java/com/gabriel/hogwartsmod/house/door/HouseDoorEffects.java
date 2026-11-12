@@ -65,7 +65,7 @@ public final class HouseDoorEffects {
 
     private static void hufflepuff(HouseDoorBlockEntity door, Level level, int tick) {
         RandomSource rnd = level.random;
-        int[][] knocks = {{2, -34, 26}, {8, 34, 26}, {13, -32, 8}, {19, 32, 8}};
+        int[][] knocks = {{2, -32, 24}, {8, 32, 24}, {13, -32, 8}, {19, 32, 8}};
         for (int[] knock : knocks) {
             if (tick == knock[0]) {
                 sound(door, level, knock[1], knock[2], SoundEvents.WOOD_HIT, 1f, 1.3f);
@@ -84,7 +84,7 @@ public final class HouseDoorEffects {
         if (tick >= 29 && tick < 44) {
             for (int i = 0; i < 2; i++) {
                 double ang = rnd.nextDouble() * Math.PI * 2;
-                Vec3 q = at(door, Math.cos(ang) * 22, 25 + Math.sin(ang) * 22, -13);
+                Vec3 q = at(door, Math.cos(ang) * 20, 22 + Math.sin(ang) * 20, -13);
                 level.addParticle(YELLOW, q.x, q.y, q.z, 0, 0.02, 0);
             }
             if (tick % 3 == 0) {
