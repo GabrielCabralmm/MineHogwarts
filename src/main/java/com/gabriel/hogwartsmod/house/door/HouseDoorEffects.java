@@ -65,7 +65,7 @@ public final class HouseDoorEffects {
 
     private static void hufflepuff(HouseDoorBlockEntity door, Level level, int tick) {
         RandomSource rnd = level.random;
-        int[][] knocks = {{2, -32, 24}, {8, 32, 24}, {13, -32, 8}, {19, 32, 8}};
+        int[][] knocks = {{2, -32, 32}, {8, 32, 32}, {13, -32, 16}, {19, 32, 16}};
         for (int[] knock : knocks) {
             if (tick == knock[0]) {
                 sound(door, level, knock[1], knock[2], SoundEvents.WOOD_HIT, 1f, 1.3f);
@@ -75,7 +75,7 @@ public final class HouseDoorEffects {
             }
         }
         if (tick == 25) {
-            sound(door, level, 0, 25, SoundEvents.WOOD_HIT, 0.8f, 0.8f);
+            sound(door, level, 0, 33, SoundEvents.WOOD_HIT, 0.8f, 0.8f);
         }
         if (tick == 29) {
             sound(door, level, 0, 25, SoundEvents.BARREL_OPEN, 1f, 0.6f);
@@ -84,11 +84,11 @@ public final class HouseDoorEffects {
         if (tick >= 29 && tick < 44) {
             for (int i = 0; i < 2; i++) {
                 double ang = rnd.nextDouble() * Math.PI * 2;
-                Vec3 q = at(door, Math.cos(ang) * 20, 22 + Math.sin(ang) * 20, -13);
+                Vec3 q = at(door, Math.cos(ang) * 20, 30 + Math.sin(ang) * 20, -13);
                 level.addParticle(YELLOW, q.x, q.y, q.z, 0, 0.02, 0);
             }
             if (tick % 3 == 0) {
-                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 30, 10 + rnd.nextFloat() * 30, -6);
+                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 30, 18 + rnd.nextFloat() * 30, -6);
                 level.addParticle(ParticleTypes.HAPPY_VILLAGER, p.x, p.y, p.z, 0, 0, 0);
             }
         }

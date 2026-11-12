@@ -38,6 +38,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 24);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty PASS = BooleanProperty.create("passagem");
+    private static final VoxelShape STEP = Block.box(0, 0, 0, 16, 8, 16);
     public static final int OPEN_TICKS = 100;
 
     private final House house;
@@ -167,7 +168,11 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return state.getValue(PASS) && passage(state.getValue(PART)) ? Shapes.empty() : Shapes.block();
+        int part = state.getValue(PART);
+        if (!state.getValue(PASS) || !passage(part)) {
+            return Shapes.block();
+        }
+        return house == House.LUFA_LUFA && part / width == 0 ? STEP : Shapes.empty();
     }
 
     @Override
