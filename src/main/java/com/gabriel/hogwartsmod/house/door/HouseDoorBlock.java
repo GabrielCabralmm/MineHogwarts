@@ -47,13 +47,39 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     public HouseDoorBlock(House house, Properties properties) {
         super(properties.lightLevel(state -> light(house, state.getValue(PART))));
         this.house = house;
-        this.width = house == House.SONSERINA ? 5 : 3;
-        this.height = house == House.SONSERINA ? 4 : 3;
+        this.width = width(house);
+        this.height = height(house);
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, width / 2).setValue(OPEN, false).setValue(PASS, false));
     }
 
+    private static int width(House house) {
+        return switch (house) {
+            case GRIFINORIA -> 3;
+            case CORVINAL -> 4;
+            case SONSERINA, LUFA_LUFA -> 5;
+        };
+    }
+
+    private static int height(House house) {
+        return switch (house) {
+            case GRIFINORIA -> 3;
+            case SONSERINA -> 4;
+            case LUFA_LUFA -> 5;
+            case CORVINAL -> 6;
+        };
+    }
+
     private static int light(House house, int part) {
-        return house == House.SONSERINA && part / 5 >= 2 && (part % 5 == 0 || part % 5 == 4) ? 12 : 0;
+        int w = width(house);
+        int col = part % w;
+        int row = part / w;
+        boolean edge = col == 0 || col == w - 1;
+        return switch (house) {
+            case SONSERINA -> edge && row >= 2 ? 12 : 0;
+            case CORVINAL -> edge && row == 3 ? 13 : 0;
+            case LUFA_LUFA -> edge && row >= 3 ? 13 : 0;
+            case GRIFINORIA -> 0;
+        };
     }
 
     public int master() {
@@ -87,7 +113,11 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     private boolean passage(int part) {
         int col = part % width - width / 2;
         int row = part / width;
-        return house == House.SONSERINA ? row < 2 && Math.abs(col) <= 1 : row < 2 && col == 0;
+        return switch (house) {
+            case GRIFINORIA -> row < 2 && col == 0;
+            case SONSERINA, LUFA_LUFA -> row < 2 && Math.abs(col) <= 1;
+            case CORVINAL -> row < 3 && (col == -1 || col == 0);
+        };
     }
 
     @Nullable
@@ -181,8 +211,8 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return switch (house) {
             case GRIFINORIA -> 22;
             case SONSERINA -> 48;
-            case CORVINAL -> 36;
-            case LUFA_LUFA -> 26;
+            case CORVINAL -> 44;
+            case LUFA_LUFA -> 36;
         };
     }
 
@@ -217,10 +247,13 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
             level.scheduleTick(pos, this, OPEN_TICKS);
             return;
         }
-        Direction side = state.getValue(FACING).getClockWise();
-        double wide = house == House.SONSERINA ? 1 : 0;
-        AABB passage = new AABB(pos).inflate(Math.abs(side.getStepX()) * wide, 0, Math.abs(side.getStepZ()) * wide).expandTowards(0, 1, 0).deflate(0.05);
-        if (!level.getEntitiesOfClass(LivingEntity.class, passage).isEmpty()) {
+        boolean inside = false;
+        for (int part = 0; part < parts() && !inside; part++) {
+            if (passage(part)) {
+                inside = !level.getEntitiesOfClass(LivingEntity.class, new AABB(partPos(pos, state.getValue(FACING), part)).deflate(0.05)).isEmpty();
+            }
+        }
+        if (inside) {
             level.scheduleTick(pos, this, 20);
             return;
         }

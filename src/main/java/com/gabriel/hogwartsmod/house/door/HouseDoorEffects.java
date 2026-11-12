@@ -17,6 +17,8 @@ import org.joml.Vector3f;
 
 public final class HouseDoorEffects {
     private static final DustParticleOptions GREEN = new DustParticleOptions(new Vector3f(0.3f, 1f, 0.45f), 1f);
+    private static final DustParticleOptions BLUE = new DustParticleOptions(new Vector3f(0.45f, 0.65f, 1f), 1f);
+    private static final DustParticleOptions YELLOW = new DustParticleOptions(new Vector3f(1f, 0.82f, 0.25f), 1f);
 
     private HouseDoorEffects() {
     }
@@ -26,8 +28,64 @@ public final class HouseDoorEffects {
         if (level == null || !(door.getBlockState().getBlock() instanceof HouseDoorBlock block)) {
             return;
         }
-        if (block.getHouse() == House.SONSERINA) {
-            slytherin(door, level, tick);
+        switch (block.getHouse()) {
+            case SONSERINA -> slytherin(door, level, tick);
+            case CORVINAL -> ravenclaw(door, level, tick);
+            case LUFA_LUFA -> hufflepuff(door, level, tick);
+            default -> {
+            }
+        }
+    }
+
+    private static void ravenclaw(HouseDoorBlockEntity door, Level level, int tick) {
+        RandomSource rnd = level.random;
+        if (tick == 0) {
+            sound(door, level, 8, 72, SoundEvents.PARROT_AMBIENT, 1f, 0.5f);
+            sound(door, level, 8, 72, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 0.8f);
+        }
+        if (tick == 10 || tick == 15) {
+            sound(door, level, 8, 72, SoundEvents.AMETHYST_BLOCK_RESONATE, 0.8f, 1.2f);
+        }
+        if (tick == 20) {
+            sound(door, level, 8, 72, SoundEvents.ENDER_DRAGON_FLAP, 0.5f, 1.7f);
+        }
+        if (tick == 32) {
+            sound(door, level, 8, 28, SoundEvents.WOODEN_DOOR_OPEN, 1f, 0.55f);
+            sound(door, level, 8, 28, SoundEvents.CHAIN_PLACE, 0.6f, 0.6f);
+        }
+        if (tick < 36) {
+            Vec3 p = at(door, 8 + rnd.nextGaussian() * 9, 72 + rnd.nextGaussian() * 6, -16);
+            level.addParticle(BLUE, p.x, p.y, p.z, 0, 0.01, 0);
+            if (tick % 2 == 0) {
+                Vec3 q = at(door, 8 + rnd.nextGaussian() * 6, 40 + rnd.nextFloat() * 20, -14);
+                level.addParticle(ParticleTypes.ENCHANT, q.x, q.y, q.z, 0, 0.3, 0);
+            }
+        }
+    }
+
+    private static void hufflepuff(HouseDoorBlockEntity door, Level level, int tick) {
+        RandomSource rnd = level.random;
+        for (int knock : new int[]{3, 6, 11, 14, 17}) {
+            if (tick == knock) {
+                sound(door, level, 0, 24, SoundEvents.WOOD_HIT, 1f, 1.3f);
+                sound(door, level, 0, 24, SoundEvents.NOTE_BLOCK_BASEDRUM.value(), 0.6f, 0.9f);
+            }
+        }
+        if (tick == 21) {
+            sound(door, level, 0, 20, SoundEvents.BARREL_OPEN, 1f, 0.8f);
+            sound(door, level, 0, 20, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.2f);
+        }
+        if (tick == 26) {
+            sound(door, level, 0, 20, SoundEvents.WOOD_PLACE, 0.8f, 0.7f);
+        }
+        if (tick >= 21 && tick < 38) {
+            BlockParticleOption wood = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.BARREL.defaultBlockState());
+            for (int i = 0; i < 2; i++) {
+                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 44, rnd.nextFloat() * 34, -10);
+                level.addParticle(wood, p.x, p.y, p.z, 0, 0, 0);
+                Vec3 q = at(door, (rnd.nextFloat() - 0.5f) * 44, rnd.nextFloat() * 34, -11);
+                level.addParticle(YELLOW, q.x, q.y, q.z, 0, 0.02, 0);
+            }
         }
     }
 
