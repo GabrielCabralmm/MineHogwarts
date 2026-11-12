@@ -1,5 +1,6 @@
 package com.gabriel.hogwartsmod.client.gui;
 
+import com.gabriel.hogwartsmod.HogwartsMod;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -13,7 +14,7 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
     private static final ResourceLocation BACKGROUND = MissionScreen.tex("grifinoria_fundo");
     private static final int GOLD = 0xFFF2C64A;
     private static final int CREAM = 0xFFF0DDB8;
-    private static final ResourceLocation LADY = MissionScreen.tex("porta_dama");
+    private static final ResourceLocation LADY = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/block/porta/grifinoria_tela.png");
     private static final ResourceLocation FRAME = MissionScreen.tex("moldura_retrato");
     private static final ResourceLocation CREST = MissionScreen.tex("casa_grifinoria");
 
@@ -52,7 +53,9 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
         int fx = left + (W - fw) / 2;
         int fy = top + 61;
         int border = Math.round(fw * 8f / 128f);
-        HiRes.image(g, LADY, fx + border - 1, fy + border - 1, fw - border * 2 + 2, fh - border * 2 + 2);
+        long ticks = minecraft != null && minecraft.level != null ? minecraft.level.getGameTime() : 0;
+        int frame = (int) ((ticks + partialTick) / 2.5f) % 48;
+        g.blit(LADY, fx + border - 1, fy + border - 1, fw - border * 2 + 2, fh - border * 2 + 2, 0, frame * 160, 112, 160, 112, 160 * 48);
         HiRes.image(g, FRAME, fx, fy, fw, fh);
         double time = System.currentTimeMillis() / 1000.0;
         float bob = (float) Math.sin(time * 4) * 1.5f;
