@@ -58,7 +58,7 @@ public class RavenclawDoorScreen extends HouseDoorScreen {
         g.pose().pushPose();
         g.pose().translate(cx, top + 62, 0);
         g.pose().mulPose(com.mojang.math.Axis.ZP.rotationDegrees(swing * 0.4f));
-        HiRes.image(g, EAGLE, -24, 0, 48, 48);
+        HiRes.image(g, EAGLE, -30, 0, 60, 48);
         g.pose().popPose();
         HiRes.centered(g, tr("screen.hogwartsmod.door.corvinal.ask"), HiRes.Style.ITALIC, 7.5f, cx, top + 113, 0xFF93A6D4);
         String text = riddle >= 0 ? "“" + question + "”" : tr("screen.hogwartsmod.door.corvinal.none");
