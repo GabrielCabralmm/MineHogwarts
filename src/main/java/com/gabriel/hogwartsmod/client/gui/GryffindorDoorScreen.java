@@ -15,6 +15,7 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
     private static final int CREAM = 0xFFF0DDB8;
     private static final ResourceLocation LADY = MissionScreen.tex("porta_dama");
     private static final ResourceLocation FRAME = MissionScreen.tex("moldura_retrato");
+    private static final ResourceLocation CREST = MissionScreen.tex("casa_grifinoria");
 
     public GryffindorDoorScreen(BlockPos pos) {
         super(pos, Component.translatable("screen.hogwartsmod.door.grifinoria"));
@@ -43,22 +44,23 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        shadowed(g, title.getString(), HiRes.Style.BOLD, 9f, cx, top + 13, GOLD);
-        g.fill(left + 50, top + 25, left + W - 50, top + 26, 0xFFD9A84A);
-        int fw = 96;
-        int fh = 132;
+        HiRes.image(g, CREST, (int) cx - 13, top + 10, 26, 30);
+        shadowed(g, title.getString(), HiRes.Style.BOLD, 9f, cx, top + 43, GOLD);
+        g.fill(left + 50, top + 55, left + W - 50, top + 56, 0xFFD9A84A);
+        int fw = 78;
+        int fh = 107;
         int fx = left + (W - fw) / 2;
-        int fy = top + 31;
+        int fy = top + 61;
         int border = Math.round(fw * 12f / 128f);
         HiRes.image(g, LADY, fx + border - 1, fy + border - 1, fw - border * 2 + 2, fh - border * 2 + 2);
         HiRes.image(g, FRAME, fx, fy, fw, fh);
         double time = System.currentTimeMillis() / 1000.0;
         float bob = (float) Math.sin(time * 4) * 1.5f;
-        HiRes.centered(g, "♪", HiRes.Style.ITALIC, 9f, cx - 44 + (float) Math.sin(time * 3) * 2, top + 164 - bob, GOLD);
-        HiRes.centered(g, "♫", HiRes.Style.ITALIC, 9f, cx + 44 + (float) Math.cos(time * 3) * 2, top + 164 + bob, GOLD);
-        shadowed(g, tr("screen.hogwartsmod.door.grifinoria.ask"), HiRes.Style.ITALIC, 10f, cx, top + 166 + bob * 0.5f, CREAM);
-        drawField(g, cx, top + H - 50, 64, tr("screen.hogwartsmod.door.password_hint"));
-        HiRes.centered(g, tr("screen.hogwartsmod.door.enter_hint"), HiRes.Style.ITALIC, 6.5f, cx, top + H - 28, 0xFFC9A98A);
+        HiRes.centered(g, "♪", HiRes.Style.ITALIC, 9f, cx - 44 + (float) Math.sin(time * 3) * 2, top + 170 - bob, GOLD);
+        HiRes.centered(g, "♫", HiRes.Style.ITALIC, 9f, cx + 44 + (float) Math.cos(time * 3) * 2, top + 170 + bob, GOLD);
+        shadowed(g, tr("screen.hogwartsmod.door.grifinoria.ask"), HiRes.Style.ITALIC, 10f, cx, top + 171 + bob * 0.5f, CREAM);
+        drawField(g, cx, top + H - 46, 64, tr("screen.hogwartsmod.door.password_hint"));
+        HiRes.centered(g, tr("screen.hogwartsmod.door.enter_hint"), HiRes.Style.ITALIC, 6.5f, cx, top + H - 24, 0xFFC9A98A);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
