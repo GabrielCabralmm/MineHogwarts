@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "hogwartsmod:block/porta/sonserina_esq"
+      "model": "hogwartsmod:block/porta/sonserina"
     }
   }
 }

@@ -99,9 +99,6 @@ public final class ClientSetup {
     @SubscribeEvent
     public static void registerExtraModels(net.minecraftforge.client.event.ModelEvent.RegisterAdditional event) {
         event.register(com.gabriel.hogwartsmod.client.potion.CauldronRenderer.SPOON);
-        for (net.minecraft.resources.ResourceLocation door : com.gabriel.hogwartsmod.client.render.HouseDoorRenderer.ALL) {
-            event.register(door);
-        }
         for (com.gabriel.hogwartsmod.wand.WandHandle handle : com.gabriel.hogwartsmod.wand.WandHandle.values()) {
             if (handle != com.gabriel.hogwartsmod.wand.WandHandle.NENHUM) {
                 event.register(WandPreview.handleModel(handle));

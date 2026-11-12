@@ -50,7 +50,7 @@ public final class ModBlocks {
                     net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(net.minecraft.world.level.block.Blocks.STONE)
                             .strength(3f, 3600000f).noOcclusion().noLootTable()));
             HOUSE_DOORS.put(house, door);
-            ModItems.ITEMS.register("porta_" + house.getId(), () -> new net.minecraft.world.item.DoubleHighBlockItem(door.get(), new Item.Properties()));
+            ModItems.ITEMS.register("porta_" + house.getId(), () -> new net.minecraft.world.item.BlockItem(door.get(), new Item.Properties()));
         }
     }
 

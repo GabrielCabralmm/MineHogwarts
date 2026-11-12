@@ -2,7 +2,6 @@ package com.gabriel.hogwartsmod.house.door;
 
 import com.gabriel.hogwartsmod.house.House;
 import com.gabriel.hogwartsmod.magic.MagicData;
-import com.gabriel.hogwartsmod.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -14,22 +13,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -37,16 +35,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class HouseDoorBlock extends HorizontalDirectionalBlock implements EntityBlock {
-    public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
+    public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 8);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
-    public static final int OPEN_TICKS = 70;
+    public static final BooleanProperty PASS = BooleanProperty.create("passagem");
+    public static final int MASTER = 1;
+    public static final int OPEN_TICKS = 100;
 
     private final House house;
 
     public HouseDoorBlock(House house, Properties properties) {
         super(properties);
         this.house = house;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(HALF, DoubleBlockHalf.LOWER).setValue(OPEN, false));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, MASTER).setValue(OPEN, false).setValue(PASS, false));
     }
 
     public House getHouse() {
@@ -55,49 +55,73 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, HALF, OPEN);
+        builder.add(FACING, PART, OPEN, PASS);
+    }
+
+    // -- Estrutura 3x3
+
+    private static BlockPos partPos(BlockPos master, Direction facing, int part) {
+        return master.relative(facing.getClockWise(), part % 3 - 1).above(part / 3);
+    }
+
+    public static BlockPos master(BlockState state, BlockPos pos) {
+        int part = state.getValue(PART);
+        return pos.relative(state.getValue(FACING).getClockWise(), 1 - part % 3).below(part / 3);
+    }
+
+    private static boolean passage(int part) {
+        return part == 1 || part == 4;
     }
 
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        BlockPos pos = context.getClickedPos();
         Level level = context.getLevel();
-        if (pos.getY() >= level.getMaxBuildHeight() - 1 || !level.getBlockState(pos.above()).canBeReplaced(context)) {
+        BlockPos pos = context.getClickedPos();
+        Direction facing = context.getHorizontalDirection().getOpposite();
+        if (pos.getY() + 2 >= level.getMaxBuildHeight()) {
             return null;
         }
-        return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
-    }
-
-    @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable net.minecraft.world.entity.LivingEntity placer, net.minecraft.world.item.ItemStack stack) {
-        level.setBlock(pos.above(), state.setValue(HALF, DoubleBlockHalf.UPPER), 3);
-    }
-
-    @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        DoubleBlockHalf half = state.getValue(HALF);
-        if (direction.getAxis() == Direction.Axis.Y && (half == DoubleBlockHalf.LOWER) == (direction == Direction.UP)) {
-            return neighbor.is(this) && neighbor.getValue(HALF) != half
-                    ? state.setValue(FACING, neighbor.getValue(FACING)).setValue(OPEN, neighbor.getValue(OPEN))
-                    : net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
+        for (int part = 0; part < 9; part++) {
+            if (!level.getBlockState(partPos(pos, facing, part)).canBeReplaced(context)) {
+                return null;
+            }
         }
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return defaultBlockState().setValue(FACING, facing);
     }
 
     @Override
-    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
-        return state.getValue(HALF) == DoubleBlockHalf.LOWER || level.getBlockState(pos.below()).is(this);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        for (int part = 0; part < 9; part++) {
+            if (part != MASTER) {
+                level.setBlock(partPos(pos, state.getValue(FACING), part), state.setValue(PART, part), 3);
+            }
+        }
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!newState.is(this)) {
+            BlockPos master = master(state, pos);
+            for (int part = 0; part < 9; part++) {
+                BlockPos p = partPos(master, state.getValue(FACING), part);
+                BlockState other = level.getBlockState(p);
+                if (!p.equals(pos) && other.is(this) && other.getValue(PART) == part) {
+                    level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), 35);
+                }
+            }
+        }
+        super.onRemove(state, level, pos, newState, moved);
     }
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return state.getValue(PART) == MASTER ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.INVISIBLE;
     }
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return state.getValue(OPEN) ? Shapes.empty() : Shapes.block();
+        return state.getValue(PASS) && passage(state.getValue(PART)) ? Shapes.empty() : Shapes.block();
     }
 
     @Override
@@ -115,10 +139,6 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return player.hasPermissions(2) ? super.getDestroyProgress(state, player, level, pos) : 0f;
     }
 
-    public static BlockPos lower(BlockState state, BlockPos pos) {
-        return state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
-    }
-
     // -- Interação
 
     @Override
@@ -130,7 +150,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
             return InteractionResult.SUCCESS;
         }
         if (!state.getValue(OPEN) && isMember(sp)) {
-            HouseDoors.openScreen(sp, lower(state, pos), house);
+            HouseDoors.openScreen(sp, master(state, pos), house);
         }
         return InteractionResult.CONSUME;
     }
@@ -140,27 +160,53 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return data != null && data.getHouse() == house;
     }
 
-    public static void setOpen(ServerLevel level, BlockPos lower, boolean open) {
-        BlockState state = level.getBlockState(lower);
-        if (!(state.getBlock() instanceof HouseDoorBlock) || state.getValue(OPEN) == open) {
+    private static int openDelay(House house) {
+        return switch (house) {
+            case GRIFINORIA -> 22;
+            case SONSERINA -> 62;
+            case CORVINAL -> 36;
+            case LUFA_LUFA -> 26;
+        };
+    }
+
+    private static void setParts(ServerLevel level, BlockPos master, BlockState state, boolean open, boolean pass) {
+        for (int part = 0; part < 9; part++) {
+            BlockPos p = partPos(master, state.getValue(FACING), part);
+            BlockState other = level.getBlockState(p);
+            if (other.is(state.getBlock())) {
+                level.setBlock(p, other.setValue(OPEN, open).setValue(PASS, pass), 10);
+            }
+        }
+    }
+
+    public static void setOpen(ServerLevel level, BlockPos master, boolean open) {
+        BlockState state = level.getBlockState(master);
+        if (!(state.getBlock() instanceof HouseDoorBlock door) || state.getValue(PART) != MASTER || state.getValue(OPEN) == open) {
             return;
         }
-        level.setBlock(lower, state.setValue(OPEN, open), 10);
-        BlockState upper = level.getBlockState(lower.above());
-        if (upper.getBlock() instanceof HouseDoorBlock) {
-            level.setBlock(lower.above(), upper.setValue(OPEN, open), 10);
-        }
+        setParts(level, master, state, open, false);
         if (open) {
-            level.scheduleTick(lower, state.getBlock(), OPEN_TICKS);
+            level.scheduleTick(master, state.getBlock(), openDelay(door.house));
         }
     }
 
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (state.getValue(HALF) == DoubleBlockHalf.LOWER && state.getValue(OPEN)) {
-            setOpen(level, pos, false);
-            HouseDoors.playClose(level, pos, house);
+        if (state.getValue(PART) != MASTER || !state.getValue(OPEN)) {
+            return;
         }
+        if (!state.getValue(PASS)) {
+            setParts(level, pos, state, true, true);
+            level.scheduleTick(pos, this, OPEN_TICKS);
+            return;
+        }
+        AABB passage = new AABB(pos).expandTowards(0, 1, 0).deflate(0.05);
+        if (!level.getEntitiesOfClass(LivingEntity.class, passage).isEmpty()) {
+            level.scheduleTick(pos, this, 20);
+            return;
+        }
+        setOpen(level, pos, false);
+        HouseDoors.playClose(level, pos, house);
     }
 
     // -- Entidade
@@ -168,13 +214,6 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     @Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return state.getValue(HALF) == DoubleBlockHalf.LOWER ? new HouseDoorBlockEntity(pos, state) : null;
-    }
-
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide && type == ModBlockEntities.HOUSE_DOOR.get()
-                ? (l, p, s, be) -> ((HouseDoorBlockEntity) be).clientTick() : null;
+        return state.getValue(PART) == MASTER ? new HouseDoorBlockEntity(pos, state) : null;
     }
 }
