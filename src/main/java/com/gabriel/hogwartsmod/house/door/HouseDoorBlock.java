@@ -265,7 +265,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     private static int openDelay(House house) {
         return switch (house) {
             case GRIFINORIA -> 22;
-            case SONSERINA -> 66;
+            case SONSERINA -> 68;
             case CORVINAL -> 56;
             case LUFA_LUFA -> 38;
         };
