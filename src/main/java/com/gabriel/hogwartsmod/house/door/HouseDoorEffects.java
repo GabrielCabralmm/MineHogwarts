@@ -75,7 +75,7 @@ public final class HouseDoorEffects {
             }
         }
         if (tick == 25) {
-            sound(door, level, 0, 25, SoundEvents.CHAIN_HIT, 0.8f, 1.2f);
+            sound(door, level, 0, 25, SoundEvents.WOOD_HIT, 0.8f, 0.8f);
         }
         if (tick == 29) {
             sound(door, level, 0, 25, SoundEvents.BARREL_OPEN, 1f, 0.6f);
