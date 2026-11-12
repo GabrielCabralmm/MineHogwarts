@@ -96,35 +96,30 @@ public final class HouseDoorEffects {
 
     private static void slytherin(HouseDoorBlockEntity door, Level level, int tick) {
         RandomSource rnd = level.random;
-        if (tick == 0) {
-            sound(door, level, 0, 32, SoundEvents.CAT_HISS, 0.9f, 0.55f);
-            sound(door, level, 0, 32, SoundEvents.CAT_HISS, 0.7f, 0.45f);
+        if (tick < 14) {
+            for (int i = 0; i < 2; i++) {
+                Vec3 p = at(door, -28 + rnd.nextGaussian() * 3, rnd.nextFloat() * 6, -12 + rnd.nextGaussian() * 3);
+                level.addParticle(GREEN, p.x, p.y, p.z, 0, 0.03, 0);
+            }
         }
         if (tick == 4) {
-            sound(door, level, 0, 24, SoundEvents.SAND_STEP, 0.6f, 0.5f);
+            sound(door, level, -28, 4, SoundEvents.ROOTED_DIRT_BREAK, 1f, 0.5f);
+            sound(door, level, -28, 4, SoundEvents.CAT_HISS, 0.8f, 0.5f);
         }
-        if (tick < 16) {
-            for (int sgn = -1; sgn <= 1; sgn += 2) {
-                Vec3 p = at(door, sgn * 34 + rnd.nextGaussian() * 1.5, 36 + rnd.nextGaussian(), -26 + rnd.nextGaussian());
-                level.addParticle(GREEN, p.x, p.y, p.z, 0, 0.01, 0);
-            }
+        if (tick > 10 && tick < 68 && tick % 5 == 0) {
+            sound(door, level, 0, 40, SoundEvents.SAND_STEP, 0.5f, 0.6f + rnd.nextFloat() * 0.2f);
         }
-        if (tick == 19) {
-            sound(door, level, 0, 16, SoundEvents.GRINDSTONE_USE, 0.8f, 0.5f);
+        if (tick > 10 && tick < 68) {
+            double a = Math.PI * rnd.nextDouble();
+            Vec3 p = at(door, -Math.cos(a) * 28, 36 + Math.sin(a) * 28, -12);
+            level.addParticle(GREEN, p.x, p.y, p.z, 0, 0.01, 0);
         }
-        if (tick == 30) {
-            sound(door, level, 0, 16, SoundEvents.PISTON_CONTRACT, 0.7f, 0.6f);
+        if (tick == 36 || tick == 44 || tick == 52) {
+            sound(door, level, 0, 30, SoundEvents.GRINDSTONE_USE, 0.6f, 0.5f);
+            sound(door, level, 0, 30, SoundEvents.DEEPSLATE_BRICKS_BREAK, 0.6f, 0.6f);
         }
-        if (tick >= 19 && tick < 50) {
-            BlockParticleOption dust = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.STONE_BRICKS.defaultBlockState());
-            for (int i = 0; i < 3; i++) {
-                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 48, rnd.nextFloat() * 42, -9);
-                level.addParticle(dust, p.x, p.y, p.z, 0, 0, 0);
-            }
-            if (tick % 2 == 0) {
-                Vec3 p = at(door, (rnd.nextFloat() - 0.5f) * 44, rnd.nextFloat() * 36, -10);
-                level.addParticle(ParticleTypes.HAPPY_VILLAGER, p.x, p.y, p.z, 0, 0, 0);
-            }
+        if (tick == 69) {
+            sound(door, level, 32, 20, SoundEvents.CAT_HISS, 1f, 0.45f);
         }
     }
 
