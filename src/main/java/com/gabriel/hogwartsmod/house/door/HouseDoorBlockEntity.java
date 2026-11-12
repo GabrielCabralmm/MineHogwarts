@@ -63,6 +63,6 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
 
     @Override
     public AABB getRenderBoundingBox() {
-        return new AABB(worldPosition).inflate(3.5).expandTowards(0, 3, 0);
+        return new AABB(worldPosition).inflate(6.5).expandTowards(0, 3, 0);
     }
 }
