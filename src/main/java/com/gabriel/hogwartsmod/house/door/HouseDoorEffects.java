@@ -39,25 +39,25 @@ public final class HouseDoorEffects {
 
     private static void ravenclaw(HouseDoorBlockEntity door, Level level, int tick) {
         RandomSource rnd = level.random;
-        if (tick == 0) {
-            sound(door, level, 8, 72, SoundEvents.PARROT_AMBIENT, 1f, 0.5f);
-            sound(door, level, 8, 72, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 0.8f);
+        if (tick == 2 || tick == 6) {
+            sound(door, level, 0, 28, SoundEvents.ANVIL_LAND, 0.25f, 1.8f);
         }
-        if (tick == 10 || tick == 15) {
-            sound(door, level, 8, 72, SoundEvents.AMETHYST_BLOCK_RESONATE, 0.8f, 1.2f);
+        if (tick == 11) {
+            sound(door, level, 0, 56, SoundEvents.PARROT_AMBIENT, 1f, 0.5f);
+            sound(door, level, 0, 56, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 0.8f);
         }
-        if (tick == 20) {
-            sound(door, level, 8, 72, SoundEvents.ENDER_DRAGON_FLAP, 0.5f, 1.7f);
+        if (tick == 20 || tick == 26) {
+            sound(door, level, 0, 50, SoundEvents.ENDER_DRAGON_FLAP, 0.5f, 1.6f);
         }
-        if (tick == 32) {
-            sound(door, level, 8, 28, SoundEvents.WOODEN_DOOR_OPEN, 1f, 0.55f);
-            sound(door, level, 8, 28, SoundEvents.CHAIN_PLACE, 0.6f, 0.6f);
+        if (tick == 36) {
+            sound(door, level, 0, 30, SoundEvents.WOODEN_DOOR_OPEN, 1f, 0.5f);
+            sound(door, level, 0, 30, SoundEvents.AMETHYST_BLOCK_RESONATE, 0.8f, 1.2f);
         }
-        if (tick < 36) {
-            Vec3 p = at(door, 8 + rnd.nextGaussian() * 9, 72 + rnd.nextGaussian() * 6, -16);
+        if (tick > 10 && tick < 40) {
+            Vec3 p = at(door, rnd.nextGaussian() * 18, 50 + rnd.nextGaussian() * 6, -14);
             level.addParticle(BLUE, p.x, p.y, p.z, 0, 0.01, 0);
             if (tick % 2 == 0) {
-                Vec3 q = at(door, 8 + rnd.nextGaussian() * 6, 40 + rnd.nextFloat() * 20, -14);
+                Vec3 q = at(door, rnd.nextGaussian() * 6, 50 + rnd.nextFloat() * 10, -12);
                 level.addParticle(ParticleTypes.ENCHANT, q.x, q.y, q.z, 0, 0.3, 0);
             }
         }
