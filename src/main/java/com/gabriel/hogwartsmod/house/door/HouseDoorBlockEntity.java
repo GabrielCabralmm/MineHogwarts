@@ -18,9 +18,12 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
     private static final RawAnimation OPENED = RawAnimation.begin().thenLoop("aberta");
     private static final RawAnimation OPEN = RawAnimation.begin().thenPlayAndHold("abrir");
     private static final RawAnimation CLOSE = RawAnimation.begin().thenPlayAndHold("fechar");
+    private static final RawAnimation AMBIENT = RawAnimation.begin().thenLoop("ambiente");
 
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private Boolean lastOpen;
+    private boolean wasOpen;
+    private int openTicks = -1;
 
     public HouseDoorBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.HOUSE_DOOR.get(), pos, state);
@@ -39,6 +42,18 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
             lastOpen = open;
             return PlayState.CONTINUE;
         }));
+        controllers.add(new AnimationController<>(this, "ambiente", 0, state -> state.setAndContinue(AMBIENT)));
+    }
+
+    public void clientTick() {
+        boolean open = getBlockState().getValue(HouseDoorBlock.OPEN);
+        if (open && !wasOpen) {
+            openTicks = 0;
+        }
+        wasOpen = open;
+        if (open && openTicks >= 0) {
+            HouseDoorEffects.opening(this, openTicks++);
+        }
     }
 
     @Override
@@ -48,6 +63,6 @@ public class HouseDoorBlockEntity extends BlockEntity implements GeoBlockEntity 
 
     @Override
     public AABB getRenderBoundingBox() {
-        return new AABB(worldPosition).inflate(2.5).expandTowards(0, 2, 0);
+        return new AABB(worldPosition).inflate(3.5).expandTowards(0, 3, 0);
     }
 }

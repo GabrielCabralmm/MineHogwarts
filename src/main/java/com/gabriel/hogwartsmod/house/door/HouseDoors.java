@@ -175,10 +175,6 @@ public class HouseDoors extends SavedData {
                 level.playSound(null, at, SoundEvents.ALLAY_ITEM_GIVEN, SoundSource.BLOCKS, 1f, 1.7f);
                 level.playSound(null, at, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1f, 0.7f);
             }
-            case SONSERINA -> {
-                level.playSound(null, at, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.8f, 0.5f);
-                level.playSound(null, at, SoundEvents.CAT_HISS, SoundSource.BLOCKS, 0.6f, 0.7f);
-            }
             case CORVINAL -> level.playSound(null, at, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1f, 0.9f);
             case LUFA_LUFA -> level.playSound(null, at, SoundEvents.BARREL_OPEN, SoundSource.BLOCKS, 1f, 0.8f);
         }

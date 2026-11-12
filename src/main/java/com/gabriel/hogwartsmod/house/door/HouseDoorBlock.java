@@ -35,18 +35,33 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 public class HouseDoorBlock extends HorizontalDirectionalBlock implements EntityBlock {
-    public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 8);
+    public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 24);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty PASS = BooleanProperty.create("passagem");
-    public static final int MASTER = 1;
     public static final int OPEN_TICKS = 100;
 
     private final House house;
+    private final int width;
+    private final int height;
 
     public HouseDoorBlock(House house, Properties properties) {
-        super(properties);
+        super(properties.lightLevel(state -> light(house, state.getValue(PART))));
         this.house = house;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, MASTER).setValue(OPEN, false).setValue(PASS, false));
+        this.width = house == House.SONSERINA ? 5 : 3;
+        this.height = house == House.SONSERINA ? 4 : 3;
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, width / 2).setValue(OPEN, false).setValue(PASS, false));
+    }
+
+    private static int light(House house, int part) {
+        return house == House.SONSERINA && part / 5 >= 2 && (part % 5 == 0 || part % 5 == 4) ? 12 : 0;
+    }
+
+    public int master() {
+        return width / 2;
+    }
+
+    public int parts() {
+        return width * height;
     }
 
     public House getHouse() {
@@ -58,19 +73,21 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         builder.add(FACING, PART, OPEN, PASS);
     }
 
-    // -- Estrutura 3x3
+    // -- Estrutura
 
-    private static BlockPos partPos(BlockPos master, Direction facing, int part) {
-        return master.relative(facing.getClockWise(), part % 3 - 1).above(part / 3);
+    private BlockPos partPos(BlockPos master, Direction facing, int part) {
+        return master.relative(facing.getClockWise(), part % width - width / 2).above(part / width);
     }
 
-    public static BlockPos master(BlockState state, BlockPos pos) {
+    public BlockPos master(BlockState state, BlockPos pos) {
         int part = state.getValue(PART);
-        return pos.relative(state.getValue(FACING).getClockWise(), 1 - part % 3).below(part / 3);
+        return pos.relative(state.getValue(FACING).getClockWise(), width / 2 - part % width).below(part / width);
     }
 
-    private static boolean passage(int part) {
-        return part == 1 || part == 4;
+    private boolean passage(int part) {
+        int col = part % width - width / 2;
+        int row = part / width;
+        return house == House.SONSERINA ? row < 2 && Math.abs(col) <= 1 : row < 2 && col == 0;
     }
 
     @Nullable
@@ -79,10 +96,10 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         Level level = context.getLevel();
         BlockPos pos = context.getClickedPos();
         Direction facing = context.getHorizontalDirection().getOpposite();
-        if (pos.getY() + 2 >= level.getMaxBuildHeight()) {
+        if (pos.getY() + height - 1 >= level.getMaxBuildHeight()) {
             return null;
         }
-        for (int part = 0; part < 9; part++) {
+        for (int part = 0; part < parts(); part++) {
             if (!level.getBlockState(partPos(pos, facing, part)).canBeReplaced(context)) {
                 return null;
             }
@@ -92,8 +109,8 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-        for (int part = 0; part < 9; part++) {
-            if (part != MASTER) {
+        for (int part = 0; part < parts(); part++) {
+            if (part != master()) {
                 level.setBlock(partPos(pos, state.getValue(FACING), part), state.setValue(PART, part), 3);
             }
         }
@@ -103,7 +120,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
         if (!newState.is(this)) {
             BlockPos master = master(state, pos);
-            for (int part = 0; part < 9; part++) {
+            for (int part = 0; part < parts(); part++) {
                 BlockPos p = partPos(master, state.getValue(FACING), part);
                 BlockState other = level.getBlockState(p);
                 if (!p.equals(pos) && other.is(this) && other.getValue(PART) == part) {
@@ -116,7 +133,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return state.getValue(PART) == MASTER ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.INVISIBLE;
+        return state.getValue(PART) == master() ? RenderShape.ENTITYBLOCK_ANIMATED : RenderShape.INVISIBLE;
     }
 
     @Override
@@ -163,14 +180,14 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     private static int openDelay(House house) {
         return switch (house) {
             case GRIFINORIA -> 22;
-            case SONSERINA -> 62;
+            case SONSERINA -> 48;
             case CORVINAL -> 36;
             case LUFA_LUFA -> 26;
         };
     }
 
-    private static void setParts(ServerLevel level, BlockPos master, BlockState state, boolean open, boolean pass) {
-        for (int part = 0; part < 9; part++) {
+    private void setParts(ServerLevel level, BlockPos master, BlockState state, boolean open, boolean pass) {
+        for (int part = 0; part < parts(); part++) {
             BlockPos p = partPos(master, state.getValue(FACING), part);
             BlockState other = level.getBlockState(p);
             if (other.is(state.getBlock())) {
@@ -181,10 +198,10 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     public static void setOpen(ServerLevel level, BlockPos master, boolean open) {
         BlockState state = level.getBlockState(master);
-        if (!(state.getBlock() instanceof HouseDoorBlock door) || state.getValue(PART) != MASTER || state.getValue(OPEN) == open) {
+        if (!(state.getBlock() instanceof HouseDoorBlock door) || state.getValue(PART) != door.master() || state.getValue(OPEN) == open) {
             return;
         }
-        setParts(level, master, state, open, false);
+        door.setParts(level, master, state, open, false);
         if (open) {
             level.scheduleTick(master, state.getBlock(), openDelay(door.house));
         }
@@ -192,7 +209,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        if (state.getValue(PART) != MASTER || !state.getValue(OPEN)) {
+        if (state.getValue(PART) != master() || !state.getValue(OPEN)) {
             return;
         }
         if (!state.getValue(PASS)) {
@@ -200,7 +217,9 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
             level.scheduleTick(pos, this, OPEN_TICKS);
             return;
         }
-        AABB passage = new AABB(pos).expandTowards(0, 1, 0).deflate(0.05);
+        Direction side = state.getValue(FACING).getClockWise();
+        double wide = house == House.SONSERINA ? 1 : 0;
+        AABB passage = new AABB(pos).inflate(Math.abs(side.getStepX()) * wide, 0, Math.abs(side.getStepZ()) * wide).expandTowards(0, 1, 0).deflate(0.05);
         if (!level.getEntitiesOfClass(LivingEntity.class, passage).isEmpty()) {
             level.scheduleTick(pos, this, 20);
             return;
@@ -213,7 +232,15 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
 
     @Nullable
     @Override
+    public <T extends BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(Level level, BlockState state,
+                                                                                                         net.minecraft.world.level.block.entity.BlockEntityType<T> type) {
+        return level.isClientSide && type == com.gabriel.hogwartsmod.registry.ModBlockEntities.HOUSE_DOOR.get()
+                ? (l, p, st, be) -> ((HouseDoorBlockEntity) be).clientTick() : null;
+    }
+
+    @Nullable
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return state.getValue(PART) == MASTER ? new HouseDoorBlockEntity(pos, state) : null;
+        return state.getValue(PART) == master() ? new HouseDoorBlockEntity(pos, state) : null;
     }
 }
