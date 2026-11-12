@@ -56,8 +56,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     private static int width(House house) {
         return switch (house) {
             case GRIFINORIA -> 3;
-            case CORVINAL -> 3;
-            case SONSERINA, LUFA_LUFA -> 5;
+            case CORVINAL, SONSERINA, LUFA_LUFA -> 5;
         };
     }
 
@@ -65,7 +64,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return switch (house) {
             case GRIFINORIA -> 3;
             case SONSERINA, LUFA_LUFA -> 4;
-            case CORVINAL -> 5;
+            case CORVINAL -> 6;
         };
     }
 
@@ -114,7 +113,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return switch (house) {
             case GRIFINORIA -> new int[]{-8, 8, 0, 32};
             case SONSERINA -> new int[]{-24, 24, 0, 32};
-            case CORVINAL -> new int[]{-16, 16, 0, 64};
+            case CORVINAL -> new int[]{-26, 26, 0, 76};
             case LUFA_LUFA -> new int[]{-18, 18, 8, 50};
         };
     }
