@@ -38,7 +38,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
     public static final IntegerProperty PART = IntegerProperty.create("parte", 0, 24);
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
     public static final BooleanProperty PASS = BooleanProperty.create("passagem");
-    private static final VoxelShape STEP = Block.box(0, 0, 0, 16, 8, 16);
+    private static final java.util.Map<Integer, VoxelShape> SHAPES = new java.util.concurrent.ConcurrentHashMap<>();
     public static final int OPEN_TICKS = 100;
 
     private final House house;
@@ -110,15 +110,57 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         return pos.relative(state.getValue(FACING).getClockWise(), width / 2 - part % width).below(part / width);
     }
 
-    private boolean passage(int part) {
-        int col = part % width - width / 2;
-        int row = part / width;
+    private int[] opening() {
         return switch (house) {
-            case GRIFINORIA -> row < 2 && col == 0;
-            case LUFA_LUFA -> row < 3 && col == 0;
-            case SONSERINA -> row < 2 && Math.abs(col) <= 1;
-            case CORVINAL -> row < 3 && (col == -1 || col == 0);
+            case GRIFINORIA -> new int[]{-8, 8, 0, 32};
+            case SONSERINA -> new int[]{-24, 24, 0, 32};
+            case CORVINAL -> new int[]{-8, 24, 0, 48};
+            case LUFA_LUFA -> new int[]{-18, 18, 8, 50};
         };
+    }
+
+    private int[] openingIn(int part) {
+        int[] o = opening();
+        int c = part % width - width / 2;
+        int row = part / width;
+        int u0 = Math.max(0, o[0] + 16 * c + 8);
+        int u1 = Math.min(16, o[1] + 16 * c + 8);
+        int y0 = Math.max(0, o[2] - 16 * row);
+        int y1 = Math.min(16, o[3] - 16 * row);
+        return u1 > u0 && y1 > y0 && y1 - y0 >= 4 ? new int[]{u0, u1, y0, y1} : null;
+    }
+
+    private boolean passage(int part) {
+        return openingIn(part) != null;
+    }
+
+    private static VoxelShape box(Direction facing, double u0, double u1, double y0, double y1) {
+        return switch (facing) {
+            case SOUTH -> Block.box(u0, y0, 0, u1, y1, 16);
+            case EAST -> Block.box(0, y0, 16 - u1, 16, y1, 16 - u0);
+            case WEST -> Block.box(0, y0, u0, 16, y1, u1);
+            default -> Block.box(16 - u1, y0, 0, 16 - u0, y1, 16);
+        };
+    }
+
+    private VoxelShape openShape(Direction facing, int part) {
+        return SHAPES.computeIfAbsent(house.ordinal() * 1000 + facing.ordinal() * 100 + part, k -> {
+            int[] o = openingIn(part);
+            VoxelShape shape = Shapes.empty();
+            if (o[0] > 0) {
+                shape = Shapes.or(shape, box(facing, 0, o[0], 0, 16));
+            }
+            if (o[1] < 16) {
+                shape = Shapes.or(shape, box(facing, o[1], 16, 0, 16));
+            }
+            if (o[2] > 0) {
+                shape = Shapes.or(shape, box(facing, o[0], o[1], 0, o[2]));
+            }
+            if (o[3] < 16) {
+                shape = Shapes.or(shape, box(facing, o[0], o[1], o[3], 16));
+            }
+            return shape;
+        });
     }
 
     @Nullable
@@ -173,7 +215,7 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
         if (!state.getValue(PASS) || !passage(part)) {
             return Shapes.block();
         }
-        return house == House.LUFA_LUFA && part / width == 0 ? STEP : Shapes.empty();
+        return openShape(state.getValue(FACING), part);
     }
 
     @Override
@@ -202,7 +244,15 @@ public class HouseDoorBlock extends HorizontalDirectionalBlock implements Entity
             return InteractionResult.SUCCESS;
         }
         if (!state.getValue(OPEN) && isMember(sp)) {
-            HouseDoors.openScreen(sp, master(state, pos), house);
+            BlockPos master = master(state, pos);
+            Direction facing = state.getValue(FACING);
+            double side = (sp.getX() - master.getX() - 0.5) * facing.getStepX() + (sp.getZ() - master.getZ() - 0.5) * facing.getStepZ();
+            if (side < 0) {
+                setOpen(sp.serverLevel(), master, true);
+                HouseDoors.playOpen(sp.serverLevel(), master, house);
+            } else {
+                HouseDoors.openScreen(sp, master, house);
+            }
         }
         return InteractionResult.CONSUME;
     }
