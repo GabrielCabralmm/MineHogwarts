@@ -106,7 +106,7 @@ public final class HouseDoorEffects {
             sound(door, level, -28, 4, SoundEvents.ROOTED_DIRT_BREAK, 1f, 0.5f);
             sound(door, level, -28, 4, SoundEvents.CAT_HISS, 0.8f, 0.5f);
         }
-        if (tick > 10 && tick < 68 && tick % 5 == 0) {
+        if (tick > 10 && tick < 70 && tick % 5 == 0) {
             sound(door, level, 0, 40, SoundEvents.SAND_STEP, 0.5f, 0.6f + rnd.nextFloat() * 0.2f);
         }
         if (tick > 10 && tick < 68) {
@@ -118,8 +118,8 @@ public final class HouseDoorEffects {
             sound(door, level, 0, 30, SoundEvents.GRINDSTONE_USE, 0.6f, 0.5f);
             sound(door, level, 0, 30, SoundEvents.DEEPSLATE_BRICKS_BREAK, 0.6f, 0.6f);
         }
-        if (tick == 69) {
-            sound(door, level, 32, 20, SoundEvents.CAT_HISS, 1f, 0.45f);
+        if (tick == 72) {
+            sound(door, level, 24, 28, SoundEvents.CAT_HISS, 1f, 0.45f);
         }
     }
 
