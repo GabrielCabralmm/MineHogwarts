@@ -45,11 +45,11 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
         float cx = left + W / 2f;
         shadowed(g, title.getString(), HiRes.Style.BOLD, 9f, cx, top + 13, GOLD);
         g.fill(left + 50, top + 25, left + W - 50, top + 26, 0xFFD9A84A);
-        int fw = 102;
+        int fw = 96;
         int fh = 132;
         int fx = left + (W - fw) / 2;
         int fy = top + 31;
-        int border = Math.round(fw * 20f / 136f);
+        int border = Math.round(fw * 12f / 128f);
         HiRes.image(g, LADY, fx + border - 1, fy + border - 1, fw - border * 2 + 2, fh - border * 2 + 2);
         HiRes.image(g, FRAME, fx, fy, fw, fh);
         double time = System.currentTimeMillis() / 1000.0;
