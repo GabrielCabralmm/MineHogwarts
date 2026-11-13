@@ -90,6 +90,20 @@ public class ShopScreen extends Screen {
         return goods.count() > 1 ? goods.count() + "× " + name : name;
     }
 
+    static void goodsIcon(GuiGraphics g, ShopOffer.Goods goods, int x, int y, int size) {
+        com.gabriel.hogwartsmod.creature.Species species = com.gabriel.hogwartsmod.creature.Species.ofEgg(goods.item());
+        if (species == null) {
+            MissionScreen.item(g, goods.stack(), x, y, size);
+            return;
+        }
+        ResourceLocation tex = MissionScreen.tex("criatura_" + species.getId());
+        g.pose().pushPose();
+        g.pose().translate(x, y, 0);
+        g.pose().scale(size / 16f, size / 16f, 1f);
+        g.blit(tex, 0, 0, 0, 0, 16, 16, 16, 16);
+        g.pose().popPose();
+    }
+
     // -- Desenho
 
     @Override
@@ -126,7 +140,7 @@ public class ShopScreen extends Screen {
                 HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 2, chosen ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             boolean afford = player != null && ShopManager.canBuy(player, kind(), offer);
-            MissionScreen.item(g, offer.product().stack(), x + 2, y + 1, 11);
+            goodsIcon(g, offer.product(), x + 2, y + 1, 11);
             HiRes.text(g, HiRes.ellipsize(goodsName(offer.product()), HiRes.Style.REGULAR, w - 18), HiRes.Style.REGULAR, x + 16, y + 2,
                     afford ? INK : MUTED);
         }
@@ -167,7 +181,7 @@ public class ShopScreen extends Screen {
         Player player = player();
         ItemStack stack = offer.product().stack();
         HiRes.highlight(g, Math.round(cx) - 16, top + 29, Math.round(cx) + 16, top + 61, HiRes.Mark.SELECTED);
-        MissionScreen.item(g, stack, Math.round(cx) - 12, top + 33, 24);
+        goodsIcon(g, offer.product(), Math.round(cx) - 12, top + 33, 24);
         HiRes.centered(g, HiRes.ellipsize(goodsName(offer.product()), HiRes.Style.BOLD, w), HiRes.Style.BOLD, 9.5f, cx, top + 67, TITLE);
         int y = top + 82;
         if (offer.limited()) {

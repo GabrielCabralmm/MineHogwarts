@@ -221,7 +221,7 @@ public class ShopEditorScreen extends Screen {
                 HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 2, i == selected ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
             }
             ShopOffer o = offers.get(i);
-            MissionScreen.item(g, o.product().stack(), x + 2, y, 10);
+            ShopScreen.goodsIcon(g, o.product(), x + 2, y, 10);
             HiRes.text(g, HiRes.ellipsize(ShopScreen.goodsName(o.product()), HiRes.Style.REGULAR, (w - 28) * HiRes.TEXT_SIZE / 7.5f),
                     HiRes.Style.REGULAR, 7.5f, x + 15, y + 1.5f, INK);
             if (hover) {
@@ -273,7 +273,7 @@ public class ShopEditorScreen extends Screen {
     private void drawProductPage(GuiGraphics g, int x, int w, ShopOffer o, int mouseX, int mouseY) {
         HiRes.text(g, tr("screen.hogwartsmod.shop_editor.product"), HiRes.Style.BOLD, x, top + 46, INK);
         HiRes.highlight(g, x, top + 58, x + 22, top + 80, HiRes.Mark.SELECTED);
-        MissionScreen.item(g, o.product().stack(), x + 3, top + 61, 16);
+        ShopScreen.goodsIcon(g, o.product(), x + 3, top + 61, 16);
         HiRes.text(g, HiRes.ellipsize(o.product().item().getDescription().getString(), HiRes.Style.BOLD, w - 28), HiRes.Style.BOLD, x + 27, top + 59, INK);
         HiRes.text(g, tr("screen.hogwartsmod.mission_editor.amount"), HiRes.Style.ITALIC, 7.5f, x + 27, top + 71, MUTED);
         stepper(g, x + 80, top + 70, w - 80, String.valueOf(o.product().count()), mouseX, mouseY);
