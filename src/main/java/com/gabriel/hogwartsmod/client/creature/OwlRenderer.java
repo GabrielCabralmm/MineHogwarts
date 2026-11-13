@@ -19,9 +19,23 @@ public class OwlRenderer extends GeoEntityRenderer<OwlEntity> {
         shadowRadius = 0.25f;
     }
 
+    @Override
+    public void scaleModelForRender(float widthScale, float heightScale, com.mojang.blaze3d.vertex.PoseStack poseStack, OwlEntity animatable,
+                                    software.bernie.geckolib.cache.object.BakedGeoModel model, boolean isReRender, float partialTick, int packedLight, int packedOverlay) {
+        float s = animatable.isBaby() ? 0.5f : 1f;
+        super.scaleModelForRender(widthScale * s, heightScale * s, poseStack, animatable, model, isReRender, partialTick, packedLight, packedOverlay);
+    }
+
     private static final class Model extends GeoModel<OwlEntity> {
         private static final ResourceLocation GEO = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "geo/criatura/coruja.geo.json");
-        private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/entity/criatura/coruja.png");
+        private static final ResourceLocation[] TEXTURES = new ResourceLocation[OwlEntity.COLORS.length];
+
+        static {
+            for (int i = 0; i < TEXTURES.length; i++) {
+                TEXTURES[i] = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID,
+                        i == 0 ? "textures/entity/criatura/coruja.png" : "textures/entity/criatura/coruja_" + OwlEntity.COLORS[i] + ".png");
+            }
+        }
         private static final ResourceLocation ANIMATION = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "animations/criatura/coruja.animation.json");
 
         @Override
@@ -31,7 +45,7 @@ public class OwlRenderer extends GeoEntityRenderer<OwlEntity> {
 
         @Override
         public ResourceLocation getTextureResource(OwlEntity entity) {
-            return TEXTURE;
+            return TEXTURES[Math.floorMod(entity.getColor(), TEXTURES.length)];
         }
 
         @Override

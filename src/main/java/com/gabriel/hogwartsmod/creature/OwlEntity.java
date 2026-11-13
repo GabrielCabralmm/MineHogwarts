@@ -59,6 +59,9 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
         NONE, DEPART, APPROACH
     }
 
+    public static final String[] COLORS = {"branca", "marrom", "cinza", "parda"};
+    private static final net.minecraft.network.syncher.EntityDataAccessor<Integer> COLOR =
+            net.minecraft.network.syncher.SynchedEntityData.defineId(OwlEntity.class, net.minecraft.network.syncher.EntityDataSerializers.INT);
     private final AnimatableInstanceCache cache = GeckoLibUtil.createInstanceCache(this);
     private Phase phase = Phase.NONE;
     private int phaseTicks;
@@ -115,15 +118,55 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
         return false;
     }
 
+    // -- Cor e filhotes
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        entityData.define(COLOR, 0);
+    }
+
+    public int getColor() {
+        return entityData.get(COLOR);
+    }
+
+    public void setColor(int value) {
+        entityData.set(COLOR, Math.floorMod(value, COLORS.length));
+    }
+
+    @Override
+    public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level, net.minecraft.world.DifficultyInstance difficulty,
+                                                                   net.minecraft.world.entity.MobSpawnType reason, @Nullable net.minecraft.world.entity.SpawnGroupData data, @Nullable CompoundTag tag) {
+        if (reason != net.minecraft.world.entity.MobSpawnType.BREEDING) {
+            setColor(random.nextInt(COLORS.length));
+        }
+        return super.finalizeSpawn(level, difficulty, reason, data, tag);
+    }
+
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob other) {
-        return null;
+        OwlEntity baby = com.gabriel.hogwartsmod.registry.ModEntities.OWL.get().create(level);
+        if (baby == null) {
+            return null;
+        }
+        baby.setColor(random.nextBoolean() || !(other instanceof OwlEntity mate) ? getColor() : mate.getColor());
+        if (getOwnerUUID() != null) {
+            baby.setOwnerUUID(getOwnerUUID());
+            baby.setTame(true);
+        }
+        return baby;
     }
 
     @Override
     public boolean isFood(ItemStack stack) {
-        return false;
+        return isTreat(stack);
+    }
+
+    @Override
+    public boolean canMate(net.minecraft.world.entity.animal.Animal other) {
+        return other != this && other instanceof OwlEntity owl && isTame() && owl.isTame() && !isInSittingPose() && !owl.isInSittingPose()
+                && !isBusy() && !owl.isBusy() && isInLove() && owl.isInLove();
     }
 
     public static boolean isTreat(ItemStack stack) {
@@ -167,6 +210,17 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
             return InteractionResult.sidedSuccess(level().isClientSide);
         }
         if (isTame() && isOwnedBy(player)) {
+            if (isTreat(held) && getHealth() >= getMaxHealth() && !isBaby() && canFallInLove()) {
+                if (!level().isClientSide) {
+                    if (!player.getAbilities().instabuild) {
+                        held.shrink(1);
+                    }
+                    setOrderedToSit(false);
+                    setInLove(player);
+                    playSound(SoundEvents.PARROT_EAT, 1f, 0.8f);
+                }
+                return InteractionResult.sidedSuccess(level().isClientSide);
+            }
             if (isTreat(held) && getHealth() < getMaxHealth()) {
                 if (!level().isClientSide) {
                     if (!player.getAbilities().instabuild) {
@@ -363,6 +417,7 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
         tag.putString("NomeDestinatario", recipientName);
         tag.putString("Remetente", senderName);
         tag.putBoolean("Voltando", returning);
+        tag.putInt("Cor", getColor());
     }
 
     @Override
@@ -379,6 +434,7 @@ public class OwlEntity extends TamableAnimal implements GeoEntity, FlyingAnimal 
         recipientName = tag.getString("NomeDestinatario");
         senderName = tag.getString("Remetente");
         returning = tag.getBoolean("Voltando");
+        setColor(tag.getInt("Cor"));
         setNoGravity(phase != Phase.NONE);
     }
 

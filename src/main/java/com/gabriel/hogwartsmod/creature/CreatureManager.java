@@ -87,6 +87,9 @@ public final class CreatureManager {
         }
         creature.tame(player);
         creature.setHealth(creature.getMaxHealth());
+        if (creature instanceof OwlEntity owl) {
+            owl.setColor(owl.getRandom().nextInt(OwlEntity.COLORS.length));
+        }
         CompoundTag tag = new CompoundTag();
         creature.saveWithoutId(tag);
         tag.remove("UUID");
