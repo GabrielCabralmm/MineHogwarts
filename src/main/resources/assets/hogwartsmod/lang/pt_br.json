@@ -97,7 +97,7 @@
   "screen.hogwartsmod.trace": "Traçado do feitiço",
   "screen.hogwartsmod.trace.title": "Aula de %s",
   "screen.hogwartsmod.trace.teacher": "com %s",
-  "screen.hogwartsmod.trace.hint": "Siga o traço antes que a sombra te alcance.",
+  "screen.hogwartsmod.trace.hint": "Arraste a partir do ponto azul.",
   "screen.hogwartsmod.trace.start_here": "Comece pelo ponto azul.",
   "screen.hogwartsmod.trace.accuracy": "Precisão: %s%%",
   "screen.hogwartsmod.trace.left_path": "Você saiu do traço.",
@@ -107,7 +107,7 @@
   "screen.hogwartsmod.trace.learned": "Você aprendeu %s!",
   "screen.hogwartsmod.trace.attempts": "Tentativas",
   "command.hogwartsmod.no_data": "Os dados mágicos de %s não estão disponíveis agora",
-  "screen.hogwartsmod.trace.caught": "A sombra te alcançou.",
+  "screen.hogwartsmod.trace.caught": "A faísca vermelha te alcançou.",
   "block.hogwartsmod.pulpito_professor": "Púlpito do Professor",
   "block.hogwartsmod.pulpito_professor.only_professor": "Só professores podem usar o púlpito",
   "block.hogwartsmod.pulpito_professor.only_professor_class": "Só professores podem dar aula no púlpito",
@@ -832,5 +832,7 @@
   "screen.hogwartsmod.shop_editor.days": "%s dia(s)",
   "screen.hogwartsmod.shop_editor.auto_hint": "Dias do Minecraft; volta ao máximo",
   "screen.hogwartsmod.shop_editor.manual_hint": "Só repõe quando a staff reabastecer",
-  "screen.hogwartsmod.shop_editor.sell_hint": "Moedas que o jogador recebe por venda"
+  "screen.hogwartsmod.shop_editor.sell_hint": "Moedas que o jogador recebe por venda",
+  "screen.hogwartsmod.trace.guide": "Fuja da faísca vermelha!",
+  "screen.hogwartsmod.trace.boost_hint": "Espaço ou botão direito nos pontos azuis: acelerar"
 }
