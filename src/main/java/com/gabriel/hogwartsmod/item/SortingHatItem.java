@@ -23,6 +23,11 @@ public class SortingHatItem extends Item {
     }
 
     @Override
+    public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientItemExtensions> consumer) {
+        consumer.accept(com.gabriel.hogwartsmod.client.house.SortingHatItemRenderer.EXTENSIONS);
+    }
+
+    @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity target, InteractionHand hand) {
         if (!(target instanceof Player)) {
             return InteractionResult.PASS;

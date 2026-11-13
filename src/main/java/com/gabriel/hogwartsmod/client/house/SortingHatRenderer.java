@@ -19,6 +19,7 @@ public class SortingHatRenderer extends GeoObjectRenderer<SortingHatRenderer.Hat
     private static SortingHatRenderer instance;
     private float talk;
     private float sway;
+    private boolean item;
 
     private SortingHatRenderer() {
         super(new DefaultedGeoModel<>(ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "chapeu_seletor")) {
@@ -40,9 +41,14 @@ public class SortingHatRenderer extends GeoObjectRenderer<SortingHatRenderer.Hat
     }
 
     public static void draw(PoseStack pose, MultiBufferSource buffers, int light, float talk, float sway) {
+        draw(pose, buffers, light, talk, sway, false);
+    }
+
+    public static void draw(PoseStack pose, MultiBufferSource buffers, int light, float talk, float sway, boolean item) {
         if (instance == null) {
             instance = new SortingHatRenderer();
         }
+        instance.item = item;
         instance.talk = talk;
         instance.sway = sway;
         instance.render(pose, HAT, buffers, null, null, light);
@@ -65,8 +71,10 @@ public class SortingHatRenderer extends GeoObjectRenderer<SortingHatRenderer.Hat
             case "topo" -> bone.setRotZ(sway * 0.06f);
             case "ponta" -> bone.setRotZ(-0.14f + sway * 0.18f);
             case "testa" -> bone.setScaleY(1f + open * 0.06f);
-            case "faixa_esq" -> bone.setRotZ(-sway * 0.03f);
-            case "faixa_dir" -> bone.setRotZ(-sway * 0.03f);
+            case "faixa_esq", "faixa_dir" -> {
+                bone.setRotZ(-sway * 0.03f);
+                bone.setHidden(item);
+            }
             default -> {
             }
         }
