@@ -53,6 +53,12 @@ public final class ShopManager {
 
     @org.jetbrains.annotations.Nullable
     public static String blocker(Player player, ShopKind kind, ShopOffer offer) {
+        if (offer.soldOut()) {
+            return offer.sell() ? "screen.hogwartsmod.shop.not_buying" : "screen.hogwartsmod.shop.sold_out";
+        }
+        if (offer.sell()) {
+            return null;
+        }
         com.gabriel.hogwartsmod.creature.Species species = offer.species();
         com.gabriel.hogwartsmod.magic.MagicData data = com.gabriel.hogwartsmod.magic.MagicData.get(player);
         if (species != null && !hasBag(player)) {
@@ -87,6 +93,9 @@ public final class ShopManager {
     }
 
     public static boolean canPay(Player player, ShopOffer offer) {
+        if (offer.sell()) {
+            return count(player, offer.product().item()) >= offer.product().count();
+        }
         if (Wallet.value(player) < offer.price()) {
             return false;
         }
@@ -112,7 +121,11 @@ public final class ShopManager {
             player.displayClientMessage(Component.translatable(blocked).withStyle(ChatFormatting.GRAY), true);
             return;
         }
-        int max = offer.single() ? 1 : Math.max(1, Math.min(BULK, times));
+        if (offer.sell()) {
+            sell(player, npc, offer, times);
+            return;
+        }
+        int max = offer.available(offer.single() ? 1 : Math.max(1, Math.min(BULK, times)));
         for (int i = 0; i < max; i++) {
             if (!canPay(player, offer) || !Wallet.pay(player, offer.galeoes(), offer.sicles(), offer.nuques())) {
                 break;
@@ -146,6 +159,9 @@ public final class ShopManager {
             }
             bought++;
         }
+        if (bought > 0 && offer.limited()) {
+            npc.replace(offer.withStock(offer.stock() - bought));
+        }
         if (bought == 0) {
             player.displayClientMessage(Component.translatable("message.hogwartsmod.shop_cannot").withStyle(ChatFormatting.GRAY), true);
             return;
@@ -156,6 +172,44 @@ public final class ShopManager {
         if (offer.species() == null) player.displayClientMessage(Component.translatable("message.hogwartsmod.shop_bought",
                 offer.product().count() * bought, offer.product().item().getDescription()).withStyle(ChatFormatting.GOLD), true);
         player.inventoryMenu.broadcastChanges();
+        open(player, npc);
+    }
+
+    private static void sell(ServerPlayer player, ShopNpcEntity npc, ShopOffer offer, int times) {
+        int max = offer.available(Math.max(1, Math.min(BULK, times)));
+        Item item = offer.product().item();
+        int sold = 0;
+        for (int i = 0; i < max && count(player, item) >= offer.product().count(); i++) {
+            int left = offer.product().count();
+            for (ItemStack stack : player.getInventory().items) {
+                if (left > 0 && stack.is(item) && !stack.hasTag()) {
+                    int take = Math.min(left, stack.getCount());
+                    stack.shrink(take);
+                    left -= take;
+                }
+            }
+            sold++;
+        }
+        if (sold == 0) {
+            player.displayClientMessage(Component.translatable("message.hogwartsmod.shop_cannot_sell").withStyle(ChatFormatting.GRAY), true);
+            return;
+        }
+        long total = offer.price() * sold;
+        int g = (int) (total / (17 * 29));
+        total -= (long) g * 17 * 29;
+        int s = (int) (total / 29);
+        total -= (long) s * 29;
+        com.gabriel.hogwartsmod.money.MoneyHelper.give(player, g, s, (int) total);
+        if (offer.limited()) {
+            npc.replace(offer.withStock(offer.stock() - sold));
+        }
+        npc.talk();
+        player.level().playSound(null, player.blockPosition(), SoundEvents.CHAIN_STEP, SoundSource.PLAYERS, 1f, 1.6f);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5f, 1.4f);
+        player.displayClientMessage(Component.translatable("message.hogwartsmod.shop_sold",
+                offer.product().count() * sold, item.getDescription()).withStyle(ChatFormatting.GOLD), true);
+        player.inventoryMenu.broadcastChanges();
+        open(player, npc);
     }
 
     private static void give(ServerPlayer player, ShopOffer.Goods goods) {

@@ -100,6 +100,10 @@ public final class ClientPacketHandler {
     }
 
     public static void handleOpenShop(com.gabriel.hogwartsmod.network.OpenShopPacket packet) {
+        if (net.minecraft.client.Minecraft.getInstance().screen instanceof com.gabriel.hogwartsmod.client.gui.ShopScreen shop && shop.entity() == packet.entity()) {
+            shop.refresh(packet);
+            return;
+        }
         net.minecraft.client.Minecraft.getInstance().setScreen(new com.gabriel.hogwartsmod.client.gui.ShopScreen(packet));
     }
 

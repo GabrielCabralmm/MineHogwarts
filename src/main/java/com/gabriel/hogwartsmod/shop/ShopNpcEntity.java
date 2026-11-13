@@ -55,6 +55,9 @@ public class ShopNpcEntity extends HogwartsNpc {
     @Override
     public void tick() {
         super.tick();
+        if (!level().isClientSide && tickCount % 100 == 0) {
+            restock();
+        }
         if (!level().isClientSide && leaveAt >= 0 && level().getGameTime() >= leaveAt) {
             ((net.minecraft.server.level.ServerLevel) level()).sendParticles(net.minecraft.core.particles.ParticleTypes.LARGE_SMOKE,
                     getX(), getY() + 1, getZ(), 30, 0.3, 0.6, 0.3, 0.02);
@@ -67,11 +70,49 @@ public class ShopNpcEntity extends HogwartsNpc {
         return List.copyOf(offers);
     }
 
+    public List<ShopOffer> getOffers(boolean sell) {
+        return offers.stream().filter(o -> o.sell() == sell).toList();
+    }
+
     public void setOffers(List<ShopOffer> list) {
         offers.clear();
+        long day = day();
+        int buy = 0, sell = 0;
         for (ShopOffer offer : list) {
-            if (offers.size() < MAX_OFFERS) {
-                offers.add(offer.sanitized());
+            if (offer.sell() && !ShopOffer.sellable(offer.product().item())) {
+                continue;
+            }
+            if (offer.sell() ? sell++ >= MAX_OFFERS : buy++ >= MAX_OFFERS) {
+                continue;
+            }
+            ShopOffer clean = offer.sanitized();
+            if (clean.lastRestock() <= 0) {
+                clean = new ShopOffer(clean.id(), clean.product(), clean.galeoes(), clean.sicles(), clean.nuques(), clean.costs(),
+                        clean.sell(), clean.max(), clean.stock(), clean.restockDays(), day);
+            }
+            offers.add(clean);
+        }
+    }
+
+    public void replace(ShopOffer offer) {
+        for (int i = 0; i < offers.size(); i++) {
+            if (offers.get(i).id().equals(offer.id())) {
+                offers.set(i, offer);
+                return;
+            }
+        }
+    }
+
+    private long day() {
+        return level().getDayTime() / 24000L;
+    }
+
+    private void restock() {
+        long day = day();
+        for (int i = 0; i < offers.size(); i++) {
+            ShopOffer o = offers.get(i);
+            if (o.limited() && o.restockDays() > 0 && day - o.lastRestock() >= o.restockDays()) {
+                offers.set(i, o.restocked(day));
             }
         }
     }

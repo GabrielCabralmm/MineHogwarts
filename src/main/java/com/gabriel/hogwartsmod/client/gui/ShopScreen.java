@@ -26,8 +26,9 @@ public class ShopScreen extends Screen {
     private static final int ROW = 16;
     private static final ResourceLocation SHEET = MissionScreen.tex("pulpit_sheet");
 
-    private final OpenShopPacket data;
+    private OpenShopPacket data;
     private int selected;
+    private boolean selling;
     private int left;
     private int top;
 
@@ -47,8 +48,27 @@ public class ShopScreen extends Screen {
         return false;
     }
 
+    public int entity() {
+        return data.entity();
+    }
+
+    public void refresh(OpenShopPacket packet) {
+        data = packet;
+        if (!hasSell()) {
+            selling = false;
+        }
+    }
+
+    private boolean hasSell() {
+        return data.offers().stream().anyMatch(ShopOffer::sell);
+    }
+
+    private List<ShopOffer> shown() {
+        return data.offers().stream().filter(o -> o.sell() == selling).toList();
+    }
+
     private ShopOffer current() {
-        List<ShopOffer> offers = data.offers();
+        List<ShopOffer> offers = shown();
         return offers.isEmpty() ? null : offers.get(Math.min(selected, offers.size() - 1));
     }
 
@@ -86,8 +106,13 @@ public class ShopScreen extends Screen {
     private void drawList(GuiGraphics g, int mouseX, int mouseY) {
         int x = left + 18;
         int w = 128;
-        HiRes.text(g, tr("screen.hogwartsmod.shop.list"), HiRes.Style.BOLD, x, top + 31, INK);
-        List<ShopOffer> offers = data.offers();
+        if (hasSell()) {
+            tab(g, x - 2, top + 27, 64, tr("screen.hogwartsmod.shop.tab_buy"), !selling, mouseX, mouseY);
+            tab(g, x + 66, top + 27, 64, tr("screen.hogwartsmod.shop.tab_sell"), selling, mouseX, mouseY);
+        } else {
+            HiRes.text(g, tr("screen.hogwartsmod.shop.list"), HiRes.Style.BOLD, x, top + 31, INK);
+        }
+        List<ShopOffer> offers = shown();
         if (offers.isEmpty()) {
             HiRes.text(g, tr("screen.hogwartsmod.shop.empty"), HiRes.Style.ITALIC, x, top + 47, MUTED);
         }
@@ -106,6 +131,13 @@ public class ShopScreen extends Screen {
                     afford ? INK : MUTED);
         }
         drawWallet(g, x, top + H - 25);
+    }
+
+    private void tab(GuiGraphics g, int x, int y, int w, String label, boolean on, int mouseX, int mouseY) {
+        if (on || (mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + 13)) {
+            HiRes.highlight(g, x, y, x + w, y + 13, on ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
+        }
+        HiRes.centered(g, label, HiRes.Style.BOLD, x + w / 2f + (on ? 2 : 0), y + 2.5f, on ? TITLE : MUTED);
     }
 
     private void drawWallet(GuiGraphics g, int x, int y) {
@@ -137,13 +169,25 @@ public class ShopScreen extends Screen {
         HiRes.highlight(g, Math.round(cx) - 16, top + 29, Math.round(cx) + 16, top + 61, HiRes.Mark.SELECTED);
         MissionScreen.item(g, stack, Math.round(cx) - 12, top + 33, 24);
         HiRes.centered(g, HiRes.ellipsize(goodsName(offer.product()), HiRes.Style.BOLD, w), HiRes.Style.BOLD, 9.5f, cx, top + 67, TITLE);
-        int y = top + 86;
-        HiRes.text(g, tr("screen.hogwartsmod.shop.price"), HiRes.Style.BOLD, x, y, INK);
+        int y = top + 82;
+        if (offer.limited()) {
+            String stock = offer.soldOut() ? tr(offer.sell() ? "screen.hogwartsmod.shop.not_buying" : "screen.hogwartsmod.shop.sold_out")
+                    : tr(offer.sell() ? "screen.hogwartsmod.shop.buys_more" : "screen.hogwartsmod.shop.stock", offer.stock());
+            HiRes.centered(g, stock, HiRes.Style.ITALIC, 7.5f, cx, top + 77, offer.soldOut() ? WINE : MUTED);
+            y += 6;
+        }
+        HiRes.text(g, tr(offer.sell() ? "screen.hogwartsmod.shop.pays" : "screen.hogwartsmod.shop.price"), HiRes.Style.BOLD, x, y, INK);
         y += 12;
-        boolean coinsOk = player != null && Wallet.value(player) >= offer.price();
-        if (offer.free()) {
+        boolean coinsOk = offer.sell() || (player != null && Wallet.value(player) >= offer.price());
+        if (offer.free() && !offer.sell()) {
             HiRes.text(g, tr("screen.hogwartsmod.shop.free"), HiRes.Style.ITALIC, x, y, GREEN);
             y += 12;
+        }
+        if (offer.sell()) {
+            int have = player == null ? 0 : ShopManager.count(player, offer.product().item());
+            boolean ok = have >= offer.product().count();
+            String mine = tr("screen.hogwartsmod.shop.you_have", have);
+            HiRes.text(g, mine, HiRes.Style.ITALIC, 7.5f, x, y + 13, ok ? GREEN : WINE);
         }
         if (offer.price() > 0) {
             int[] amounts = {offer.galeoes(), offer.sicles(), offer.nuques()};
@@ -182,12 +226,14 @@ public class ShopScreen extends Screen {
         }
         String blocked = player == null ? null : ShopManager.blocker(player, kind(), offer);
         boolean afford = player != null && ShopManager.canBuy(player, kind(), offer);
-        if (!offer.single()) {
+        if (offer.sell()) {
+            HiRes.centered(g, tr("screen.hogwartsmod.shop.bulk_sell", ShopManager.BULK), HiRes.Style.ITALIC, 7f, cx, top + H - 42, MUTED);
+        } else if (!offer.single()) {
             HiRes.centered(g, tr("screen.hogwartsmod.shop.bulk", ShopManager.BULK), HiRes.Style.ITALIC, 7f, cx, top + H - 42, MUTED);
         } else if (offer.species() != null) {
             HiRes.centered(g, tr("screen.hogwartsmod.shop.to_bag"), HiRes.Style.ITALIC, 7f, cx, top + H - 42, MUTED);
         }
-        String label = afford ? tr("screen.hogwartsmod.shop.buy") : blocked != null ? tr(blocked)
+        String label = afford ? tr(offer.sell() ? "screen.hogwartsmod.shop.sell" : "screen.hogwartsmod.shop.buy") : blocked != null ? tr(blocked)
                 : tr(coinsOk ? "screen.hogwartsmod.shop.missing_items" : "screen.hogwartsmod.shop.missing_coins");
         button(g, x, top + H - 30, w, label, afford, GREEN, mouseX, mouseY);
     }
@@ -206,7 +252,16 @@ public class ShopScreen extends Screen {
             return super.mouseClicked(mx, my, button);
         }
         int x = left + 18;
-        List<ShopOffer> offers = data.offers();
+        if (hasSell() && my >= top + 27 && my < top + 40 && mx >= x - 2 && mx < x + 130) {
+            boolean want = mx >= x + 66;
+            if (want != selling) {
+                selling = want;
+                selected = 0;
+                click();
+            }
+            return true;
+        }
+        List<ShopOffer> offers = shown();
         for (int i = 0; i < offers.size(); i++) {
             int y = top + 44 + i * ROW;
             if (mx >= x - 2 && mx < x + 130 && my >= y - 1 && my < y + ROW - 2) {
@@ -219,7 +274,7 @@ public class ShopScreen extends Screen {
         int bx = left + 174;
         int by = top + H - 30;
         if (offer != null && mx >= bx && mx < bx + 128 && my >= by && my < by + 15 && player() != null && ShopManager.canBuy(player(), kind(), offer)) {
-            ModNetwork.CHANNEL.sendToServer(new ShopBuyPacket(data.entity(), offer.id(), hasShiftDown() && !offer.single() ? ShopManager.BULK : 1));
+            ModNetwork.CHANNEL.sendToServer(new ShopBuyPacket(data.entity(), offer.id(), hasShiftDown() && (offer.sell() || !offer.single()) ? ShopManager.BULK : 1));
             click();
             return true;
         }

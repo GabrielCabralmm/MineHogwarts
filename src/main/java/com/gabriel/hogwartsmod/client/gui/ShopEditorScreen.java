@@ -42,7 +42,8 @@ public class ShopEditorScreen extends Screen {
     private String model;
     private int selected;
     private boolean confirmRemove;
-    private boolean pricePage;
+    private int page;
+    private boolean sellTab;
     private int left;
     private int top;
 
@@ -97,7 +98,17 @@ public class ShopEditorScreen extends Screen {
     }
 
     private ShopOffer current() {
-        return selected >= 0 && selected < offers.size() ? offers.get(selected) : null;
+        return selected >= 0 && selected < offers.size() && offers.get(selected).sell() == sellTab ? offers.get(selected) : null;
+    }
+
+    private List<Integer> visible() {
+        List<Integer> out = new ArrayList<>();
+        for (int i = 0; i < offers.size(); i++) {
+            if (offers.get(i).sell() == sellTab) {
+                out.add(i);
+            }
+        }
+        return out;
     }
 
     private int resultRows() {
@@ -112,7 +123,7 @@ public class ShopEditorScreen extends Screen {
         }
         List<Item> found = new ArrayList<>();
         for (Item item : BuiltInRegistries.ITEM) {
-            if (item == Items.AIR) {
+            if (item == Items.AIR || (sellTab && page == 0 && !ShopOffer.sellable(item))) {
                 continue;
             }
             String id = BuiltInRegistries.ITEM.getKey(item).toString();
@@ -132,8 +143,13 @@ public class ShopEditorScreen extends Screen {
         if (o == null || item == Items.AIR) {
             return;
         }
-        if (!pricePage) {
-            offers.set(selected, o.withProduct(ShopOffer.Goods.of(item, count)));
+        if (page == 0) {
+            if (!o.sell() || ShopOffer.sellable(item)) {
+                offers.set(selected, o.withProduct(ShopOffer.Goods.of(item, count)));
+            }
+            return;
+        }
+        if (o.sell() || page != 1) {
             return;
         }
         List<ShopOffer.Goods> list = new ArrayList<>(o.costs());
@@ -193,10 +209,13 @@ public class ShopEditorScreen extends Screen {
         field(g, nameBox, x, top + 40, w);
         HiRes.text(g, tr("screen.hogwartsmod.mission_editor.model"), HiRes.Style.BOLD, x, top + 60, INK);
         stepper(g, x, top + 72, w, model, mouseX, mouseY);
-        HiRes.text(g, tr("screen.hogwartsmod.shop_editor.offers"), HiRes.Style.BOLD, x, top + 92, INK);
-        HiRes.right(g, offers.size() + "/" + ShopNpcEntity.MAX_OFFERS, HiRes.Style.ITALIC, x + w, top + 92, MUTED);
-        for (int i = 0; i < offers.size(); i++) {
-            int y = top + 104 + i * ROW;
+        List<Integer> vis = visible();
+        subTab(g, x - 2, top + 88, 56, tr("screen.hogwartsmod.shop_editor.tab_sells"), !sellTab, mouseX, mouseY);
+        subTab(g, x + 56, top + 88, 56, tr("screen.hogwartsmod.shop_editor.tab_buys"), sellTab, mouseX, mouseY);
+        HiRes.right(g, vis.size() + "/" + ShopNpcEntity.MAX_OFFERS, HiRes.Style.ITALIC, x + w, top + 91, MUTED);
+        for (int k = 0; k < vis.size(); k++) {
+            int i = vis.get(k);
+            int y = top + 104 + k * ROW;
             boolean hover = inside(mouseX, mouseY, x - 2, y - 1, w + 4, ROW - 1);
             if (i == selected || hover) {
                 HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 2, i == selected ? HiRes.Mark.SELECTED : HiRes.Mark.HOVER);
@@ -209,13 +228,13 @@ public class ShopEditorScreen extends Screen {
                 HiRes.right(g, "×", HiRes.Style.BOLD, x + w - 1, y + 0.5f, WINE);
             }
         }
-        if (offers.size() < ShopNpcEntity.MAX_OFFERS) {
-            int y = top + 104 + offers.size() * ROW;
+        if (vis.size() < ShopNpcEntity.MAX_OFFERS) {
+            int y = top + 104 + vis.size() * ROW;
             boolean hover = inside(mouseX, mouseY, x - 2, y - 1, w + 4, ROW - 1);
             if (hover) {
                 HiRes.highlight(g, x - 2, y - 1, x + w + 2, y + ROW - 2, HiRes.Mark.HOVER);
             }
-            HiRes.text(g, tr("screen.hogwartsmod.shop_editor.add"), HiRes.Style.BOLD, 7.5f, x + 3, y + 1.5f, GREEN);
+            HiRes.text(g, tr(sellTab ? "screen.hogwartsmod.shop_editor.add_buy" : "screen.hogwartsmod.shop_editor.add"), HiRes.Style.BOLD, 7.5f, x + 3, y + 1.5f, GREEN);
         }
     }
 
@@ -226,14 +245,20 @@ public class ShopEditorScreen extends Screen {
         if (o == null) {
             HiRes.centered(g, tr("screen.hogwartsmod.shop_editor.pick"), HiRes.Style.ITALIC, x + w / 2f, top + 100, MUTED);
         } else {
-            subTab(g, x, top + 28, 73, tr("screen.hogwartsmod.shop_editor.page_product"), !pricePage, mouseX, mouseY);
-            subTab(g, x + 75, top + 28, 73, tr("screen.hogwartsmod.shop_editor.page_price"), pricePage, mouseX, mouseY);
-            if (pricePage) {
+            String[] pages = {"page_product", "page_price", "page_stock"};
+            for (int i = 0; i < 3; i++) {
+                subTab(g, x + i * 50, top + 28, 48, tr("screen.hogwartsmod.shop_editor." + pages[i]), page == i, mouseX, mouseY);
+            }
+            if (page == 1) {
                 drawPricePage(g, x, w, o, mouseX, mouseY);
+            } else if (page == 2) {
+                drawStockPage(g, x, w, o, mouseX, mouseY);
             } else {
                 drawProductPage(g, x, w, o, mouseX, mouseY);
             }
-            drawSearch(g, x, w, mouseX, mouseY);
+            if (page == 0 || (page == 1 && !o.sell())) {
+                drawSearch(g, x, w, mouseX, mouseY);
+            }
         }
         button(g, x, top + H - 26, w, tr("screen.hogwartsmod.mission_editor.save"), true, GREEN, mouseX, mouseY);
     }
@@ -252,7 +277,7 @@ public class ShopEditorScreen extends Screen {
         HiRes.text(g, HiRes.ellipsize(o.product().item().getDescription().getString(), HiRes.Style.BOLD, w - 28), HiRes.Style.BOLD, x + 27, top + 59, INK);
         HiRes.text(g, tr("screen.hogwartsmod.mission_editor.amount"), HiRes.Style.ITALIC, 7.5f, x + 27, top + 71, MUTED);
         stepper(g, x + 80, top + 70, w - 80, String.valueOf(o.product().count()), mouseX, mouseY);
-        HiRes.text(g, tr("screen.hogwartsmod.shop.price"), HiRes.Style.BOLD, x, top + 94, INK);
+        HiRes.text(g, tr(o.sell() ? "screen.hogwartsmod.shop.pays" : "screen.hogwartsmod.shop.price"), HiRes.Style.BOLD, x, top + 94, INK);
         float px = x;
         int py = top + 107;
         int[] amounts = {o.galeoes(), o.sicles(), o.nuques()};
@@ -275,17 +300,47 @@ public class ShopEditorScreen extends Screen {
         if (o.free()) {
             HiRes.text(g, tr("screen.hogwartsmod.shop.free"), HiRes.Style.ITALIC, x, py, GREEN);
         }
-        HiRes.text(g, tr("screen.hogwartsmod.shop_editor.change_product"), HiRes.Style.BOLD, x, top + 140, INK);
+        HiRes.text(g, tr(o.sell() ? "screen.hogwartsmod.shop_editor.change_bought" : "screen.hogwartsmod.shop_editor.change_product"), HiRes.Style.BOLD, x, top + 140, INK);
+    }
+
+    private void drawStockPage(GuiGraphics g, int x, int w, ShopOffer o, int mouseX, int mouseY) {
+        HiRes.text(g, tr(o.sell() ? "screen.hogwartsmod.shop_editor.limit_buy" : "screen.hogwartsmod.shop_editor.limit"), HiRes.Style.BOLD, x, top + 46, INK);
+        stepper(g, x, top + 59, w, o.limited() ? String.valueOf(o.max()) : tr("screen.hogwartsmod.shop_editor.unlimited"), mouseX, mouseY);
+        if (!o.limited()) {
+            HiRes.text(g, tr("screen.hogwartsmod.shop_editor.unlimited_hint"), HiRes.Style.ITALIC, 7f, x, top + 74, MUTED);
+            return;
+        }
+        HiRes.text(g, tr("screen.hogwartsmod.shop_editor.now", o.stock(), o.max()), HiRes.Style.REGULAR, x, top + 78, INK);
+        button(g, x + w - 62, top + 75, 62, tr("screen.hogwartsmod.shop_editor.refill"), o.stock() < o.max(), GREEN, mouseX, mouseY);
+        boolean auto = o.restockDays() > 0;
+        boolean hover = inside(mouseX, mouseY, x, top + 98, w, 12);
+        g.fill(x, top + 99, x + 10, top + 109, NOTE_EDGE);
+        g.fill(x + 1, top + 100, x + 9, top + 108, hover ? NOTE_ON : NOTE);
+        if (auto) {
+            HiRes.image(g, MissionScreen.tex("check"), x + 1, top + 100, 8, 8);
+        }
+        HiRes.text(g, tr("screen.hogwartsmod.shop_editor.auto"), HiRes.Style.BOLD, x + 15, top + 100, INK);
+        if (auto) {
+            HiRes.text(g, tr("screen.hogwartsmod.shop_editor.every"), HiRes.Style.ITALIC, 7.5f, x, top + 118, MUTED);
+            stepper(g, x + 52, top + 117, w - 52, tr("screen.hogwartsmod.shop_editor.days", o.restockDays()), mouseX, mouseY);
+            HiRes.text(g, tr("screen.hogwartsmod.shop_editor.auto_hint"), HiRes.Style.ITALIC, 7f, x, top + 134, MUTED);
+        } else {
+            HiRes.text(g, tr("screen.hogwartsmod.shop_editor.manual_hint"), HiRes.Style.ITALIC, 7f, x, top + 118, MUTED);
+        }
     }
 
     private void drawPricePage(GuiGraphics g, int x, int w, ShopOffer o, int mouseX, int mouseY) {
-        HiRes.text(g, tr("screen.hogwartsmod.mission_editor.coins"), HiRes.Style.BOLD, x, top + 45, INK);
+        HiRes.text(g, tr(o.sell() ? "screen.hogwartsmod.shop.pays" : "screen.hogwartsmod.mission_editor.coins"), HiRes.Style.BOLD, x, top + 45, INK);
         int[] amounts = {o.galeoes(), o.sicles(), o.nuques()};
         String[] ids = {"galeao", "sicle", "nuque"};
         for (int i = 0; i < 3; i++) {
             int gx = x + i * 50;
             HiRes.image(g, MissionScreen.tex("moeda_" + ids[i]), gx, top + 56, 10, 11);
             stepper(g, gx + 11, top + 56, 37, String.valueOf(amounts[i]), mouseX, mouseY);
+        }
+        if (o.sell()) {
+            HiRes.text(g, tr("screen.hogwartsmod.shop_editor.sell_hint"), HiRes.Style.ITALIC, 7f, x, top + 76, MUTED);
+            return;
         }
         HiRes.text(g, tr("screen.hogwartsmod.shop_editor.costs"), HiRes.Style.BOLD, x, top + 74, INK);
         HiRes.right(g, o.costs().size() + "/" + ShopOffer.MAX_COSTS, HiRes.Style.ITALIC, x + w, top + 74, MUTED);
@@ -393,12 +448,27 @@ public class ShopEditorScreen extends Screen {
             click();
             return true;
         }
-        for (int i = 0; i < offers.size(); i++) {
-            int y = top + 104 + i * ROW;
+        if (my >= top + 88 && my < top + 101 && mx >= lx - 2 && mx < lx + 110) {
+            boolean want = mx >= lx + 56;
+            if (want != sellTab) {
+                sellTab = want;
+                List<Integer> vis = visible();
+                selected = vis.isEmpty() ? -1 : vis.get(0);
+                page = 0;
+                searchBox.setValue("");
+                click();
+            }
+            return true;
+        }
+        List<Integer> vis = visible();
+        for (int k = 0; k < vis.size(); k++) {
+            int i = vis.get(k);
+            int y = top + 104 + k * ROW;
             if (inside(mx, my, lx - 2, y - 1, 138, ROW - 1)) {
                 if (mx >= lx + 124) {
                     offers.remove(i);
-                    selected = Math.min(selected, offers.size() - 1);
+                    List<Integer> left2 = visible();
+                    selected = left2.isEmpty() ? -1 : left2.get(Math.min(k, left2.size() - 1));
                 } else {
                     selected = i;
                 }
@@ -406,10 +476,10 @@ public class ShopEditorScreen extends Screen {
                 return true;
             }
         }
-        if (offers.size() < ShopNpcEntity.MAX_OFFERS && inside(mx, my, lx - 2, top + 104 + offers.size() * ROW - 1, 138, ROW - 1)) {
-            offers.add(ShopOffer.blank());
+        if (vis.size() < ShopNpcEntity.MAX_OFFERS && inside(mx, my, lx - 2, top + 104 + vis.size() * ROW - 1, 138, ROW - 1)) {
+            offers.add(sellTab ? ShopOffer.blankSell() : ShopOffer.blank());
             selected = offers.size() - 1;
-            pricePage = false;
+            page = 0;
             searchBox.setValue("");
             focus(searchBox);
             click();
@@ -427,11 +497,55 @@ public class ShopEditorScreen extends Screen {
         if (o == null) {
             return super.mouseClicked(mx, my, button);
         }
-        if (inside(mx, my, x, top + 28, 73, 13) || inside(mx, my, x + 75, top + 28, 73, 13)) {
-            pricePage = mx >= x + 75;
+        if (inside(mx, my, x, top + 28, 148, 13)) {
+            page = Math.min(2, (int) ((mx - x) / 50));
             searchBox.setValue("");
             click();
             return true;
+        }
+        int step0 = hasShiftDown() ? 10 : 1;
+        if (page == 2) {
+            int d = stepperDir(mx, my, x, top + 59, w);
+            if (d != 0) {
+                offers.set(selected, o.withLimit(o.max() + d * step0, o.restockDays()));
+                click();
+                return true;
+            }
+            if (!o.limited()) {
+                return super.mouseClicked(mx, my, button);
+            }
+            if (inside(mx, my, x + w - 62, top + 75, 62, 15)) {
+                offers.set(selected, o.withStock(o.max()));
+                click();
+                return true;
+            }
+            if (inside(mx, my, x, top + 98, w, 12)) {
+                offers.set(selected, o.withLimit(o.max(), o.restockDays() > 0 ? 0 : 1));
+                click();
+                return true;
+            }
+            if (o.restockDays() > 0) {
+                int dd = stepperDir(mx, my, x + 52, top + 117, w - 52);
+                if (dd != 0) {
+                    offers.set(selected, o.withLimit(o.max(), Math.max(1, o.restockDays() + dd)));
+                    click();
+                    return true;
+                }
+            }
+            return super.mouseClicked(mx, my, button);
+        }
+        if (page == 1 && o.sell()) {
+            int[] am = {o.galeoes(), o.sicles(), o.nuques()};
+            for (int i = 0; i < 3; i++) {
+                int d = stepperDir(mx, my, x + i * 50 + 11, top + 56, 37);
+                if (d != 0) {
+                    am[i] = Math.max(0, Math.min(9999, am[i] + d * step0));
+                    offers.set(selected, o.withPrice(am[0], am[1], am[2]));
+                    click();
+                    return true;
+                }
+            }
+            return super.mouseClicked(mx, my, button);
         }
         if (inside(mx, my, x, top + 150, 98, 13)) {
             return focus(searchBox);
@@ -452,7 +566,7 @@ public class ShopEditorScreen extends Screen {
             }
         }
         int step = hasShiftDown() ? 10 : 1;
-        if (!pricePage) {
+        if (page == 0) {
             int d = stepperDir(mx, my, x + 80, top + 70, w - 80);
             if (d != 0) {
                 ShopOffer.Goods p = o.product();
