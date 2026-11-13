@@ -244,9 +244,6 @@ public class TraceScreen extends Screen {
         g.setColor(new Color(0x82, 0x68, 0x4C, 110));
         g.setStroke(new BasicStroke(2.2f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 1f, new float[]{4f * s, 3.5f * s}, 0f));
         g.draw(guide);
-        for (float f : new float[]{0.12f, 0.42f, 0.68f, 0.92f}) {
-            arrow(g, (int) (f * (n - 1)), s);
-        }
 
         if (pos > 1f || learned) {
             drawLight(g, s, spellColor, span(0, learned ? total : pos));
@@ -373,21 +370,6 @@ public class TraceScreen extends Screen {
             path.lineTo(guideX(i) * s, guideY(i) * s);
         }
         return path;
-    }
-
-    private void arrow(Graphics2D g, int i, float s) {
-        int j = Math.min(pattern.length - 1, i + 2);
-        double angle = Math.atan2(guideY(j) - guideY(i), guideX(j) - guideX(i));
-        double x = guideX(i) * s;
-        double y = guideY(i) * s;
-        double len = 5 * s;
-        Path2D head = new Path2D.Double();
-        head.moveTo(x + Math.cos(angle + 2.5) * len, y + Math.sin(angle + 2.5) * len);
-        head.lineTo(x, y);
-        head.lineTo(x + Math.cos(angle - 2.5) * len, y + Math.sin(angle - 2.5) * len);
-        g.setStroke(new BasicStroke(1.6f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.setColor(new Color(0x6E, 0x28, 0x1E, 150));
-        g.draw(head);
     }
 
     private static void letter(Graphics2D g, float x, float y, float size, char c, Color color) {
