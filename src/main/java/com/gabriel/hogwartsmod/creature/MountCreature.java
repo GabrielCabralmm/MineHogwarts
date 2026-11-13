@@ -324,6 +324,9 @@ public abstract class MountCreature extends TamableAnimal implements GeoEntity, 
             roll *= 0.8f;
         }
         super.tick();
+        if (level().isClientSide) {
+            airTicks = isFlyingVisual() ? airTicks + 1 : 0;
+        }
         if (!level().isClientSide && getControllingPassenger() == null && entityData.get(BOOST)) {
             entityData.set(BOOST, false);
         }
@@ -355,6 +358,8 @@ public abstract class MountCreature extends TamableAnimal implements GeoEntity, 
     protected void tickRidden(Player player, Vec3 input) {
         super.tickRidden(player, input);
         if (!flying) {
+            rollOld = roll;
+            roll *= 0.6f;
             setRot(player.getYRot(), 0);
             yRotO = yBodyRot = yHeadRot = getYRot();
             if (inVertical > 0 && onGround() && !Zones.blocks(this, ZoneRule.VOO)) {
@@ -425,6 +430,12 @@ public abstract class MountCreature extends TamableAnimal implements GeoEntity, 
             boosting = false;
             speed = 0;
         }
+    }
+
+    private int airTicks;
+
+    public boolean isWingsOpen() {
+        return airTicks > 3;
     }
 
     public boolean isFlyingVisual() {
@@ -506,7 +517,7 @@ public abstract class MountCreature extends TamableAnimal implements GeoEntity, 
         fly = RawAnimation.begin().thenLoop(p + "voar");
         sit = RawAnimation.begin().thenLoop(p + "sentado");
         controllers.add(new AnimationController<>(this, "corpo", 5, state -> {
-            if (isFlyingVisual()) {
+            if (isWingsOpen()) {
                 return state.setAndContinue(fly);
             }
             if (isInSittingPose()) {
