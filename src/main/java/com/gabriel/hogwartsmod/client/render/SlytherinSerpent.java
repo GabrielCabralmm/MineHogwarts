@@ -296,9 +296,8 @@ public final class SlytherinSerpent {
         for (int sgn = -1; sgn <= 1; sgn += 2) {
             Vector3f n = new Vector3f(hf.side).mul(sgn);
             Vector3f across = new Vector3f(hf.up);
-            Vector3f side = new Vector3f(hf.p).add(new Vector3f(n).mul(4.53f)).add(new Vector3f(hf.t).mul(1.9f)).add(new Vector3f(hf.up).mul(1.5f));
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, side, n, hf.t, across, 0.6f, 0.6f, 8);
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(side).add(new Vector3f(n).mul(0.02f)), n, hf.t, across, 0.15f, 0.6f, 24);
+            Vector3f side = new Vector3f(hf.p).add(new Vector3f(n).mul(4.53f)).add(new Vector3f(hf.t).mul(2.25f)).add(new Vector3f(hf.up).mul(1.5f));
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, side, n, hf.t, across, 0.25f, 0.6f, 8);
             Vector3f front = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(2.53f)).add(new Vector3f(hf.side).mul(sgn * 3.9f)).add(new Vector3f(hf.up).mul(1.5f));
             patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, front, hf.t, hf.side, hf.up, 0.6f, 0.6f, 8);
             patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(front).add(new Vector3f(hf.t).mul(0.02f)), hf.t, hf.side, hf.up, 0.15f, 0.6f, 24);
