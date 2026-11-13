@@ -295,14 +295,13 @@ public final class SlytherinSerpent {
         Frame hf = frame(head - 4, head, wave, moving);
         for (int sgn = -1; sgn <= 1; sgn += 2) {
             Vector3f n = new Vector3f(hf.side).mul(sgn);
-            Vector3f base = new Vector3f(hf.p).add(new Vector3f(n).mul(4.55f));
-            Vector3f eye = new Vector3f(base).add(new Vector3f(hf.t).mul(1.0f)).add(new Vector3f(hf.up).mul(1.0f));
             Vector3f across = new Vector3f(hf.up);
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, eye, n, hf.t, across, 1.0f, 0.5f, 8);
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(eye).add(new Vector3f(n).mul(0.02f)), n, hf.t, across, 0.5f, 0.5f, 24);
-            Vector3f front = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(2.55f)).add(new Vector3f(hf.side).mul(sgn * 3.6f)).add(new Vector3f(hf.up).mul(1.6f));
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, front, hf.t, hf.side, hf.up, 0.9f, 0.6f, 8);
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(front).add(new Vector3f(hf.t).mul(0.02f)).add(new Vector3f(hf.side).mul(sgn * 0.2f)), hf.t, hf.side, hf.up, 0.3f, 0.6f, 24);
+            Vector3f side = new Vector3f(hf.p).add(new Vector3f(n).mul(4.53f)).add(new Vector3f(hf.t).mul(1.9f)).add(new Vector3f(hf.up).mul(1.5f));
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, side, n, hf.t, across, 0.6f, 0.6f, 8);
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(side).add(new Vector3f(n).mul(0.02f)), n, hf.t, across, 0.15f, 0.6f, 24);
+            Vector3f front = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(2.53f)).add(new Vector3f(hf.side).mul(sgn * 3.9f)).add(new Vector3f(hf.up).mul(1.5f));
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, front, hf.t, hf.side, hf.up, 0.6f, 0.6f, 8);
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(front).add(new Vector3f(hf.t).mul(0.02f)), hf.t, hf.side, hf.up, 0.15f, 0.6f, 24);
             Vector3f nostril = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(5.05f)).add(new Vector3f(hf.side).mul(sgn * 1.3f)).add(new Vector3f(hf.up).mul(1.1f));
             patch(buffer, matrix, normals, light, nostril, hf.t, hf.side, hf.up, 0.3f, 0.25f, 56);
             Vector3f top = new Vector3f(hf.p).add(new Vector3f(hf.up).mul(2.55f)).add(new Vector3f(hf.side).mul(sgn * 2.5f)).add(new Vector3f(hf.t).mul(0.5f));
