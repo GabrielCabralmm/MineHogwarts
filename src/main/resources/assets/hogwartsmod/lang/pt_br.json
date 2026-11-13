@@ -834,5 +834,5 @@
   "screen.hogwartsmod.shop_editor.manual_hint": "Só repõe quando a staff reabastecer",
   "screen.hogwartsmod.shop_editor.sell_hint": "Moedas que o jogador recebe por venda",
   "screen.hogwartsmod.trace.guide": "Fuja da faísca vermelha!",
-  "screen.hogwartsmod.trace.boost_hint": "Espaço ou botão direito nos pontos azuis: acelerar"
+  "screen.hogwartsmod.trace.boost_hint": "Aperte a seta (ou WASD) quando a luz chegar nela"
 }

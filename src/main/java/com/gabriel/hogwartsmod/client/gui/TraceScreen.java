@@ -30,7 +30,7 @@ public class TraceScreen extends Screen {
     private static final int SHEET_H = 220;
     private static final int CANVAS = 140;
     private static final float MIN_ACCURACY = 1.0f;
-    private static final float SHADOW_DELAY = 1.5f;
+    private static final float SHADOW_DELAY = 2.2f;
     private static final int ORB = 16;
 
     private static final int INK = 0xFF38261A;
@@ -50,9 +50,16 @@ public class TraceScreen extends Screen {
 
     private enum State { READY, DRAWING, MISSED, FAILED, LEARNED }
 
-    private static final float[] MARKERS = {0.28f, 0.55f, 0.8f};
-    private static final float MARKER_WINDOW = 9f;
-    private static final float BOOST_TIME = 1.1f;
+    private static final float MARKER_WINDOW = 10f;
+    private static final float MARKER_GAP = 50f;
+    private static final float LIGHT_SPEED = 16f;
+    private static final float BOOST_SPEED = 5.5f;
+    private static final float BOOST_TIME = 0.6f;
+    private static final int[][] KEYS = {
+            {org.lwjgl.glfw.GLFW.GLFW_KEY_UP, org.lwjgl.glfw.GLFW.GLFW_KEY_W},
+            {org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT, org.lwjgl.glfw.GLFW.GLFW_KEY_D},
+            {org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN, org.lwjgl.glfw.GLFW.GLFW_KEY_S},
+            {org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT, org.lwjgl.glfw.GLFW.GLFW_KEY_A}};
 
     private final Spell spell;
     private final String teacher;
@@ -60,7 +67,6 @@ public class TraceScreen extends Screen {
     private final float[][] pattern;
     private final float[] cum;
     private final float total;
-    private final float lightSpeed;
     private final float shadowSpeed;
     private long drawStart;
     private long lastFrame;
@@ -70,7 +76,9 @@ public class TraceScreen extends Screen {
     private float chaser;
     private float boost;
     private float flash;
-    private final boolean[] markerHit = new boolean[MARKERS.length];
+    private final float[] markers;
+    private final int[] markerDir;
+    private final int[] markerState;
     private final List<float[]> sparks = new ArrayList<>();
     private static final java.util.Random RANDOM = new java.util.Random();
     private final HiRes.Canvas canvas = new HiRes.Canvas();
@@ -99,8 +107,15 @@ public class TraceScreen extends Screen {
             cum[i] = cum[i - 1] + (float) Math.hypot(pattern[i][0] - pattern[i - 1][0], pattern[i][1] - pattern[i - 1][1]) * CANVAS;
         }
         this.total = cum[pattern.length - 1];
-        this.shadowSpeed = 34f + 3f * spell.getRequiredLevel();
-        this.lightSpeed = shadowSpeed * 1.6f;
+        this.shadowSpeed = 46f + 4f * spell.getRequiredLevel();
+        int count = Math.max(3, (int) Math.ceil((total - 44f) / MARKER_GAP) + 1);
+        this.markers = new float[count];
+        for (int i = 0; i < count; i++) {
+            markers[i] = 24f + i * (total - 44f) / (count - 1);
+        }
+        this.markerDir = new int[count];
+        this.markerState = new int[count];
+        shuffleArrows();
     }
 
     @Override
@@ -251,13 +266,19 @@ public class TraceScreen extends Screen {
             g.draw(dark);
         }
 
-        for (int m = 0; m < MARKERS.length; m++) {
-            float[] p = at(MARKERS[m] * total);
-            boolean near = state == State.DRAWING && !markerHit[m] && Math.abs(pos - MARKERS[m] * total) <= MARKER_WINDOW;
-            Color ring = markerHit[m] ? new Color(0xE0, 0xB0, 0x30, 230) : near ? new Color(0x9E, 0xE6, 0xFF, 255) : new Color(0x1E, 0x7B, 0xFF, 200);
-            dot(g, p[0] * s, p[1] * s, (near ? 7.5f : 6f) * s, withAlpha(ring, near ? 90 : 50), true);
-            dot(g, p[0] * s, p[1] * s, 4f * s, ring, false);
-            dot(g, p[0] * s, p[1] * s, 1.6f * s, ring, true);
+        for (int m = 0; m < markers.length; m++) {
+            float[] p = at(markers[m]);
+            boolean near = state == State.DRAWING && markerState[m] == 0 && Math.abs(pos - markers[m]) <= MARKER_WINDOW;
+            Color fill = markerState[m] == 1 ? new Color(0xE0, 0xB0, 0x30, 235)
+                    : markerState[m] == 2 ? new Color(0x8E, 0x2A, 0x2A, 200)
+                    : near ? new Color(0x3A, 0xA8, 0xFF, 255) : new Color(0x1E, 0x6B, 0xD8, 215);
+            float r = (near ? 8f : 6.4f) * s;
+            if (near) {
+                dot(g, p[0] * s, p[1] * s, r + 3f * s, new Color(0x9E, 0xE6, 0xFF, 90), true);
+            }
+            dot(g, p[0] * s, p[1] * s, r, fill, true);
+            dot(g, p[0] * s, p[1] * s, r, new Color(0xF4, 0xEC, 0xD8, 230), false);
+            arrow(g, p[0] * s, p[1] * s, r * 0.62f, markerDir[m], new Color(0xFF, 0xFC, 0xF2, 255));
         }
 
         dot(g, guideX(n - 1) * s, guideY(n - 1) * s, 3.2f * s, new Color(0x82, 0x68, 0x4C, 170), false);
@@ -359,6 +380,32 @@ public class TraceScreen extends Screen {
         g.draw(head);
     }
 
+    private static void arrow(Graphics2D g, float x, float y, float r, int dir, Color color) {
+        java.awt.geom.AffineTransform old = g.getTransform();
+        g.translate(x, y);
+        g.rotate(dir * Math.PI / 2);
+        Path2D a = new Path2D.Float();
+        a.moveTo(0, -r);
+        a.lineTo(r * 0.9f, -r * 0.05f);
+        a.lineTo(r * 0.32f, -r * 0.05f);
+        a.lineTo(r * 0.32f, r);
+        a.lineTo(-r * 0.32f, r);
+        a.lineTo(-r * 0.32f, -r * 0.05f);
+        a.lineTo(-r * 0.9f, -r * 0.05f);
+        a.closePath();
+        g.setComposite(AlphaComposite.SrcOver);
+        g.setColor(color);
+        g.fill(a);
+        g.setTransform(old);
+    }
+
+    private void shuffleArrows() {
+        for (int i = 0; i < markerDir.length; i++) {
+            markerDir[i] = RANDOM.nextInt(4);
+            markerState[i] = 0;
+        }
+    }
+
     private static void dot(Graphics2D g, float x, float y, float r, Color color, boolean fill) {
         g.setComposite(AlphaComposite.SrcOver);
         g.setColor(color);
@@ -454,10 +501,19 @@ public class TraceScreen extends Screen {
             return;
         }
         boost = Math.max(0, boost - dt);
-        float speed = lightSpeed * (boost > 0 ? 1.75f : 1f);
+        float speed = LIGHT_SPEED * (boost > 0 ? BOOST_SPEED : 1f);
         float move = Math.min(pending, speed * dt);
         pending = Math.max(0, Math.min(speed * 0.25f, pending - move));
+        float before = pos;
         pos = Math.min(total, pos + move);
+        for (int m = 0; m < markers.length; m++) {
+            if (markerState[m] == 0 && boost > 0 && before < markers[m] - MARKER_WINDOW * 0.5f && pos >= markers[m] - MARKER_WINDOW * 0.5f) {
+                boost = 0;
+            }
+            if (markerState[m] == 0 && pos > markers[m] + MARKER_WINDOW) {
+                markerState[m] = 2;
+            }
+        }
         if (elapsed() > SHADOW_DELAY) {
             chaser += shadowSpeed * dt;
         }
@@ -491,7 +547,7 @@ public class TraceScreen extends Screen {
         chaser = 0;
         pending = 0;
         boost = 0;
-        java.util.Arrays.fill(markerHit, false);
+        shuffleArrows();
         feedback = tr("screen.hogwartsmod.trace.hint");
         feedbackColor = MUTED;
         dirty = true;
@@ -499,10 +555,6 @@ public class TraceScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        if (button == 1 && state == State.DRAWING) {
-            tryBoost();
-            return true;
-        }
         if (button == 0 && state == State.READY) {
             float x = (float) (mx - canvasX());
             float y = (float) (my - canvasY());
@@ -528,22 +580,32 @@ public class TraceScreen extends Screen {
 
     @Override
     public boolean keyPressed(int key, int scan, int modifiers) {
-        if (key == org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE && state == State.DRAWING) {
-            tryBoost();
-            return true;
+        if (state == State.DRAWING) {
+            for (int d = 0; d < 4; d++) {
+                if (key == KEYS[d][0] || key == KEYS[d][1]) {
+                    tryArrow(d);
+                    return true;
+                }
+            }
         }
         return super.keyPressed(key, scan, modifiers);
     }
 
-    private void tryBoost() {
-        for (int m = 0; m < MARKERS.length; m++) {
-            if (!markerHit[m] && Math.abs(pos - MARKERS[m] * total) <= MARKER_WINDOW) {
-                markerHit[m] = true;
-                boost = BOOST_TIME;
-                flash = 1f;
-                chaser = Math.max(0, chaser - shadowSpeed * 0.6f);
-                playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.6f + m * 0.15f);
+    private void tryArrow(int dir) {
+        for (int m = 0; m < markers.length; m++) {
+            if (markerState[m] == 0 && Math.abs(pos - markers[m]) <= MARKER_WINDOW) {
                 dirty = true;
+                if (markerDir[m] == dir) {
+                    markerState[m] = 1;
+                    boost = BOOST_TIME;
+                    flash = 1f;
+                    chaser = Math.max(0, chaser - shadowSpeed * 0.25f);
+                    playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.4f + Math.min(m, 6) * 0.1f);
+                } else {
+                    markerState[m] = 2;
+                    chaser += shadowSpeed * 0.3f;
+                    playSound(SoundEvents.NOTE_BLOCK_BASS.get(), 0.5f);
+                }
                 return;
             }
         }
