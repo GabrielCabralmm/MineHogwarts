@@ -51,15 +51,12 @@ public class TraceScreen extends Screen {
     private enum State { READY, DRAWING, MISSED, FAILED, LEARNED }
 
     private static final float MARKER_WINDOW = 10f;
-    private static final float MARKER_GAP = 50f;
+    private static final float[] MARKER_AT = {0f, 0.36f, 0.7f};
     private static final float LIGHT_SPEED = 16f;
     private static final float BOOST_SPEED = 5.5f;
-    private static final float BOOST_TIME = 0.6f;
-    private static final int[][] KEYS = {
-            {org.lwjgl.glfw.GLFW.GLFW_KEY_UP, org.lwjgl.glfw.GLFW.GLFW_KEY_W},
-            {org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT, org.lwjgl.glfw.GLFW.GLFW_KEY_D},
-            {org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN, org.lwjgl.glfw.GLFW.GLFW_KEY_S},
-            {org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT, org.lwjgl.glfw.GLFW.GLFW_KEY_A}};
+    private static final int[] KEYS = {
+            org.lwjgl.glfw.GLFW.GLFW_KEY_W, org.lwjgl.glfw.GLFW.GLFW_KEY_D,
+            org.lwjgl.glfw.GLFW.GLFW_KEY_S, org.lwjgl.glfw.GLFW.GLFW_KEY_A};
 
     private final Spell spell;
     private final String teacher;
@@ -108,10 +105,10 @@ public class TraceScreen extends Screen {
         }
         this.total = cum[pattern.length - 1];
         this.shadowSpeed = 46f + 4f * spell.getRequiredLevel();
-        int count = Math.max(3, (int) Math.ceil((total - 44f) / MARKER_GAP) + 1);
+        int count = MARKER_AT.length;
         this.markers = new float[count];
         for (int i = 0; i < count; i++) {
-            markers[i] = 24f + i * (total - 44f) / (count - 1);
+            markers[i] = 24f + MARKER_AT[i] * (total - 24f);
         }
         this.markerDir = new int[count];
         this.markerState = new int[count];
@@ -582,7 +579,7 @@ public class TraceScreen extends Screen {
     public boolean keyPressed(int key, int scan, int modifiers) {
         if (state == State.DRAWING) {
             for (int d = 0; d < 4; d++) {
-                if (key == KEYS[d][0] || key == KEYS[d][1]) {
+                if (key == KEYS[d]) {
                     tryArrow(d);
                     return true;
                 }
@@ -597,7 +594,7 @@ public class TraceScreen extends Screen {
                 dirty = true;
                 if (markerDir[m] == dir) {
                     markerState[m] = 1;
-                    boost = BOOST_TIME;
+                    boost = Float.MAX_VALUE;
                     flash = 1f;
                     chaser = Math.max(0, chaser - shadowSpeed * 0.25f);
                     playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.4f + Math.min(m, 6) * 0.1f);

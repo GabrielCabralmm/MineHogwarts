@@ -831,5 +831,5 @@
   "screen.hogwartsmod.shop_editor.manual_hint": "Only restocks when staff restocks it",
   "screen.hogwartsmod.shop_editor.sell_hint": "Coins the player gets per sale",
   "screen.hogwartsmod.trace.guide": "Outrun the red spark!",
-  "screen.hogwartsmod.trace.boost_hint": "Press the arrow (or WASD) when the light reaches it"
+  "screen.hogwartsmod.trace.boost_hint": "Press W, A, S or D to match the arrow"
 }
