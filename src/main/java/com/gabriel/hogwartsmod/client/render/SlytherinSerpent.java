@@ -22,7 +22,6 @@ public final class SlytherinSerpent {
     private static final float YS = 36, RC = 29, ZC = -12.2f;
     private static final float BODY = 176;
     private static final float T0 = 0.5f, TH = 3.5f, LF = 3.2f;
-    private static final int SIDES = 14;
     private static final ResourceLocation DETAIL = ResourceLocation.fromNamespaceAndPath(HogwartsMod.MOD_ID, "textures/block/porta/sonserina_cobra_detalhes.png");
 
     private static final float[] PX, PY, PZ, ACC, TOPX, TOPY, TOPZ;
@@ -240,85 +239,83 @@ public final class SlytherinSerpent {
         return new Frame(p, t, up, side);
     }
 
+    private static final float TW = 32, THT = 16;
+
     private static void drawBody(VertexConsumer buffer, Matrix4f matrix, Matrix3f normals, int light, float head, float wave, boolean moving) {
-        float step = 0.8f;
-        int rings = (int) (BODY / step);
-        Vector3f[][] pos = new Vector3f[rings + 1][SIDES + 1];
-        Vector3f[][] nor = new Vector3f[rings + 1][SIDES + 1];
-        float[] vs = new float[rings + 1];
-        boolean[] visible = new boolean[rings + 1];
-        for (int r = 0; r <= rings; r++) {
-            float d = r * step;
+        for (float d = 10; d < BODY; d += 4) {
             float s = head - d;
-            visible[r] = s >= S0 - 0.5f;
-            Frame fr = frame(s, head, wave, moving);
-            float rad = radius(d);
-            float headness = smooth((12.5f - d) / 3f);
-            float w = rad * (1.05f + 0.4f * headness), h = rad * (0.9f - 0.25f * headness);
-            vs[r] = s;
-            for (int k = 0; k <= SIDES; k++) {
-                double a = 2 * Math.PI * k / SIDES;
-                float c = (float) Math.cos(a), sn = (float) Math.sin(a);
-                Vector3f off = new Vector3f(fr.up).mul(c * h).add(new Vector3f(fr.side).mul(sn * w));
-                pos[r][k] = new Vector3f(fr.p).add(off);
-                nor[r][k] = new Vector3f(fr.up).mul(c / h).add(new Vector3f(fr.side).mul(sn / w)).normalize();
-            }
-        }
-        for (int r = 0; r < rings; r++) {
-            if (!visible[r] || !visible[r + 1]) {
+            if (s < S0 + 1) {
                 continue;
             }
-            float v0 = vs[r] / 32f, v1 = vs[r + 1] / 32f;
-            for (int k = 0; k < SIDES; k++) {
-                float u0 = (float) k / SIDES, u1 = (float) (k + 1) / SIDES;
-                quad(buffer, matrix, normals, light,
-                        pos[r][k], nor[r][k], u0, v0,
-                        pos[r][k + 1], nor[r][k + 1], u1, v0,
-                        pos[r + 1][k + 1], nor[r + 1][k + 1], u1, v1,
-                        pos[r + 1][k], nor[r + 1][k], u0, v1);
-            }
+            Frame f = frame(s, head, wave, moving);
+            float r = radius(d);
+            float hw = Math.max(0.5f, Math.round(r * 2) / 2f);
+            float hh = Math.max(0.5f, Math.round(r * 1.6f) / 2f);
+            float v0 = (d % 16);
+            box(buffer, matrix, normals, light, f, 2.6f, hh, hw, 0, v0, v0 + 4);
         }
+        Frame neck = frame(head - 9, head, wave, moving);
+        box(buffer, matrix, normals, light, neck, 2.0f, 2.5f, 3.0f, 0, 0, 4);
+        Frame hf = frame(head - 4, head, wave, moving);
+        Frame main = new Frame(new Vector3f(hf.p).sub(new Vector3f(hf.t).mul(1.5f)), hf.t, hf.up, hf.side);
+        box(buffer, matrix, normals, light, main, 4.0f, 2.5f, 4.5f, 24, 0, 8);
+        Frame snout = new Frame(new Vector3f(hf.p).add(new Vector3f(hf.t).mul(3.5f)).sub(new Vector3f(hf.up).mul(0.3f)), hf.t, hf.up, hf.side);
+        box(buffer, matrix, normals, light, snout, 1.5f, 2.0f, 3.0f, 24, 8, 11);
+    }
+
+    private static void box(VertexConsumer buffer, Matrix4f matrix, Matrix3f normals, int light, Frame f,
+                            float hl, float hh, float hw, int topX, float v0, float v1) {
+        Vector3f t = new Vector3f(f.t), u = new Vector3f(f.up), w = new Vector3f(f.side);
+        Vector3f c = f.p;
+        Vector3f[] corner = new Vector3f[8];
+        for (int i = 0; i < 8; i++) {
+            float a = (i & 1) == 0 ? -hl : hl, b = (i & 2) == 0 ? -hh : hh, e = (i & 4) == 0 ? -hw : hw;
+            corner[i] = new Vector3f(c).add(new Vector3f(t).mul(a)).add(new Vector3f(u).mul(b)).add(new Vector3f(w).mul(e));
+        }
+        float vt0 = v0 / THT, vt1 = v1 / THT;
+        face(buffer, matrix, normals, light, corner[2], corner[3], corner[7], corner[6], u, topX, topX + 8, vt0, vt1);
+        face(buffer, matrix, normals, light, corner[0], corner[1], corner[5], corner[4], new Vector3f(u).negate(), 16, 24, vt0, vt1);
+        face(buffer, matrix, normals, light, corner[4], corner[5], corner[7], corner[6], w, 8, 16, vt0, vt1);
+        face(buffer, matrix, normals, light, corner[0], corner[1], corner[3], corner[2], new Vector3f(w).negate(), 8, 16, vt0, vt1);
+        face(buffer, matrix, normals, light, corner[1], corner[3], corner[7], corner[5], t, 8, 16, 0, 2 / THT);
+        face(buffer, matrix, normals, light, corner[0], corner[2], corner[6], corner[4], new Vector3f(t).negate(), 8, 16, 0, 2 / THT);
+    }
+
+    private static void face(VertexConsumer buffer, Matrix4f matrix, Matrix3f normals, int light, Vector3f a, Vector3f b, Vector3f c, Vector3f d,
+                             Vector3f n, float x0, float x1, float vt0, float vt1) {
+        float u0 = x0 / TW, u1 = x1 / TW;
+        quad(buffer, matrix, normals, light, a, n, u0, vt1, b, n, u0, vt0, c, n, u1, vt0, d, n, u1, vt1);
     }
 
     private static void drawFace(MultiBufferSource buffers, Matrix4f matrix, Matrix3f normals, int light, float head, float wave, boolean moving, float tongue) {
-        VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(DETAIL));
         if (head < S0 + 1) {
             return;
         }
-        Frame tipFrame = frame(head, head, wave, moving);
-        Frame capFrame = frame(head - 0.8f, head, wave, moving);
-        for (int k = 0; k < SIDES; k++) {
-            double a0 = 2 * Math.PI * k / SIDES, a1 = 2 * Math.PI * (k + 1) / SIDES;
-            float r0 = radius(0.8f);
-            Vector3f q0 = new Vector3f(capFrame.p).add(new Vector3f(capFrame.up).mul((float) Math.cos(a0) * r0 * 0.65f)).add(new Vector3f(capFrame.side).mul((float) Math.sin(a0) * r0 * 1.45f));
-            Vector3f q1 = new Vector3f(capFrame.p).add(new Vector3f(capFrame.up).mul((float) Math.cos(a1) * r0 * 0.65f)).add(new Vector3f(capFrame.side).mul((float) Math.sin(a1) * r0 * 1.45f));
-            patchTri(buffer, matrix, normals, light, tipFrame.p, q0, q1, tipFrame.t, 56);
-        }
-        float de = 6.5f;
-        Frame fe = frame(head - de, head, wave, moving);
-        float rad = radius(de);
-        float w = rad * 1.45f, h = rad * 0.65f;
+        VertexConsumer buffer = buffers.getBuffer(RenderType.entityCutoutNoCull(DETAIL));
+        Frame hf = frame(head - 4, head, wave, moving);
         for (int sgn = -1; sgn <= 1; sgn += 2) {
-            double a = sgn * 1.05;
-            float c = (float) Math.cos(a), sn = (float) Math.sin(a);
-            Vector3f n = new Vector3f(fe.up).mul(c / h).add(new Vector3f(fe.side).mul(sn / w)).normalize();
-            Vector3f center = new Vector3f(fe.p).add(new Vector3f(fe.up).mul(c * h * 1.04f)).add(new Vector3f(fe.side).mul(sn * w * 1.04f));
-            Vector3f along = new Vector3f(fe.t);
-            Vector3f across = new Vector3f(n).cross(along).normalize();
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, center, n, along, across, 1.3f, 0.85f, 8);
-            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(center).add(new Vector3f(n).mul(0.03f)), n, along, across, 0.3f, 0.8f, 24);
-            Vector3f brow = new Vector3f(fe.p).add(new Vector3f(fe.up).mul((float) Math.cos(sgn * 0.75) * h * 1.08f)).add(new Vector3f(fe.side).mul((float) Math.sin(sgn * 0.75) * w * 1.08f));
-            patch(buffer, matrix, normals, light, new Vector3f(brow).add(new Vector3f(along).mul(0.4f)), n, along, across, 1.6f, 0.45f, 56);
+            Vector3f n = new Vector3f(hf.side).mul(sgn);
+            Vector3f base = new Vector3f(hf.p).add(new Vector3f(n).mul(4.55f));
+            Vector3f eye = new Vector3f(base).add(new Vector3f(hf.t).mul(1.0f)).add(new Vector3f(hf.up).mul(1.0f));
+            Vector3f across = new Vector3f(hf.up);
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, eye, n, hf.t, across, 1.0f, 0.5f, 8);
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(eye).add(new Vector3f(n).mul(0.02f)), n, hf.t, across, 0.5f, 0.5f, 24);
+            Vector3f front = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(2.55f)).add(new Vector3f(hf.side).mul(sgn * 3.6f)).add(new Vector3f(hf.up).mul(1.6f));
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, front, hf.t, hf.side, hf.up, 0.9f, 0.6f, 8);
+            patch(buffer, matrix, normals, LightTexture.FULL_BRIGHT, new Vector3f(front).add(new Vector3f(hf.t).mul(0.02f)).add(new Vector3f(hf.side).mul(sgn * 0.2f)), hf.t, hf.side, hf.up, 0.3f, 0.6f, 24);
+            Vector3f nostril = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(5.05f)).add(new Vector3f(hf.side).mul(sgn * 1.3f)).add(new Vector3f(hf.up).mul(1.1f));
+            patch(buffer, matrix, normals, light, nostril, hf.t, hf.side, hf.up, 0.3f, 0.25f, 56);
+            Vector3f top = new Vector3f(hf.p).add(new Vector3f(hf.up).mul(2.55f)).add(new Vector3f(hf.side).mul(sgn * 2.5f)).add(new Vector3f(hf.t).mul(0.5f));
+            patch(buffer, matrix, normals, light, top, hf.up, hf.t, hf.side, 1.5f, 0.5f, 56);
         }
         if (tongue > 0) {
-            Frame tip = frame(head, head, wave, moving);
-            Vector3f n = new Vector3f(tip.up);
-            Vector3f base = new Vector3f(tip.p).add(new Vector3f(tip.up).mul(-0.6f));
-            Vector3f end = new Vector3f(base).add(new Vector3f(tip.t).mul(3.2f));
-            ribbon(buffer, matrix, normals, light, base, end, tip.side, 0.22f, n);
+            Vector3f n = new Vector3f(hf.up);
+            Vector3f startP = new Vector3f(hf.p).add(new Vector3f(hf.t).mul(5.0f)).sub(new Vector3f(hf.up).mul(1.0f));
+            Vector3f end = new Vector3f(startP).add(new Vector3f(hf.t).mul(3f));
+            ribbon(buffer, matrix, normals, light, startP, end, hf.side, 0.5f, n);
             for (int sgn = -1; sgn <= 1; sgn += 2) {
-                Vector3f fork = new Vector3f(end).add(new Vector3f(tip.t).mul(1.2f)).add(new Vector3f(tip.side).mul(sgn * 0.7f));
-                ribbon(buffer, matrix, normals, light, end, fork, tip.side, 0.2f, n);
+                Vector3f fork = new Vector3f(end).add(new Vector3f(hf.t).mul(1.0f)).add(new Vector3f(hf.side).mul(sgn * 1.0f));
+                ribbon(buffer, matrix, normals, light, end, fork, hf.side, 0.5f, n);
             }
         }
     }
