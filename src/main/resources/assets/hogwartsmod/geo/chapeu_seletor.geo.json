@@ -1,0 +1,441 @@
+{
+ "format_version": "1.12.0",
+ "minecraft:geometry": [
+  {
+   "description": {
+    "identifier": "geometry.chapeu_seletor",
+    "texture_width": 128,
+    "texture_height": 64,
+    "visible_bounds_width": 2,
+    "visible_bounds_height": 3,
+    "visible_bounds_offset": [
+     0,
+     1,
+     0
+    ]
+   },
+   "bones": [
+    {
+     "name": "chapeu",
+     "pivot": [
+      0,
+      0,
+      0
+     ]
+    },
+    {
+     "name": "aba",
+     "pivot": [
+      0,
+      0,
+      0
+     ],
+     "parent": "chapeu",
+     "cubes": [
+      {
+       "origin": [
+        -6,
+        0,
+        -6
+       ],
+       "size": [
+        12,
+        1,
+        12
+       ],
+       "uv": [
+        0,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -5,
+        -0.4,
+        -7.2
+       ],
+       "size": [
+        10,
+        1,
+        1.2
+       ],
+       "uv": [
+        49,
+        0
+       ]
+      },
+      {
+       "origin": [
+        -5,
+        -1,
+        6
+       ],
+       "size": [
+        10,
+        1,
+        1.6
+       ],
+       "uv": [
+        72,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "aba_esq",
+     "pivot": [
+      -6,
+      0.5,
+      0
+     ],
+     "parent": "aba",
+     "rotation": [
+      0,
+      0,
+      -16
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -7.6,
+        0,
+        -5
+       ],
+       "size": [
+        1.6,
+        1,
+        10
+       ],
+       "uv": [
+        97,
+        0
+       ]
+      }
+     ]
+    },
+    {
+     "name": "aba_dir",
+     "pivot": [
+      6,
+      0.5,
+      0
+     ],
+     "parent": "aba",
+     "rotation": [
+      0,
+      0,
+      10
+     ],
+     "cubes": [
+      {
+       "origin": [
+        6,
+        0,
+        -5
+       ],
+       "size": [
+        1.6,
+        1,
+        10
+       ],
+       "uv": [
+        0,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "copa",
+     "pivot": [
+      0,
+      1,
+      0
+     ],
+     "parent": "chapeu",
+     "cubes": [
+      {
+       "origin": [
+        -4.5,
+        1,
+        -4.5
+       ],
+       "size": [
+        9,
+        3,
+        9
+       ],
+       "uv": [
+        25,
+        14
+       ]
+      },
+      {
+       "origin": [
+        -3,
+        1.4,
+        -4.7
+       ],
+       "size": [
+        6,
+        2,
+        1
+       ],
+       "uv": [
+        62,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "boca",
+     "pivot": [
+      0,
+      2.6,
+      -4.8
+     ],
+     "parent": "copa",
+     "cubes": [
+      {
+       "origin": [
+        -3.2,
+        1.2,
+        -5.2
+       ],
+       "size": [
+        6.4,
+        1,
+        1
+       ],
+       "uv": [
+        77,
+        14
+       ]
+      }
+     ]
+    },
+    {
+     "name": "testa",
+     "pivot": [
+      0,
+      4,
+      0
+     ],
+     "parent": "copa",
+     "rotation": [
+      0,
+      0,
+      -3
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -4,
+        4,
+        -4
+       ],
+       "size": [
+        8,
+        3,
+        8
+       ],
+       "uv": [
+        92,
+        14
+       ]
+      },
+      {
+       "origin": [
+        -3,
+        4.8,
+        -4.3
+       ],
+       "size": [
+        2,
+        1,
+        1
+       ],
+       "uv": [
+        0,
+        27
+       ]
+      },
+      {
+       "origin": [
+        1,
+        4.8,
+        -4.3
+       ],
+       "size": [
+        2,
+        1,
+        1
+       ],
+       "uv": [
+        7,
+        27
+       ]
+      }
+     ]
+    },
+    {
+     "name": "sobrancelha",
+     "pivot": [
+      0,
+      6.2,
+      -4
+     ],
+     "parent": "testa",
+     "cubes": [
+      {
+       "origin": [
+        -3.6,
+        5.8,
+        -4.8
+       ],
+       "size": [
+        3,
+        1,
+        1
+       ],
+       "uv": [
+        14,
+        27
+       ]
+      },
+      {
+       "origin": [
+        0.6,
+        5.8,
+        -4.8
+       ],
+       "size": [
+        3,
+        1,
+        1
+       ],
+       "uv": [
+        23,
+        27
+       ]
+      }
+     ]
+    },
+    {
+     "name": "topo",
+     "pivot": [
+      0,
+      7,
+      0
+     ],
+     "parent": "testa",
+     "rotation": [
+      -12,
+      0,
+      5
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -3,
+        7,
+        -3
+       ],
+       "size": [
+        6,
+        3,
+        6
+       ],
+       "uv": [
+        32,
+        27
+       ]
+      }
+     ]
+    },
+    {
+     "name": "topo2",
+     "pivot": [
+      0,
+      10,
+      0
+     ],
+     "parent": "topo",
+     "rotation": [
+      -26,
+      0,
+      -8
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -2,
+        10,
+        -2
+       ],
+       "size": [
+        4,
+        3,
+        4
+       ],
+       "uv": [
+        57,
+        27
+       ]
+      }
+     ]
+    },
+    {
+     "name": "ponta",
+     "pivot": [
+      0,
+      13,
+      0
+     ],
+     "parent": "topo2",
+     "rotation": [
+      -70,
+      0,
+      14
+     ],
+     "cubes": [
+      {
+       "origin": [
+        -1.5,
+        13,
+        -1.5
+       ],
+       "size": [
+        3,
+        2,
+        3
+       ],
+       "uv": [
+        74,
+        27
+       ]
+      },
+      {
+       "origin": [
+        -1,
+        15,
+        -1
+       ],
+       "size": [
+        2,
+        2,
+        2
+       ],
+       "uv": [
+        87,
+        27
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
