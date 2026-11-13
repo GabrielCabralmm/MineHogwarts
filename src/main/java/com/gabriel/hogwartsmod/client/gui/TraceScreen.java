@@ -265,10 +265,20 @@ public class TraceScreen extends Screen {
         for (int m = 0; m < markers.length; m++) {
             float[] p = at(markers[m]);
             boolean near = state == State.DRAWING && markerState[m] == 0 && Math.abs(pos - markers[m]) <= MARKER_WINDOW;
-            float x = p[0] * s, y = p[1] * s, r = (near ? 8.2f : 7f) * s;
+            float[] t = tangent(markers[m]);
+            float nx = -t[1], ny = t[0];
+            if (nx * (p[0] - CANVAS / 2f) + ny * (p[1] - CANVAS / 2f) < 0) {
+                nx = -nx;
+                ny = -ny;
+            }
+            float x = (p[0] + nx * 11f) * s, y = (p[1] + ny * 11f) * s, r = (near ? 6.2f : 5.2f) * s;
+            g.setStroke(new BasicStroke(1.2f * s, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.setColor(new Color(0xBE, 0x8C, 0x28, 200));
+            g.draw(new java.awt.geom.Line2D.Float(p[0] * s, p[1] * s, x, y));
+            dot(g, p[0] * s, p[1] * s, 2.2f * s, new Color(0xBE, 0x8C, 0x28, 230), true);
             if (near) {
-                dot(g, x, y, r + 4.5f * s, withAlpha(spellColor, 60), true);
-                dot(g, x, y, r + 2.2f * s, withAlpha(spellColor, 110), true);
+                dot(g, x, y, r + 3.6f * s, withAlpha(spellColor, 60), true);
+                dot(g, x, y, r + 1.8f * s, withAlpha(spellColor, 110), true);
             }
             dot(g, x + 0.6f * s, y + 0.9f * s, r, new Color(0x38, 0x26, 0x1A, 70), true);
             Color rim = markerState[m] == 2 ? new Color(0x8E, 0x2A, 0x2A) : new Color(0xBE, 0x8C, 0x28);
@@ -278,8 +288,7 @@ public class TraceScreen extends Screen {
                     : markerState[m] == 1 ? new Color(0xFF, 0xF6, 0xDC) : new Color(0x38, 0x26, 0x1A);
             dot(g, x, y, r, rim, true);
             dot(g, x, y, r * 0.8f, face, true);
-            dot(g, x, y, r * 0.66f, withAlpha(rim, 150), false);
-            arrow(g, x, y, r * 0.5f, markerDir[m], ink);
+            letter(g, x, y, r * 1.15f, "WDSA".charAt(markerDir[m]), ink);
         }
 
         dot(g, guideX(n - 1) * s, guideY(n - 1) * s, 3.2f * s, new Color(0x82, 0x68, 0x4C, 170), false);
@@ -381,26 +390,14 @@ public class TraceScreen extends Screen {
         g.draw(head);
     }
 
-    private static void arrow(Graphics2D g, float x, float y, float r, int dir, Color color) {
-        java.awt.geom.AffineTransform old = g.getTransform();
-        g.translate(x, y);
-        g.rotate(dir * Math.PI / 2);
-        Path2D a = new Path2D.Float();
-        a.moveTo(0, -r * 1.05f);
-        a.lineTo(r * 0.78f, -r * 0.18f);
-        a.lineTo(r * 0.24f, -r * 0.32f);
-        a.lineTo(r * 0.16f, r * 0.62f);
-        a.lineTo(r * 0.42f, r * 1.0f);
-        a.lineTo(0, r * 0.8f);
-        a.lineTo(-r * 0.42f, r * 1.0f);
-        a.lineTo(-r * 0.16f, r * 0.62f);
-        a.lineTo(-r * 0.24f, -r * 0.32f);
-        a.lineTo(-r * 0.78f, -r * 0.18f);
-        a.closePath();
+    private static void letter(Graphics2D g, float x, float y, float size, char c, Color color) {
         g.setComposite(AlphaComposite.SrcOver);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setFont(new java.awt.Font(java.awt.Font.SERIF, java.awt.Font.BOLD, 1).deriveFont(size));
+        java.awt.font.GlyphVector gv = g.getFont().createGlyphVector(g.getFontRenderContext(), String.valueOf(c));
+        java.awt.geom.Rectangle2D b = gv.getVisualBounds();
         g.setColor(color);
-        g.fill(a);
-        g.setTransform(old);
+        g.drawGlyphVector(gv, (float) (x - b.getCenterX()), (float) (y - b.getCenterY()));
     }
 
     private void shuffleArrows() {
