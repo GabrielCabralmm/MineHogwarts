@@ -65,8 +65,8 @@ public class SortingHatRenderer extends GeoObjectRenderer<SortingHatRenderer.Hat
             case "topo" -> bone.setRotZ(sway * 0.06f);
             case "ponta" -> bone.setRotZ(-0.14f + sway * 0.18f);
             case "testa" -> bone.setScaleY(1f + open * 0.06f);
-            case "faixa_esq" -> bone.setRotZ(-0.07f - sway * 0.04f);
-            case "faixa_dir" -> bone.setRotZ(0.07f - sway * 0.04f);
+            case "faixa_esq" -> bone.setRotZ(-sway * 0.03f);
+            case "faixa_dir" -> bone.setRotZ(-sway * 0.03f);
             default -> {
             }
         }
