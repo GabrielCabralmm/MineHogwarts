@@ -69,7 +69,6 @@ public class TraceScreen extends Screen {
     private long lastFrame;
     private long lastMove;
     private float pos;
-    private float pending;
     private float chaser;
     private float boost;
     private float flash;
@@ -121,7 +120,7 @@ public class TraceScreen extends Screen {
         top = (height - SHEET_H) / 2;
         dirty = true;
         if (state == State.READY) {
-            feedback = tr("screen.hogwartsmod.trace.hint");
+            feedback = tr("screen.hogwartsmod.trace.ready");
             feedbackColor = MUTED;
         }
     }
@@ -266,16 +265,21 @@ public class TraceScreen extends Screen {
         for (int m = 0; m < markers.length; m++) {
             float[] p = at(markers[m]);
             boolean near = state == State.DRAWING && markerState[m] == 0 && Math.abs(pos - markers[m]) <= MARKER_WINDOW;
-            Color fill = markerState[m] == 1 ? new Color(0xE0, 0xB0, 0x30, 235)
-                    : markerState[m] == 2 ? new Color(0x8E, 0x2A, 0x2A, 200)
-                    : near ? new Color(0x3A, 0xA8, 0xFF, 255) : new Color(0x1E, 0x6B, 0xD8, 215);
-            float r = (near ? 8f : 6.4f) * s;
+            float x = p[0] * s, y = p[1] * s, r = (near ? 8.2f : 7f) * s;
             if (near) {
-                dot(g, p[0] * s, p[1] * s, r + 3f * s, new Color(0x9E, 0xE6, 0xFF, 90), true);
+                dot(g, x, y, r + 4.5f * s, withAlpha(spellColor, 60), true);
+                dot(g, x, y, r + 2.2f * s, withAlpha(spellColor, 110), true);
             }
-            dot(g, p[0] * s, p[1] * s, r, fill, true);
-            dot(g, p[0] * s, p[1] * s, r, new Color(0xF4, 0xEC, 0xD8, 230), false);
-            arrow(g, p[0] * s, p[1] * s, r * 0.62f, markerDir[m], new Color(0xFF, 0xFC, 0xF2, 255));
+            dot(g, x + 0.6f * s, y + 0.9f * s, r, new Color(0x38, 0x26, 0x1A, 70), true);
+            Color rim = markerState[m] == 2 ? new Color(0x8E, 0x2A, 0x2A) : new Color(0xBE, 0x8C, 0x28);
+            Color face = markerState[m] == 1 ? new Color(0xC8, 0x8E, 0x22)
+                    : markerState[m] == 2 ? new Color(0xD8, 0xC2, 0xA0) : new Color(0xF6, 0xEA, 0xCC);
+            Color ink = markerState[m] == 2 ? new Color(0x8E, 0x2A, 0x2A, 170)
+                    : markerState[m] == 1 ? new Color(0xFF, 0xF6, 0xDC) : new Color(0x38, 0x26, 0x1A);
+            dot(g, x, y, r, rim, true);
+            dot(g, x, y, r * 0.8f, face, true);
+            dot(g, x, y, r * 0.66f, withAlpha(rim, 150), false);
+            arrow(g, x, y, r * 0.5f, markerDir[m], ink);
         }
 
         dot(g, guideX(n - 1) * s, guideY(n - 1) * s, 3.2f * s, new Color(0x82, 0x68, 0x4C, 170), false);
@@ -382,13 +386,16 @@ public class TraceScreen extends Screen {
         g.translate(x, y);
         g.rotate(dir * Math.PI / 2);
         Path2D a = new Path2D.Float();
-        a.moveTo(0, -r);
-        a.lineTo(r * 0.9f, -r * 0.05f);
-        a.lineTo(r * 0.32f, -r * 0.05f);
-        a.lineTo(r * 0.32f, r);
-        a.lineTo(-r * 0.32f, r);
-        a.lineTo(-r * 0.32f, -r * 0.05f);
-        a.lineTo(-r * 0.9f, -r * 0.05f);
+        a.moveTo(0, -r * 1.05f);
+        a.lineTo(r * 0.78f, -r * 0.18f);
+        a.lineTo(r * 0.24f, -r * 0.32f);
+        a.lineTo(r * 0.16f, r * 0.62f);
+        a.lineTo(r * 0.42f, r * 1.0f);
+        a.lineTo(0, r * 0.8f);
+        a.lineTo(-r * 0.42f, r * 1.0f);
+        a.lineTo(-r * 0.16f, r * 0.62f);
+        a.lineTo(-r * 0.24f, -r * 0.32f);
+        a.lineTo(-r * 0.78f, -r * 0.18f);
         a.closePath();
         g.setComposite(AlphaComposite.SrcOver);
         g.setColor(color);
@@ -499,8 +506,7 @@ public class TraceScreen extends Screen {
         }
         boost = Math.max(0, boost - dt);
         float speed = LIGHT_SPEED * (boost > 0 ? BOOST_SPEED : 1f);
-        float move = Math.min(pending, speed * dt);
-        pending = Math.max(0, Math.min(speed * 0.25f, pending - move));
+        float move = speed * dt;
         float before = pos;
         pos = Math.min(total, pos + move);
         for (int m = 0; m < markers.length; m++) {
@@ -525,6 +531,9 @@ public class TraceScreen extends Screen {
     @Override
     public void tick() {
         ticks++;
+        if (state == State.READY && ++stateTicks >= 25) {
+            begin();
+        }
         if (state == State.MISSED || state == State.FAILED || state == State.LEARNED) {
             stateTicks++;
             if (state == State.MISSED && stateTicks >= 30) {
@@ -542,37 +551,25 @@ public class TraceScreen extends Screen {
         state = State.READY;
         pos = 0;
         chaser = 0;
-        pending = 0;
         boost = 0;
+        stateTicks = 0;
         shuffleArrows();
-        feedback = tr("screen.hogwartsmod.trace.hint");
+        feedback = tr("screen.hogwartsmod.trace.ready");
         feedbackColor = MUTED;
         dirty = true;
     }
 
-    @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (button == 0 && state == State.READY) {
-            float x = (float) (mx - canvasX());
-            float y = (float) (my - canvasY());
-            if (Math.hypot(x - guideX(0), y - guideY(0)) <= 12f) {
-                state = State.DRAWING;
-                drawStart = System.nanoTime();
-                sparks.clear();
-                pos = 0;
-                chaser = -shadowSpeed * 0.15f;
-                pending = 0;
-                hideCursor(true);
-                feedback = tr("screen.hogwartsmod.trace.guide");
-                feedbackColor = INK;
-                dirty = true;
-            } else {
-                feedback = tr("screen.hogwartsmod.trace.start_here");
-                feedbackColor = WINE;
-            }
-            return true;
-        }
-        return super.mouseClicked(mx, my, button);
+    private void begin() {
+        state = State.DRAWING;
+        drawStart = System.nanoTime();
+        lastMove = 0;
+        sparks.clear();
+        pos = 0;
+        chaser = -shadowSpeed * 0.15f;
+        hideCursor(true);
+        feedback = tr("screen.hogwartsmod.trace.guide");
+        feedbackColor = INK;
+        dirty = true;
     }
 
     @Override
@@ -607,30 +604,6 @@ public class TraceScreen extends Screen {
             }
         }
         playSound(SoundEvents.NOTE_BLOCK_HAT.get(), 0.6f);
-    }
-
-    @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
-        if (button != 0 || state != State.DRAWING) {
-            return super.mouseDragged(mx, my, button, dx, dy);
-        }
-        float[] t = tangent(pos + 1f);
-        float along = (float) (dx * t[0] + dy * t[1]);
-        float across = (float) Math.abs(-dx * t[1] + dy * t[0]);
-        float push = along - across * 0.2f;
-        if (push > 0) {
-            pending += push * 1.8f;
-        }
-        return true;
-    }
-
-    @Override
-    public boolean mouseReleased(double mx, double my, int button) {
-        if (button == 0 && state == State.DRAWING) {
-            pending = 0;
-            return true;
-        }
-        return super.mouseReleased(mx, my, button);
     }
 
     private void miss(String reason) {

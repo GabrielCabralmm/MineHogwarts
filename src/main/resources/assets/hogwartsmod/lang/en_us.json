@@ -97,8 +97,6 @@
   "screen.hogwartsmod.trace": "Spell tracing",
   "screen.hogwartsmod.trace.title": "%s Lesson",
   "screen.hogwartsmod.trace.teacher": "with %s",
-  "screen.hogwartsmod.trace.hint": "Drag starting from the blue point.",
-  "screen.hogwartsmod.trace.start_here": "Start at the blue dot.",
   "screen.hogwartsmod.trace.accuracy": "Accuracy: %s%%",
   "screen.hogwartsmod.trace.left_path": "You left the path.",
   "screen.hogwartsmod.trace.shaky": "The movement was too shaky.",
@@ -831,5 +829,6 @@
   "screen.hogwartsmod.shop_editor.manual_hint": "Only restocks when staff restocks it",
   "screen.hogwartsmod.shop_editor.sell_hint": "Coins the player gets per sale",
   "screen.hogwartsmod.trace.guide": "Outrun the red spark!",
-  "screen.hogwartsmod.trace.boost_hint": "Press W, A, S or D to match the arrow"
+  "screen.hogwartsmod.trace.boost_hint": "Press W, A, S or D to match the arrow",
+  "screen.hogwartsmod.trace.ready": "Ready your wand..."
 }

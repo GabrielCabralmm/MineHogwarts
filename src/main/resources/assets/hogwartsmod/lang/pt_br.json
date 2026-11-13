@@ -97,8 +97,6 @@
   "screen.hogwartsmod.trace": "Traçado do feitiço",
   "screen.hogwartsmod.trace.title": "Aula de %s",
   "screen.hogwartsmod.trace.teacher": "com %s",
-  "screen.hogwartsmod.trace.hint": "Arraste a partir do ponto azul.",
-  "screen.hogwartsmod.trace.start_here": "Comece pelo ponto azul.",
   "screen.hogwartsmod.trace.accuracy": "Precisão: %s%%",
   "screen.hogwartsmod.trace.left_path": "Você saiu do traço.",
   "screen.hogwartsmod.trace.shaky": "O movimento ficou impreciso.",
@@ -834,5 +832,6 @@
   "screen.hogwartsmod.shop_editor.manual_hint": "Só repõe quando a staff reabastecer",
   "screen.hogwartsmod.shop_editor.sell_hint": "Moedas que o jogador recebe por venda",
   "screen.hogwartsmod.trace.guide": "Fuja da faísca vermelha!",
-  "screen.hogwartsmod.trace.boost_hint": "Aperte W, A, S ou D conforme a seta"
+  "screen.hogwartsmod.trace.boost_hint": "Aperte W, A, S ou D conforme a seta",
+  "screen.hogwartsmod.trace.ready": "Prepare a varinha..."
 }
