@@ -66,6 +66,8 @@ public class TraceScreen extends Screen {
     private int drawnShadow = -1;
     private final HiRes.Canvas canvas = new HiRes.Canvas();
     private final List<float[]> stroke = new ArrayList<>();
+    private final List<float[]> samples = new ArrayList<>();
+    private boolean cursorHidden;
 
     private int attemptsLeft;
     private State state = State.READY;
@@ -201,7 +203,7 @@ public class TraceScreen extends Screen {
             g.draw(done);
         }
 
-        if (stroke.size() > 1 && !learned) {
+        if (samples.size() > 1 && !learned) {
             drawLight(g, s, spellColor);
         }
 
@@ -228,7 +230,7 @@ public class TraceScreen extends Screen {
 
     private void drawLight(Graphics2D g, float s, Color spellColor) {
         g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        List<float[]> smooth = smooth(stroke);
+        List<float[]> smooth = spline(samples);
         boolean bad = state == State.MISSED || state == State.FAILED;
         Color glow = bad ? new Color(0x8E2A2A) : spellColor;
         Color core = bad ? new Color(0xF2C8C0) : BLUE_CORE;
@@ -295,20 +297,42 @@ public class TraceScreen extends Screen {
         return new Color(color.getRed(), color.getGreen(), color.getBlue(), Math.max(0, Math.min(255, alpha)));
     }
 
-    private static List<float[]> smooth(List<float[]> points) {
-        List<float[]> out = new ArrayList<>(points);
-        for (int pass = 0; pass < 2 && out.size() > 2; pass++) {
-            List<float[]> next = new ArrayList<>(out.size() * 2);
-            next.add(out.get(0));
-            for (int i = 0; i < out.size() - 1; i++) {
-                float[] a = out.get(i);
-                float[] b = out.get(i + 1);
-                next.add(new float[]{a[0] * 0.75f + b[0] * 0.25f, a[1] * 0.75f + b[1] * 0.25f});
-                next.add(new float[]{a[0] * 0.25f + b[0] * 0.75f, a[1] * 0.25f + b[1] * 0.75f});
+    private static List<float[]> spline(List<float[]> points) {
+        List<float[]> pts = new ArrayList<>();
+        for (float[] p : points) {
+            if (pts.isEmpty() || Math.hypot(p[0] - pts.get(pts.size() - 1)[0], p[1] - pts.get(pts.size() - 1)[1]) >= 1.5) {
+                pts.add(p);
             }
-            next.add(out.get(out.size() - 1));
-            out = next;
         }
+        float[] last = points.get(points.size() - 1);
+        if (pts.get(pts.size() - 1) != last) {
+            pts.add(last);
+        }
+        List<float[]> out = new ArrayList<>();
+        int n = pts.size();
+        if (n < 3) {
+            out.addAll(pts);
+            return out;
+        }
+        for (int i = 0; i < n - 1; i++) {
+            float[] p0 = pts.get(Math.max(0, i - 1));
+            float[] p1 = pts.get(i);
+            float[] p2 = pts.get(i + 1);
+            float[] p3 = pts.get(Math.min(n - 1, i + 2));
+            int steps = Math.max(2, (int) Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) / 0.75));
+            for (int k = 0; k < steps; k++) {
+                float t = k / (float) steps;
+                float t2 = t * t;
+                float t3 = t2 * t;
+                float[] q = new float[2];
+                for (int c = 0; c < 2; c++) {
+                    q[c] = 0.5f * (2 * p1[c] + (-p0[c] + p2[c]) * t + (2 * p0[c] - 5 * p1[c] + 4 * p2[c] - p3[c]) * t2
+                            + (-p0[c] + 3 * p1[c] - 3 * p2[c] + p3[c]) * t3);
+                }
+                out.add(q);
+            }
+        }
+        out.add(pts.get(n - 1));
         return out;
     }
 
@@ -378,8 +402,8 @@ public class TraceScreen extends Screen {
         float time = (System.nanoTime() % 4_000_000_000L) / 1_000_000_000f;
         if (state == State.DRAWING && !stroke.isEmpty()) {
             float[] pen = stroke.get(stroke.size() - 1);
-            penX += (pen[0] - penX) * 0.6f;
-            penY += (pen[1] - penY) * 0.6f;
+            penX = pen[0];
+            penY = pen[1];
             if (sparks.size() < 60 && RANDOM.nextFloat() < 0.8f) {
                 double angle = RANDOM.nextDouble() * Math.PI * 2;
                 float speed = 6f + RANDOM.nextFloat() * 14f;
@@ -464,6 +488,7 @@ public class TraceScreen extends Screen {
     private void reset() {
         state = State.READY;
         stroke.clear();
+        samples.clear();
         progress = 0;
         offPoints = 0;
         feedback = tr("screen.hogwartsmod.trace.hint");
@@ -485,6 +510,9 @@ public class TraceScreen extends Screen {
                 drawnShadow = -1;
                 stroke.clear();
                 stroke.add(new float[]{x, y});
+                samples.clear();
+                samples.add(new float[]{x, y});
+                hideCursor(true);
                 progress = 0;
                 offPoints = 0;
                 feedback = accuracyText();
@@ -511,6 +539,7 @@ public class TraceScreen extends Screen {
         if (step < 1.0) {
             return true;
         }
+        samples.add(new float[]{x, y});
         int pieces = (int) Math.ceil(step / 2.0);
         for (int p = 1; p <= pieces; p++) {
             float t = p / (float) pieces;
@@ -575,6 +604,7 @@ public class TraceScreen extends Screen {
     }
 
     private void miss(String reason) {
+        hideCursor(false);
         attemptsLeft--;
         stateTicks = 0;
         dirty = true;
@@ -591,6 +621,7 @@ public class TraceScreen extends Screen {
     }
 
     private void learned() {
+        hideCursor(false);
         state = State.LEARNED;
         stateTicks = 0;
         dirty = true;
@@ -618,8 +649,22 @@ public class TraceScreen extends Screen {
         onClose();
     }
 
+    private void hideCursor(boolean hide) {
+        if (minecraft == null || hide == cursorHidden) {
+            return;
+        }
+        cursorHidden = hide;
+        long window = minecraft.getWindow().getWindow();
+        double mx = minecraft.mouseHandler.xpos();
+        double my = minecraft.mouseHandler.ypos();
+        org.lwjgl.glfw.GLFW.glfwSetInputMode(window, org.lwjgl.glfw.GLFW.GLFW_CURSOR,
+                hide ? org.lwjgl.glfw.GLFW.GLFW_CURSOR_HIDDEN : org.lwjgl.glfw.GLFW.GLFW_CURSOR_NORMAL);
+        org.lwjgl.glfw.GLFW.glfwSetCursorPos(window, mx, my);
+    }
+
     @Override
     public void onClose() {
+        hideCursor(false);
         send(TraceResult.GAVE_UP);
         canvas.close();
         super.onClose();
@@ -627,6 +672,7 @@ public class TraceScreen extends Screen {
 
     @Override
     public void removed() {
+        hideCursor(false);
         send(TraceResult.GAVE_UP);
         canvas.close();
     }
