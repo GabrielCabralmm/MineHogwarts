@@ -30,7 +30,7 @@ public class TraceScreen extends Screen {
     private static final int SHEET_H = 220;
     private static final int CANVAS = 140;
     private static final float MIN_ACCURACY = 1.0f;
-    private static final float SHADOW_DELAY = 2.2f;
+    private static final float SHADOW_DELAY = 1.9f;
     private static final int ORB = 16;
 
     private static final int INK = 0xFF38261A;
@@ -103,7 +103,7 @@ public class TraceScreen extends Screen {
             cum[i] = cum[i - 1] + (float) Math.hypot(pattern[i][0] - pattern[i - 1][0], pattern[i][1] - pattern[i - 1][1]) * CANVAS;
         }
         this.total = cum[pattern.length - 1];
-        this.shadowSpeed = 46f + 4f * spell.getRequiredLevel();
+        this.shadowSpeed = 62f + 5f * spell.getRequiredLevel();
         int count = MARKER_AT.length;
         this.markers = new float[count];
         for (int i = 0; i < count; i++) {
@@ -590,7 +590,7 @@ public class TraceScreen extends Screen {
                     markerState[m] = 1;
                     boost = Float.MAX_VALUE;
                     flash = 1f;
-                    chaser = Math.max(0, chaser - shadowSpeed * 0.25f);
+                    chaser = Math.max(0, chaser - shadowSpeed * 0.2f);
                     playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.4f + Math.min(m, 6) * 0.1f);
                 } else {
                     markerState[m] = 2;
