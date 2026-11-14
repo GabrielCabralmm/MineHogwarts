@@ -72,7 +72,7 @@ public class SlytherinDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.image(g, CREST, (int) cx - 13, top + 12, 26, 30);
+        HiRes.pixelImage(g, CREST, (int) cx - 13, top + 12, 26, 30);
         shadowed(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 46, SILVER);
         HiRes.centered(g, tr("screen.hogwartsmod.door.sonserina.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 59, 0xFF9CC8AE);
         int y = cylY();

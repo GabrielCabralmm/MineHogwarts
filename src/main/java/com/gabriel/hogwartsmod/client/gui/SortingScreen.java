@@ -106,7 +106,7 @@ public class SortingScreen extends Screen {
             }
             g.pose().pushPose();
             g.pose().translate(0, -lift, 0);
-            HiRes.image(g, tex("casa_" + house.getId()), x, y, CREST_W, CREST_H);
+            HiRes.pixelImage(g, tex("casa_" + house.getId()), x, y, CREST_W, CREST_H);
             g.pose().popPose();
             HiRes.centered(g, house.getDisplayName().getString(), HiRes.Style.BOLD, x + CREST_W / 2f, y + CREST_H + 7, 0xFF000000 | darker(house.getColor()));
         }

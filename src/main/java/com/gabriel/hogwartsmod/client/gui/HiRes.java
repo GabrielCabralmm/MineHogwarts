@@ -215,6 +215,29 @@ public final class HiRes {
         return image;
     }
 
+    public static void pixelImage(GuiGraphics g, ResourceLocation source, int x, int y, int w, int h) {
+        double scale = scale();
+        int pw = Math.max(1, (int) Math.round(w * scale));
+        int ph = Math.max(1, (int) Math.round(h * scale));
+        String key = "pix|" + source + "|" + pw + "x" + ph;
+        Entry entry = CACHE.get(key);
+        if (entry == null) {
+            BufferedImage src = loadSource(source);
+            if (src == null) {
+                return;
+            }
+            BufferedImage out = new BufferedImage(pw, ph, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D gr = out.createGraphics();
+            gr.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            gr.drawImage(toArgb(src), 0, 0, pw, ph, null);
+            gr.dispose();
+            entry = upload(key, out, w, h, 0);
+        }
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        g.blit(entry.id(), x, y, w, h, 0, 0, entry.pixelW(), entry.pixelH(), entry.pixelW(), entry.pixelH());
+    }
+
     private static BufferedImage resize(BufferedImage src, int w, int h) {
         BufferedImage current = toArgb(src);
         while (current.getWidth() / 2 >= w && current.getHeight() / 2 >= h) {

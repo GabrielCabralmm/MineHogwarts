@@ -440,7 +440,7 @@ public class GrimoireScreen extends Screen {
             if (first) {
                 HiRes.highlight(g, lx - 3, y - 3, lx + pageW + 3, y + 30, HiRes.Mark.SELECTED);
             }
-            HiRes.image(g, crest(house), lx, y, 23, 27);
+            HiRes.pixelImage(g, crest(house), lx, y, 23, 27);
             String place = value > 0 ? placeOf(points, value) + "º" : "–";
             HiRes.text(g, place, HiRes.Style.BOLD, lx + 28, y + 2, first ? GOLD : MUTED);
             HiRes.text(g, house.getDisplayName().getString(), HiRes.Style.BOLD, lx + 42, y + 2, inkOf(house));
@@ -466,7 +466,7 @@ public class GrimoireScreen extends Screen {
             HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_house1"), HiRes.Style.ITALIC, cx, top + 60, MUTED);
             HiRes.centered(g, tr("screen.hogwartsmod.grimoire.no_house2"), HiRes.Style.ITALIC, cx, top + 71, MUTED);
         } else {
-            HiRes.image(g, crest(mine), Math.round(cx - 28), top + 30, 56, 66);
+            HiRes.pixelImage(g, crest(mine), Math.round(cx - 28), top + 30, 56, 66);
             HiRes.centered(g, mine.getDisplayName().getString(), HiRes.Style.BOLD, 10f, cx, top + 101, inkOf(mine));
             int own = points[mine.ordinal()];
             String line = own > 0 ? Component.translatable("screen.hogwartsmod.grimoire.house_points", own, placeOf(points, own)).getString()
@@ -481,7 +481,7 @@ public class GrimoireScreen extends Screen {
         } else {
             String label = last.getDisplayName().getString();
             float w = HiRes.width(label, HiRes.Style.BOLD) + 14;
-            HiRes.image(g, crest(last), Math.round(cx - w / 2), top + 147, 10, 12);
+            HiRes.pixelImage(g, crest(last), Math.round(cx - w / 2), top + 147, 10, 12);
             HiRes.text(g, label, HiRes.Style.BOLD, cx - w / 2 + 14, top + 149, inkOf(last));
             int cups = com.gabriel.hogwartsmod.house.HousePoints.clientCups[last.ordinal()];
             HiRes.centered(g, Component.translatable("screen.hogwartsmod.grimoire.cups", cups).getString(), HiRes.Style.ITALIC, cx, top + 162, MUTED);
