@@ -45,7 +45,7 @@ public class GryffindorDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.pixelImage(g, CREST, (int) cx - 13, top + 10, 26, 30);
+        HiRes.image(g, CREST, (int) cx - 13, top + 10, 26, 30);
         shadowed(g, title.getString(), HiRes.Style.BOLD, 9f, cx, top + 43, GOLD);
         g.fill(left + 50, top + 55, left + W - 50, top + 56, 0xFFD9A84A);
         int fw = 78;

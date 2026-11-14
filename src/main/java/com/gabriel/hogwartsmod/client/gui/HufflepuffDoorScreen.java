@@ -62,7 +62,7 @@ public class HufflepuffDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.pixelImage(g, CREST, (int) cx - 13, top + 20, 26, 30);
+        HiRes.image(g, CREST, (int) cx - 13, top + 20, 26, 30);
         HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx + 0.7f, top + 54.7f, 0xC0000000);
         HiRes.centered(g, title.getString(), HiRes.Style.BOLD, 10f, cx, top + 54, GOLD);
         HiRes.centered(g, tr("screen.hogwartsmod.door.lufa_lufa.hint"), HiRes.Style.ITALIC, 6.5f, cx, top + 67, CREAM);

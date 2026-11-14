@@ -51,7 +51,7 @@ public class RavenclawDoorScreen extends HouseDoorScreen {
         renderBackground(g);
         HiRes.image(g, BACKGROUND, left, top, W, H);
         float cx = left + W / 2f;
-        HiRes.pixelImage(g, CREST, (int) cx - 13, top + 12, 26, 30);
+        HiRes.image(g, CREST, (int) cx - 13, top + 12, 26, 30);
         shadowed(g, title.getString(), HiRes.Style.BOLD, 9f, cx, top + 45, BRONZE);
         g.fill(left + 56, top + 57, left + W - 56, top + 58, 0xFFC08A4A);
         float swing = (float) Math.sin(System.currentTimeMillis() / 600.0) * 4f;
