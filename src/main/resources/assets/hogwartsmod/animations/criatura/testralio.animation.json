@@ -615,51 +615,6 @@
    "loop": true,
    "animation_length": 1.0,
    "bones": {
-    "corpo": {
-     "position": {
-      "0": [
-       0,
-       -9,
-       0
-      ]
-     }
-    },
-    "perna_frente_esq": {
-     "rotation": {
-      "0": [
-       -80,
-       0,
-       0
-      ]
-     }
-    },
-    "perna_frente_dir": {
-     "rotation": {
-      "0": [
-       -80,
-       0,
-       0
-      ]
-     }
-    },
-    "perna_tras_esq": {
-     "rotation": {
-      "0": [
-       80,
-       0,
-       0
-      ]
-     }
-    },
-    "perna_tras_dir": {
-     "rotation": {
-      "0": [
-       80,
-       0,
-       0
-      ]
-     }
-    },
     "membrana_esq": {
      "scale": {
       "0": [
@@ -693,6 +648,112 @@
        1,
        0.34,
        1
+      ]
+     }
+    },
+    "corpo": {
+     "position": {
+      "0": [
+       0,
+       -10,
+       4
+      ]
+     },
+     "rotation": {
+      "0": [
+       -32,
+       0,
+       0
+      ]
+     }
+    },
+    "pescoco": {
+     "rotation": {
+      "0": [
+       19.2,
+       0,
+       0
+      ]
+     }
+    },
+    "cauda": {
+     "rotation": {
+      "0": [
+       57,
+       0,
+       0
+      ]
+     }
+    },
+    "perna_frente_esq": {
+     "rotation": {
+      "0": [
+       32,
+       0,
+       0
+      ]
+     }
+    },
+    "perna_tras_esq": {
+     "rotation": {
+      "0": [
+       -90,
+       0,
+       0
+      ]
+     }
+    },
+    "jarrete_esq": {
+     "rotation": {
+      "0": [
+       120,
+       0,
+       0
+      ]
+     }
+    },
+    "canela_tras_esq": {
+     "rotation": {
+      "0": [
+       -30,
+       0,
+       0
+      ]
+     }
+    },
+    "perna_frente_dir": {
+     "rotation": {
+      "0": [
+       32,
+       0,
+       0
+      ]
+     }
+    },
+    "perna_tras_dir": {
+     "rotation": {
+      "0": [
+       -90,
+       0,
+       0
+      ]
+     }
+    },
+    "jarrete_dir": {
+     "rotation": {
+      "0": [
+       120,
+       0,
+       0
+      ]
+     }
+    },
+    "canela_tras_dir": {
+     "rotation": {
+      "0": [
+       -30,
+       0,
+       0
       ]
      }
     }
